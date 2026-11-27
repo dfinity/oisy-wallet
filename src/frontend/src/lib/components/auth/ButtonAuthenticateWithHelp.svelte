@@ -21,6 +21,7 @@
 		needHelpLink?: boolean;
 		asPopup?: boolean;
 		testIdSuffix?: string;
+		onSignInSuccess?: () => Promise<void>;
 	}
 
 	let {
@@ -28,7 +29,8 @@
 		helpAlignment = 'inherit',
 		needHelpLink = true,
 		asPopup = false,
-		testIdSuffix = ''
+		testIdSuffix = '',
+		onSignInSuccess
 	}: Props = $props();
 
 	const modalId = Symbol();
@@ -48,6 +50,8 @@
 			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 
 			transactionsFilterStore.clear();
+
+			await onSignInSuccess?.();
 		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}

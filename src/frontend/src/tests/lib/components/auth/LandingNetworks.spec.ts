@@ -5,7 +5,13 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.hoisted(() => vi.stubEnv('VITE_ROBINHOOD_MAINNET_DISABLED', 'true'));
+
 describe('LandingNetworks', () => {
+	afterAll(() => {
+		vi.unstubAllEnvs();
+	});
+
 	it('lists every network in brand order', () => {
 		const { getByRole } = render(LandingNetworks);
 
@@ -22,6 +28,12 @@ describe('LandingNetworks', () => {
 			'XRP Ledger',
 			'Solana'
 		]);
+	});
+
+	it('omits a network disabled by the deployment', () => {
+		const { queryByText } = render(LandingNetworks);
+
+		expect(queryByText('Robinhood Chain')).not.toBeInTheDocument();
 	});
 
 	it('shows the reframe line', () => {

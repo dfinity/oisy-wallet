@@ -5,19 +5,20 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { LANDING_HOLD_TOKENS } from '$lib/constants/landing-preview.constants';
-	import { currentCurrency } from '$lib/derived/currency.derived';
+	import {
+		LANDING_HOLD_TOKENS,
+		LANDING_PREVIEW_USD_RATE
+	} from '$lib/constants/landing-preview.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { TokenCategoryTagValue } from '$lib/enums/token-tag';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 
 	const price = (value: number): string | undefined =>
 		formatCurrency({
 			value,
-			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore,
+			currency: LANDING_PREVIEW_USD_RATE.currency,
+			exchangeRate: LANDING_PREVIEW_USD_RATE,
 			language: $currentLanguage
 		});
 
@@ -88,7 +89,11 @@
 
 						{#snippet descriptionEnd()}
 							<span class="block min-w-12 text-nowrap">
-								<TokenExchangeBalance balance={data.balance} usdBalance={data.usdBalance} />
+								<TokenExchangeBalance
+									balance={data.balance}
+									fiatExchangeRate={LANDING_PREVIEW_USD_RATE}
+									usdBalance={data.usdBalance}
+								/>
 							</span>
 						{/snippet}
 					</LogoButton>

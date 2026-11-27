@@ -12,6 +12,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { CurrencyExchangeData } from '$lib/types/currency';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
@@ -23,6 +24,7 @@
 		token?: Token;
 		displayUnit?: DisplayUnit;
 		disabled?: boolean;
+		fiatExchangeRate?: CurrencyExchangeData;
 	}
 
 	let {
@@ -30,7 +32,8 @@
 		exchangeRate,
 		token,
 		displayUnit = $bindable('usd'),
-		disabled = false
+		disabled = false,
+		fiatExchangeRate
 	}: Props = $props();
 
 	const handleUnitSwitch = () => {
@@ -51,8 +54,8 @@
 	let formattedUSDAmount = $derived(
 		formatCurrency({
 			value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
-			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore,
+			currency: fiatExchangeRate?.currency ?? $currentCurrency,
+			exchangeRate: fiatExchangeRate ?? $currencyExchangeStore,
 			language: $currentLanguage
 		})
 	);

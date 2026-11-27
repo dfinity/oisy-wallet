@@ -1,9 +1,16 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LandingNavyPanel from '$lib/components/auth/LandingNavyPanel.svelte';
 	import { LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { landingReveal } from '$lib/utils/landing-reveal.utils';
+
+	const resetWalletScroll = async () => {
+		await tick();
+
+		window.scrollTo({ left: 0, top: 0, behavior: 'instant' });
+	};
 </script>
 
 <section class="w-full pb-16 md:pb-24" aria-labelledby="landing-close-title">
@@ -26,6 +33,7 @@
 			<ButtonAuthenticateWithHelp
 				helpAlignment="center"
 				needHelpLink={false}
+				onSignInSuccess={resetWalletScroll}
 				testIdSuffix="-closing"
 			/>
 		</div>

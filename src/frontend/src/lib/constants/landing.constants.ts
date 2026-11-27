@@ -4,6 +4,7 @@ import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { SUPPORTED_MAINNET_NETWORKS_IDS } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
@@ -22,7 +23,7 @@ export const LANDING_NETWORKS: Network[] = [
 	BSC_MAINNET_NETWORK,
 	POLYGON_MAINNET_NETWORK,
 	ROBINHOOD_MAINNET_NETWORK
-];
+].filter(({ id }) => SUPPORTED_MAINNET_NETWORKS_IDS.includes(id));
 
 // The landing's one-time entrance, shared by the hero (CSS) and the sections below it
 // (`landingReveal`), so the page settles as one piece.

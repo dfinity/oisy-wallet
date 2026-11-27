@@ -4,6 +4,9 @@ import * as backendApi from '$lib/api/backend.api';
 import LandingBorrowPreview from '$lib/components/auth/LandingBorrowPreview.svelte';
 import LandingPage from '$lib/components/auth/LandingPage.svelte';
 import { LANDING_SECTION_IDS } from '$lib/constants/landing.constants';
+import { currentCurrency } from '$lib/derived/currency.derived';
+import { Currency } from '$lib/enums/currency';
+import { currencyStore } from '$lib/stores/currency.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { themeStore } from '$lib/stores/theme.store';
 import { Theme } from '$lib/types/theme';
@@ -87,6 +90,29 @@ describe('LandingPage', () => {
 
 		window.location.hash = '';
 		Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+	});
+
+	it('shows sample fiat prices, balances, and fees with a non-USD wallet preference', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const originalCurrency = get(currentCurrency);
+
+		currencyStore.switchCurrency(Currency.EUR);
+
+		try {
+			const { findByRole } = render(LandingPage);
+			const { hold_title, swap_title } = get(i18n).auth.landing;
+			const hold = within(await findByRole('region', { name: hold_title }, { timeout: 5000 }));
+			const swap = within(await findByRole('region', { name: swap_title }, { timeout: 5000 }));
+
+			expect(hold.getByText('$96,154.86')).toBeInTheDocument();
+			expect(hold.getByText('$40,385.04')).toBeInTheDocument();
+			expect(swap.getByText('$4,807.74')).toBeInTheDocument();
+			expect(swap.getByText('$4,795.20')).toBeInTheDocument();
+			expect(swap.getByText('~$1.40')).toBeInTheDocument();
+			expect(get(currentCurrency)).toBe(Currency.EUR);
+		} finally {
+			currencyStore.switchCurrency(originalCurrency);
+		}
 	});
 
 	it('brings the selected Borrow or Earn preview to the front', async () => {

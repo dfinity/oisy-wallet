@@ -14,10 +14,9 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
-	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { LANDING_PREVIEW_USD_RATE } from '$lib/constants/landing-preview.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -57,8 +56,8 @@
 	let networkFee = $derived(
 		formatCurrency({
 			value: NETWORK_FEE_USD,
-			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore,
+			currency: LANDING_PREVIEW_USD_RATE.currency,
+			exchangeRate: LANDING_PREVIEW_USD_RATE,
 			language: $currentLanguage
 		})
 	);
@@ -97,6 +96,7 @@
 						<TokenInputAmountExchange
 							amount={PAY.amount}
 							exchangeRate={PAY.exchangeRate}
+							fiatExchangeRate={LANDING_PREVIEW_USD_RATE}
 							token={PAY.token}
 						/>
 					</div>
@@ -135,6 +135,7 @@
 						<TokenInputAmountExchange
 							amount={RECEIVE.amount}
 							exchangeRate={RECEIVE.exchangeRate}
+							fiatExchangeRate={LANDING_PREVIEW_USD_RATE}
 							token={RECEIVE.token}
 						/>
 						<ValueDifference value={VALUE_DIFFERENCE_PCT} />

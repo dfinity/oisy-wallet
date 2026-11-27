@@ -8,9 +8,17 @@ import usdCoin from '$eth/assets/usdc.svg?inline';
 import tetherGold from '$eth/assets/xaut.svg?inline';
 import ethereum from '$icp-eth/assets/eth.svg?inline';
 import internetComputer from '$icp/assets/icp-light.svg?inline';
+import { Currency } from '$lib/enums/currency';
+import type { CurrencyExchangeData } from '$lib/types/currency';
 import type { CardData } from '$lib/types/token-card';
 import nvidia from '$sol/assets/nvdax.svg?inline';
 import xrp from '$xrp/assets/xrp.svg?inline';
+
+export const LANDING_PREVIEW_USD_RATE: CurrencyExchangeData = {
+	currency: Currency.USD,
+	exchangeRateToUsd: 1,
+	exchangeRate24hChangeMultiplier: null
+};
 
 // Sample holdings laid out like the home screen's TokenCard rows; nothing here reads wallet
 // state. TokenCard itself waits for the exchange worker, which never starts signed out, so its
