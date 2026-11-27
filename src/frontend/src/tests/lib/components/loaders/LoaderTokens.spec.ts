@@ -1,3 +1,4 @@
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
 import {
 	loadDefaultErc20Tokens,
@@ -35,12 +36,14 @@ import {
 	solAddressLocalnetStore,
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import {
 	loadDefaultSplTokens,
 	processCustomTokens as processSplCustomTokens
 } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -55,7 +58,7 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { render, waitFor } from '@testing-library/svelte';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
@@ -294,6 +297,43 @@ describe('LoaderTokens', () => {
 				expect(processIcrc7CustomTokens).toHaveBeenCalled();
 				expect(processErc20CustomTokens).toHaveBeenCalled();
 				expect(processSplCustomTokens).toHaveBeenCalled();
+			});
+		});
+
+		// The cached answer comes first, and the rows in it have to stand until the backend answers.
+		describe('with a cached answer', () => {
+			beforeEach(() => {
+				backendCustomTokens.set([]);
+			});
+
+			afterEach(() => {
+				vi.mocked(loadNetworkCustomTokens).mockResolvedValue([]);
+			});
+
+			it('should keep the cached rows as the backend rows when the backend fetch fails', async () => {
+				const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+				vi.mocked(loadNetworkCustomTokens).mockImplementation(({ certified }) =>
+					certified ? Promise.reject(new Error('backend down')) : Promise.resolve(mockCustomTokens)
+				);
+
+				render(LoaderTokens);
+
+				await waitFor(() => expect(errorSpy).toHaveBeenCalled());
+
+				expect(get(backendCustomTokens)).toEqual(mockCustomTokens);
+
+				errorSpy.mockRestore();
+			});
+
+			it('should keep the cached rows as the backend rows while the backend fetch is pending', async () => {
+				vi.mocked(loadNetworkCustomTokens).mockImplementation(({ certified }) =>
+					certified ? new Promise<CustomToken[]>(() => {}) : Promise.resolve(mockCustomTokens)
+				);
+
+				render(LoaderTokens);
+
+				await waitFor(() => expect(get(backendCustomTokens)).toEqual(mockCustomTokens));
 			});
 		});
 	});
