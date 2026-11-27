@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import SwapRiftRoute from '$lib/components/swap/SwapRiftRoute.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -9,8 +10,6 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { riftRouteVenues } from '$lib/utils/rift.utils';
 
 	interface Props {
 		provider: Extract<SwapMappedResult, { provider: SwapProvider.RIFT }>;
@@ -26,9 +25,6 @@
 			? formatToken({ value: provider.receiveAmount, unitName: $destinationToken.decimals })
 			: undefined
 	);
-
-	// Rift's own venue ids: it names no display names for them.
-	const venues = $derived(riftRouteVenues(provider.swapDetails));
 
 	// What delivering to the destination chain costs, already taken out of the estimate.
 	const executionCost = $derived(BigInt(provider.swapDetails.estimated_execution_cost));
@@ -46,17 +42,7 @@
 	</ModalValue>
 {/if}
 
-{#if venues.length > 0}
-	<ModalValue>
-		{#snippet label()}
-			{$i18n.swap.text.swap_route}
-		{/snippet}
-
-		{#snippet mainValue()}
-			{replacePlaceholders($i18n.swap.text.rift_route_via, { $venues: venues.join(' → ') })}
-		{/snippet}
-	</ModalValue>
-{/if}
+<SwapRiftRoute quote={provider.swapDetails} />
 
 {#if nonNullish($destinationToken)}
 	<FeeDisplay

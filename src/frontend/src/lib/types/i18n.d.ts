@@ -1186,7 +1186,10 @@ interface I18nSwap {
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;
-		rift_route_via: string;
+		rift_route_one_hop: string;
+		rift_route_hops: string;
+		rift_route_asset: string;
+		rift_route_hop: string;
 		rift_estimate_warning: string;
 		near_intents_tos: string;
 		onesec_transfer_fee: string;

@@ -106,9 +106,9 @@ export const isRiftQuoteForRequest = ({
 	);
 };
 
-// The venues of a quote's route, in the order the swap passes through them.
-export const riftRouteVenues = ({ route }: RiftQuote): string[] =>
-	route.flatMap((step) => (step.type === 'venue' ? [step.venue] : []));
+// The venue hops in quote order. Delivery contributes to fees, not the route display.
+export const riftRouteHops = ({ route }: RiftQuote) =>
+	route.filter((step) => step.type === 'venue');
 
 const isRiftBtcAssetId = (assetId: string): boolean =>
 	isSameRiftAssetId({ a: assetId, b: RIFT_BTC_ASSET_ID });

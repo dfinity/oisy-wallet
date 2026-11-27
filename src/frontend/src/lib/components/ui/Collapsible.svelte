@@ -63,6 +63,18 @@
 	// recalculate max-height after DOM update
 	$effect(updateMaxHeight);
 
+	// Nested disclosures can change the measured height while this one is open.
+	$effect(() => {
+		if (!expanded || isNullish(container) || typeof ResizeObserver === 'undefined') {
+			return;
+		}
+
+		const observer = new ResizeObserver(updateMaxHeight);
+		observer.observe(container);
+
+		return () => observer.disconnect();
+	});
+
 	const toggle = () => (externalToggle ? undefined : toggleContent());
 </script>
 

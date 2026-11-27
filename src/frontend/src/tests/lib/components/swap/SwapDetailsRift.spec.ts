@@ -1,3 +1,4 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SwapDetailsRift from '$lib/components/swap/SwapDetailsRift.svelte';
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { RiftQuote } from '$lib/types/rift';
@@ -7,7 +8,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockRiftQuote } from '$tests/mocks/rift.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SwapDetailsRift', () => {
 	const usdc = {
@@ -20,7 +21,10 @@ describe('SwapDetailsRift', () => {
 
 	const renderDetails = (swapDetails: RiftQuote = mockRiftQuote) => {
 		const context = new Map();
-		context.set(SWAP_CONTEXT_KEY, initSwapContext({ destinationToken: usdc }));
+		context.set(
+			SWAP_CONTEXT_KEY,
+			initSwapContext({ sourceToken: BTC_MAINNET_TOKEN, destinationToken: usdc })
+		);
 
 		return render(SwapDetailsRift, {
 			props: {
@@ -44,13 +48,54 @@ describe('SwapDetailsRift', () => {
 		expect(queryByText(en.swap.text.expected_minimum)).not.toBeInTheDocument();
 	});
 
-	it("shows the route's venues in order", () => {
-		const { getByText } = renderDetails();
+	it('shows the expanded token path with venues in quote order', () => {
+		const { getByText, getByTitle, getAllByRole } = renderDetails();
+		const route = getByText(en.swap.text.swap_route).closest('details');
 
-		expect(getByText(en.swap.text.swap_route)).toBeInTheDocument();
+		expect(route).toHaveAttribute('open');
+		expect(getByTitle('BTC on Bitcoin')).toHaveTextContent('BTC');
+		expect(getByTitle('kBTC on Ink')).toHaveTextContent('kBTC');
+		expect(getByTitle('USDC on Ethereum')).toHaveTextContent('USDC');
+		expect(getByText('Rift OTC')).toBeVisible();
+		expect(getByText('Velora')).toBeVisible();
+		expect(getAllByRole('listitem').map(({ textContent }) => textContent?.trim())).toEqual([
+			'BTC on Bitcoin to kBTC on Ink via Rift OTC',
+			'kBTC on Ink to USDC on Ethereum via Velora'
+		]);
+	});
+
+	it('collapses to the number of venue hops', async () => {
+		const { getByText } = renderDetails();
+		const label = getByText(en.swap.text.swap_route);
+		const route = label.closest('details');
+
+		await fireEvent.click(label);
+
+		expect(route).not.toHaveAttribute('open');
 		expect(
-			getByText(replacePlaceholders(en.swap.text.rift_route_via, { $venues: 'rift_otc → velora' }))
-		).toBeInTheDocument();
+			getByText(replacePlaceholders(en.swap.text.rift_route_hops, { $count: '2' }))
+		).toBeVisible();
+
+		await fireEvent.click(label);
+
+		expect(route).toHaveAttribute('open');
+	});
+
+	it('preserves the raw identity of an unknown asset and venue', () => {
+		const unknownAsset = 'evm:57073.0x0000000000000000000000000000000000001234';
+		const route = mockRiftQuote.route.map((step) => {
+			if (step.type === 'delivery') {
+				return step;
+			}
+
+			return step.venue === 'rift_otc'
+				? { ...step, to: unknownAsset, venue: 'new_venue' }
+				: { ...step, from: unknownAsset };
+		});
+		const { getByText, getByTitle } = renderDetails({ ...mockRiftQuote, route });
+
+		expect(getByTitle(unknownAsset)).toHaveTextContent('evm:...1234');
+		expect(getByText('new_venue')).toBeInTheDocument();
 	});
 
 	it('leaves the route out when the quote names no venue', () => {

@@ -24,7 +24,7 @@ import {
 	isRiftOrderForReview,
 	isRiftQuoteForRequest,
 	isSameRiftAssetId,
-	riftRouteVenues,
+	riftRouteHops,
 	riftSwapRefusedMessage,
 	toRiftAssetId,
 	toRiftSwapErrorType
@@ -188,9 +188,9 @@ describe('rift.utils', () => {
 		});
 	});
 
-	describe('riftRouteVenues', () => {
+	describe('riftRouteHops', () => {
 		it('lists the venues in route order, without the delivery step', () => {
-			expect(riftRouteVenues(mockRiftQuote)).toEqual(['rift_otc', 'velora']);
+			expect(riftRouteHops(mockRiftQuote)).toEqual(mockRiftQuote.route.slice(0, 2));
 		});
 	});
 
