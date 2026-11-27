@@ -43,7 +43,8 @@ pub fn is_priceable_token_id(token_id: &TokenId) -> bool {
         | TokenId::SolNativeMainnet
         | TokenId::BtcNativeMainnet
         | TokenId::XrpNativeMainnet
-        | TokenId::SplMainnet(_) => true,
+        | TokenId::SplMainnet(_)
+        | TokenId::XrpTrustLineMainnet(..) => true,
         TokenId::Erc721(..)
         | TokenId::Erc1155(..)
         | TokenId::Erc4626(..)
@@ -126,6 +127,10 @@ mod tests {
         ));
         assert!(is_priceable_token_id(&TokenId::SplMainnet(
             shared::types::custom_token::SplTokenId("So111".to_string())
+        )));
+        assert!(is_priceable_token_id(&TokenId::XrpTrustLineMainnet(
+            shared::types::custom_token::XrpCurrencyCode("USD".to_string()),
+            shared::types::account::XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De".to_string())
         )));
     }
 

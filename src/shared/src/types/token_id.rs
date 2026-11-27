@@ -1,6 +1,9 @@
 use candid::{CandidType, Deserialize};
 
-use super::custom_token::{CanisterId, ChainId, ErcTokenId, LedgerId, SplTokenId, Token};
+use super::{
+    account::XrpAddress,
+    custom_token::{CanisterId, ChainId, ErcTokenId, LedgerId, SplTokenId, Token, XrpCurrencyCode},
+};
 
 /// A unified token identifier covering both native and custom tokens for the main supported chains.
 /// Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
@@ -46,6 +49,8 @@ pub enum TokenId {
     Icrc7(CanisterId) = 16,
     /// Native XRP on mainnet
     XrpNativeMainnet = 17,
+    /// Trust-line token on the XRP Ledger mainnet, identified by currency code and issuer
+    XrpTrustLineMainnet(XrpCurrencyCode, XrpAddress) = 18,
 }
 
 impl From<&Token> for TokenId {
@@ -62,6 +67,9 @@ impl From<&Token> for TokenId {
             Token::Dip721(t) => Self::Dip721(t.canister_id),
             Token::IcPunks(t) => Self::IcPunks(t.canister_id),
             Token::Icrc7(t) => Self::Icrc7(t.canister_id),
+            Token::XrpTrustLineMainnet(t) => {
+                Self::XrpTrustLineMainnet(t.currency.clone(), t.issuer.clone())
+            }
         }
     }
 }

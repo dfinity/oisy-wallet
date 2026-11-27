@@ -9,6 +9,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
@@ -249,6 +250,33 @@ describe('custom-tokens.services', () => {
 			expect(result).toStrictEqual(mockCustomTokens.slice(4, 5));
 
 			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should return the cached XRP Ledger trust-line custom tokens as they are', async () => {
+			// Text only, no principal to revive: the cached token is the token.
+			const cachedTokens = [
+				{
+					token: {
+						XrpTrustLineMainnet: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer }
+					},
+					version: toNullable(1n),
+					enabled: true,
+					section: toNullable(),
+					allow_external_content_source: toNullable(),
+					allowed_external_content_source_urls: toNullable()
+				}
+			];
+			mockGetIdbTokens.mockResolvedValue(cachedTokens);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(cachedTokens);
 
 			expect(listCustomTokens).not.toHaveBeenCalled();
 		});
