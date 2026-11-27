@@ -108,17 +108,18 @@
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
 			"standalone_mode": "Es sind bekannte Verbindungsprobleme aufgetreten, wenn sowohl eine App als auch $oisy_short auf dem Startbildschirm installiert sind. Wenn beim Verbinden von $oisy_short oder beim Signieren von Transaktionen Probleme auftreten, starten Sie die App bitte über einen regulären Browser. Wir arbeiten an einer Lösung, die bald verfügbar sein wird. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Mehr erfahren</a>",
 			"video_not_supported": "",
-			"oisy_allowance_used_up_title": "Gratis-Nutzungsguthaben aufgebraucht",
-			"oisy_allowance_used_up": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher kann das Signieren einiger Transaktionen fehlschlagen.",
-			"oisy_allowance_used_up_own_cycles": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher nutzt das Signieren jetzt dein Ausgabelimit.",
-			"oisy_allowance_used_up_short": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher kann das Signieren fehlschlagen.",
-			"oisy_allowance_used_up_own_cycles_short": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher nutzt das Signieren <a href=\"$url\">dein Ausgabelimit</a>.",
+			"oisy_allowance_used_up_title": "Vorübergehendes Problem beim Signieren",
+			"oisy_allowance_used_up": "$oisy_short kann die zum Signieren von Transaktionen nötigen Cycles vorübergehend nicht abdecken, daher kann das Signieren fehlschlagen. Wir arbeiten an einer Lösung.",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short kann die zum Signieren von Transaktionen nötigen Cycles vorübergehend nicht abdecken, daher übernehmen das vorerst deine eigenen ICP Cycles. Wir arbeiten an einer Lösung.",
+			"oisy_allowance_used_up_short": "$oisy_short kann das Signieren vorübergehend nicht abdecken, daher kann es fehlschlagen. Wir arbeiten an einer Lösung.",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short kann das Signieren vorübergehend nicht abdecken, daher übernehmen das vorerst <a href=\"$url\">deine eigenen ICP Cycles</a>.",
 			"oisy_allowance_tools_link": "Verwalte dein Ausgabelimit unter&nbsp;<a href=\"$url\">Werkzeuge</a>.",
-			"oisy_allowance_exceeded": "Diese Transaktion kostet mehr, als dein Gratis-Kontingent von $oisy_name abdeckt."
+			"oisy_allowance_tools_link_urgent": "Für dringende Transaktionen kannst du das Signieren unter&nbsp;<a href=\"$url\">Werkzeuge</a> mit deinen eigenen ICP Cycles abdecken.",
+			"oisy_allowance_exceeded": "Diese Transaktion braucht zum Signieren mehr Cycles, als $oisy_short abdeckt."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "Deine Transaktion konnte nicht signiert werden, weil du nicht mehr genug Nutzungsguthaben hast."
+			"usage_credits_insufficient": "Deine Transaktion konnte gerade nicht signiert werden."
 		}
 	},
 	"progress": {
@@ -930,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Nutzungsguthaben",
-			"description": "Wenn dein tägliches Gratis-Nutzungsguthaben aufgebraucht ist, wird das Signieren aus deinen ICP Cycles bezahlt, bis zu dem Ausgabelimit, das du hier festlegst.",
+			"description": "$oisy_short deckt die zum Signieren nötigen Cycles normalerweise ab. Wenn das eingeschränkt ist, springen deine eigenen ICP Cycles ein, bis zu dem Ausgabelimit, das du hier festlegst.",
 			"own_credits": "Ausgabelimit",
 			"balance": "ICP Cycles-Guthaben",
 			"add_more": "Ausgabelimit festlegen",

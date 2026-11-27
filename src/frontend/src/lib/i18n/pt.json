@@ -108,17 +108,18 @@
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
 			"standalone_mode": "Há problemas de conexão conhecidos quando um aplicativo e o $oisy_short estão instalados na tela inicial. Se você tiver problemas para conectar o $oisy_short ou assinar transações, inicie o aplicativo em um navegador comum. Estamos trabalhando em uma correção que será resolvida em breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leia mais</a>",
 			"video_not_supported": "",
-			"oisy_allowance_used_up_title": "Créditos de uso gratuitos esgotados",
-			"oisy_allowance_used_up": "Sua quantidade diária de créditos de uso gratuitos se esgotou, então a assinatura de algumas transações pode falhar.",
-			"oisy_allowance_used_up_own_cycles": "Sua quantidade diária de créditos de uso gratuitos se esgotou, então a assinatura agora usa seu limite de gastos.",
-			"oisy_allowance_used_up_short": "Seus créditos de uso gratuitos diários se esgotaram, então a assinatura pode falhar.",
-			"oisy_allowance_used_up_own_cycles_short": "Seus créditos de uso gratuitos diários se esgotaram, então a assinatura usa <a href=\"$url\">seu limite de gastos</a>.",
+			"oisy_allowance_used_up_title": "Problema temporário com a assinatura",
+			"oisy_allowance_used_up": "O $oisy_short temporariamente não consegue cobrir os ciclos necessários para assinar transações, então a assinatura pode falhar. Estamos trabalhando em uma solução.",
+			"oisy_allowance_used_up_own_cycles": "O $oisy_short temporariamente não consegue cobrir os ciclos necessários para assinar transações, então seus próprios ICP Cycles os cobrem por enquanto. Estamos trabalhando em uma solução.",
+			"oisy_allowance_used_up_short": "O $oisy_short temporariamente não consegue cobrir o custo da assinatura, então a assinatura pode falhar. Estamos trabalhando em uma solução.",
+			"oisy_allowance_used_up_own_cycles_short": "O $oisy_short temporariamente não consegue cobrir o custo da assinatura, então <a href=\"$url\">seus próprios ICP Cycles</a> o cobrem por enquanto.",
 			"oisy_allowance_tools_link": "Gerencie seu limite de gastos em&nbsp;<a href=\"$url\">Ferramentas</a>.",
-			"oisy_allowance_exceeded": "Esta transação custa mais do que sua cota gratuita do $oisy_name cobre."
+			"oisy_allowance_tools_link_urgent": "Para transações urgentes, você pode cobrir o custo da assinatura com seus próprios ICP Cycles em&nbsp;<a href=\"$url\">Ferramentas</a>.",
+			"oisy_allowance_exceeded": "Esta transação precisa de mais ciclos para ser assinada do que o $oisy_short cobre."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "Não foi possível assinar sua transação porque você não tem créditos de uso suficientes."
+			"usage_credits_insufficient": "Não foi possível assinar sua transação agora."
 		}
 	},
 	"progress": {
@@ -930,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Créditos de uso",
-			"description": "Quando seus créditos de uso gratuitos diários se esgotam, a assinatura é paga com seus ICP Cycles, até o limite de gastos que você definir aqui.",
+			"description": "O $oisy_short normalmente cobre os ciclos necessários para a assinatura. Quando isso está limitado, seus próprios ICP Cycles entram em ação, até o limite de gastos que você definir aqui.",
 			"own_credits": "Limite de gastos",
 			"balance": "Saldo de ICP Cycles",
 			"add_more": "Definir limite de gastos",

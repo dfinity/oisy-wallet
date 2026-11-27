@@ -108,17 +108,18 @@
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
 			"standalone_mode": "Při instalaci aplikace i $oisy_short na domovskou obrazovku jsou známy problémy s připojením. Pokud narazíte na problémy s připojením $oisy_short nebo podepisováním transakcí, spusťte prosím aplikaci z běžného prohlížeče. Pracujeme na opravě, která bude brzy k dispozici. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Více informací</a>",
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa.",
-			"oisy_allowance_used_up_title": "Bezplatné kredity za používání jsou vyčerpány",
-			"oisy_allowance_used_up": "Váš denní objem bezplatných kreditů za používání je vyčerpán, takže podepsání některých transakcí může selhat.",
-			"oisy_allowance_used_up_own_cycles": "Váš denní objem bezplatných kreditů za používání je vyčerpán, takže podepisování nyní využívá váš limit výdajů.",
-			"oisy_allowance_used_up_short": "Vaše denní bezplatné kredity za používání jsou vyčerpány, takže podepisování může selhat.",
-			"oisy_allowance_used_up_own_cycles_short": "Vaše denní bezplatné kredity za používání jsou vyčerpány, takže podepisování využívá <a href=\"$url\">váš limit výdajů</a>.",
+			"oisy_allowance_used_up_title": "Dočasný problém s podepisováním",
+			"oisy_allowance_used_up": "$oisy_short dočasně nemůže pokrýt cykly potřebné k podepisování transakcí, takže podepisování může selhat. Pracujeme na řešení.",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short dočasně nemůže pokrýt cykly potřebné k podepisování transakcí, takže je zatím pokrývají vaše vlastní ICP Cycles. Pracujeme na řešení.",
+			"oisy_allowance_used_up_short": "$oisy_short dočasně nemůže pokrýt náklady na podepisování, takže podepisování může selhat. Pracujeme na řešení.",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short dočasně nemůže pokrýt náklady na podepisování, takže je zatím pokrývají <a href=\"$url\">vaše vlastní ICP Cycles</a>.",
 			"oisy_allowance_tools_link": "Svůj limit výdajů spravujte v sekci&nbsp;<a href=\"$url\">Nástroje</a>.",
-			"oisy_allowance_exceeded": "Tato transakce stojí víc, než pokryje váš bezplatný limit $oisy_name."
+			"oisy_allowance_tools_link_urgent": "Pro naléhavé transakce můžete náklady na podepisování pokrýt vlastními ICP Cycles v sekci&nbsp;<a href=\"$url\">Nástroje</a>.",
+			"oisy_allowance_exceeded": "Tato transakce potřebuje k podepsání víc cyklů, než $oisy_short pokrývá."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "Vaši transakci nebylo možné podepsat, protože vám nezbývá dost kreditů za používání."
+			"usage_credits_insufficient": "Vaši transakci teď nebylo možné podepsat."
 		}
 	},
 	"progress": {
@@ -930,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Kredity za používání",
-			"description": "Když vyčerpáte denní bezplatné kredity za používání, podepisování se platí z vašich ICP Cycles, až do limitu výdajů, který zde nastavíte.",
+			"description": "$oisy_short běžně pokrývá cykly potřebné k podepisování. Když je to omezené, nastoupí vaše vlastní ICP Cycles, až do limitu výdajů, který zde nastavíte.",
 			"own_credits": "Limit výdajů",
 			"balance": "Zůstatek ICP Cycles",
 			"add_more": "Nastavit limit výdajů",

@@ -108,17 +108,18 @@
 			"do_not_close": "Don't close this tab until the transaction is done",
 			"standalone_mode": "There are known connection issues when both an app and $oisy_short are installed on a home&nbsp;screen. If you encounter issues connecting $oisy_short or signing transactions, please start the app from a regular browser. We are working on a fix and it will be resolved soon. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
 			"video_not_supported": "Your browser does not support video playback.",
-			"oisy_allowance_used_up_title": "Free usage credits are used up",
-			"oisy_allowance_used_up": "Your daily amount of free usage credits is used up, so signing some transactions may fail.",
-			"oisy_allowance_used_up_own_cycles": "Your daily amount of free usage credits is used up, so signing now uses your spending limit.",
-			"oisy_allowance_used_up_short": "Your free daily usage credits are used up, so signing may fail.",
-			"oisy_allowance_used_up_own_cycles_short": "Your free daily usage credits are used up, so signing uses <a href=\"$url\">your spending limit</a>.",
+			"oisy_allowance_used_up_title": "Temporary issue with signing",
+			"oisy_allowance_used_up": "$oisy_short temporarily can't cover the cycles needed to sign transactions, so signing may fail. We're working on a fix.",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short temporarily can't cover the cycles needed to sign transactions, so your own ICP Cycles cover them for now. We're working on a fix.",
+			"oisy_allowance_used_up_short": "$oisy_short temporarily can't cover signing, so it may fail. We're working on a fix.",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short temporarily can't cover signing, so <a href=\"$url\">your own ICP Cycles</a> cover it for now.",
 			"oisy_allowance_tools_link": "Manage your spending limit in&nbsp;<a href=\"$url\">Tools</a>.",
-			"oisy_allowance_exceeded": "This transaction costs more than your free $oisy_name allowance covers."
+			"oisy_allowance_tools_link_urgent": "For urgent transactions, you can cover signing with your own ICP Cycles in&nbsp;<a href=\"$url\">Tools</a>.",
+			"oisy_allowance_exceeded": "This transaction needs more cycles to sign than $oisy_short covers."
 		},
 		"error": {
 			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again.",
-			"usage_credits_insufficient": "Your transaction couldn't be signed because you don't have enough usage credits left."
+			"usage_credits_insufficient": "Your transaction couldn't be signed right now."
 		}
 	},
 	"progress": {
@@ -930,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Usage credits",
-			"description": "When your free daily usage credits are used up, signing is paid from your ICP Cycles, up to the spending limit you set here.",
+			"description": "$oisy_short normally covers the cycles needed for signing. When that's limited, your own ICP Cycles step in, up to the spending limit you set here.",
 			"own_credits": "Spending limit",
 			"balance": "ICP Cycles balance",
 			"add_more": "Set spending limit",

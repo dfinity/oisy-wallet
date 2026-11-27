@@ -108,17 +108,18 @@
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
 			"standalone_mode": "Znane są problemy z połączeniem, gdy zarówno aplikacja, jak i $oisy_short są zainstalowane na ekranie głównym. Jeśli napotkasz problemy z połączeniem z $oisy_short lub podpisywaniem transakcji, uruchom aplikację z poziomu zwykłej przeglądarki. Pracujemy nad poprawką, która zostanie wkrótce wdrożona. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Dowiedz się więcej</a>",
 			"video_not_supported": "",
-			"oisy_allowance_used_up_title": "Darmowe kredyty użytkowania wykorzystane",
-			"oisy_allowance_used_up": "Twoja dzienna pula darmowych kredytów użytkowania została wykorzystana, więc podpisanie niektórych transakcji może się nie powieść.",
-			"oisy_allowance_used_up_own_cycles": "Twoja dzienna pula darmowych kredytów użytkowania została wykorzystana, więc podpisywanie korzysta teraz z Twojego limitu wydatków.",
-			"oisy_allowance_used_up_short": "Twoje dzienne darmowe kredyty użytkowania zostały wykorzystane, więc podpisywanie może się nie powieść.",
-			"oisy_allowance_used_up_own_cycles_short": "Twoje dzienne darmowe kredyty użytkowania zostały wykorzystane, więc podpisywanie korzysta z <a href=\"$url\">Twojego limitu wydatków</a>.",
+			"oisy_allowance_used_up_title": "Tymczasowy problem z podpisywaniem",
+			"oisy_allowance_used_up": "$oisy_short tymczasowo nie może pokryć cykli potrzebnych do podpisywania transakcji, więc podpisywanie może się nie powieść. Pracujemy nad rozwiązaniem.",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short tymczasowo nie może pokryć cykli potrzebnych do podpisywania transakcji, więc na razie pokrywają je Twoje własne ICP Cycles. Pracujemy nad rozwiązaniem.",
+			"oisy_allowance_used_up_short": "$oisy_short tymczasowo nie może pokryć kosztów podpisywania, więc podpisywanie może się nie powieść. Pracujemy nad rozwiązaniem.",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short tymczasowo nie może pokryć kosztów podpisywania, więc na razie pokrywają je <a href=\"$url\">Twoje własne ICP Cycles</a>.",
 			"oisy_allowance_tools_link": "Zarządzaj limitem wydatków w&nbsp;<a href=\"$url\">Narzędziach</a>.",
-			"oisy_allowance_exceeded": "Ta transakcja kosztuje więcej, niż pokrywa Twój darmowy limit $oisy_name."
+			"oisy_allowance_tools_link_urgent": "W przypadku pilnych transakcji możesz pokryć koszty podpisywania własnymi ICP Cycles w&nbsp;<a href=\"$url\">Narzędziach</a>.",
+			"oisy_allowance_exceeded": "Ta transakcja potrzebuje do podpisania więcej cykli, niż pokrywa $oisy_short."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "Nie udało się podpisać Twojej transakcji, ponieważ nie masz wystarczającej liczby kredytów użytkowania."
+			"usage_credits_insufficient": "Nie udało się teraz podpisać Twojej transakcji."
 		}
 	},
 	"progress": {
@@ -930,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Kredyty użytkowania",
-			"description": "Gdy Twoje dzienne darmowe kredyty użytkowania się wyczerpią, podpisywanie jest opłacane z Twoich ICP Cycles, do limitu wydatków, który tu ustawisz.",
+			"description": "$oisy_short zwykle pokrywa cykle potrzebne do podpisywania. Gdy jest to ograniczone, wkraczają Twoje własne ICP Cycles, do limitu wydatków, który tu ustawisz.",
 			"own_credits": "Limit wydatków",
 			"balance": "Saldo ICP Cycles",
 			"add_more": "Ustaw limit wydatków",
