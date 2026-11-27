@@ -7,15 +7,20 @@
 	import { browser } from '$app/environment';
 	import { goto, preloadData } from '$app/navigation';
 	import type { PublicTip } from '$declarations/backend/backend.did';
+	import {
+		LISTED_ICRC_LEDGER_CANISTER_IDS,
+		LISTED_TOKEN_LABELS
+	} from '$env/tokens/tokens.listed.env';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import { isEmbeddedImage } from '$icp/utils/icrc.utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import TipClaimHero from '$lib/components/tip/TipClaimHero.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { TIP_CLAIM_BUTTON } from '$lib/constants/test-ids.constants';
+	import { TIP_CLAIM_BUTTON, TIP_TOKEN_WARNING } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
@@ -27,7 +32,9 @@
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatNanosecondsToDateAndTime, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { findLookalike } from '$lib/utils/lookalike.utils';
 	import { isTipUnavailable } from '$lib/utils/tip.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		tipId: string;
@@ -54,8 +61,20 @@
 	// visitor's token list: whoever opens a tip link may never have held this
 	// token, so the list is exactly the wrong place to look for how to render it.
 	let symbol = $state<string | undefined>();
+	let name = $state<string | undefined>();
 	let decimals = $state<number | undefined>();
 	let logo = $state<string | undefined>();
+
+	// Decided by the ledger alone, before its metadata answers or even if it never does: anyone can
+	// give a ledger any name, symbol and logo, so only the ledger says which token this is.
+	let listed = $derived(
+		nonNullish(preview) && LISTED_ICRC_LEDGER_CANISTER_IDS.has(preview.ledger_canister_id.toText())
+	);
+
+	// A token OISY does not list, whose name or symbol looks like one it does.
+	let copied = $derived(
+		listed ? undefined : findLookalike({ token: { symbol, name }, among: LISTED_TOKEN_LABELS })
+	);
 
 	let signedIn = $derived(nonNullish($authIdentity));
 
@@ -102,7 +121,7 @@
 			);
 
 			if (nonNullish(meta)) {
-				({ symbol, decimals } = meta);
+				({ symbol, name, decimals } = meta);
 				// Without a logo the hero spells out the symbol instead.
 				logo = nonNullish(meta.icon) && isEmbeddedImage(meta.icon) ? meta.icon : undefined;
 			}
@@ -302,6 +321,17 @@
 		without having identified themselves to anyone.
 	-->
 	<p class="mb-6 text-center text-sm text-tertiary">{$i18n.tip.text.claimer_disclosure}</p>
+
+	<!-- Ahead of the button for the same reason as the line above. -->
+	{#if !listed}
+		<MessageBox level="warning" styleClass="mb-6" testId={TIP_TOKEN_WARNING}>
+			{nonNullish(copied)
+				? replacePlaceholders($i18n.tip.text.token_copies_listed, {
+						$token: getTokenDisplaySymbol(copied)
+					})
+				: $i18n.tip.text.token_not_listed}
+		</MessageBox>
+	{/if}
 
 	{#if signedIn}
 		<Button fullWidth onclick={handOff} testId={TIP_CLAIM_BUTTON}>

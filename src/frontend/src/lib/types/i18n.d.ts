@@ -2795,6 +2795,8 @@ interface I18nTip {
 		open_or_create: string;
 		open_or_create_hint: string;
 		claimer_disclosure: string;
+		token_not_listed: string;
+		token_copies_listed: string;
 		claimed_title: string;
 		claimed_description: string;
 		claiming_title: string;
@@ -2802,6 +2804,9 @@ interface I18nTip {
 		claim_retry: string;
 		received_title: string;
 		received_description: string;
+		added_token_not_listed: string;
+		added_token_copies: string;
+		dont_add_token: string;
 		network: string;
 		status_completed: string;
 		take_me_to_wallet: string;

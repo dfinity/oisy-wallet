@@ -295,7 +295,7 @@ export const findTwinToken = ({
  * @param token - for which the symbol to display should be found
  * @returns the symbol to display for the token
  */
-export const getTokenDisplaySymbol = (token: Token | CardData): string =>
+export const getTokenDisplaySymbol = (token: Pick<Token, 'symbol' | 'oisySymbol'>): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;
 
 /**

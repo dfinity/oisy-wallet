@@ -3,16 +3,25 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
-import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	TIP_ADDED_TOKEN_WARNING,
+	TIP_CLAIM_RETRY_BUTTON,
+	TIP_DONT_ADD_TOKEN_BUTTON,
+	TIP_RECEIVED_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import * as tokenServices from '$lib/services/token.services';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
+import { mockIndexCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
@@ -55,6 +64,16 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 				ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
 				enabled: false,
 				symbol: 'ckTEST'
+			},
+			// The BITCAT ledger names itself BITCAT•ID•YRMO•ODIN; OISY shows it as BITCAT.
+			{
+				...mockIcrcCustomToken,
+				id: parseTokenId('BITCAT'),
+				ledgerCanisterId: 'xlwi6-kyaaa-aaaar-qarya-cai',
+				enabled: false,
+				symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				name: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				oisySymbol: { oisySymbol: 'BITCAT' }
 			}
 		])
 	};
@@ -108,6 +127,7 @@ describe('TipClaimModal', () => {
 		vi.mocked(loadCustomTokens).mockReset();
 		modalStore.close();
 		icrcCustomTokensStore.resetAll();
+		backendCustomTokens.set([]);
 		mockAuthStore();
 		// Describes one sign-in, so it must not leak between tests.
 		userProfileCreated.set(false);
@@ -215,6 +235,185 @@ describe('TipClaimModal', () => {
 		await waitFor(() => expect(getByText(get(i18n).tip.text.claimed_title)).toBeInTheDocument());
 
 		expect(queryByText(/500000/)).not.toBeInTheDocument();
+	});
+
+	describe('a token the wallet does not know', () => {
+		const unlistedLedger = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
+
+		const renderWithToken = async ({
+			ledger,
+			symbol,
+			name
+		}: {
+			ledger: Principal;
+			symbol: string;
+			name: string;
+		}) => {
+			mockDetailsFor(ledger);
+			mockClaimFor(ledger);
+			const { metadata } = await import('$icp/api/icrc-ledger.api');
+			vi.mocked(metadata).mockResolvedValue([
+				[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
+				[IcrcMetadataResponseEntries.NAME, { Text: name }],
+				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
+				[IcrcMetadataResponseEntries.FEE, { Nat: 10_000n }]
+			]);
+
+			const result = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() =>
+				expect(
+					result.container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)
+				).toBeInTheDocument()
+			);
+
+			return result;
+		};
+
+		const warning = (container: HTMLElement) =>
+			container.querySelector(`[data-tid=${TIP_ADDED_TOKEN_WARNING}]`);
+
+		const dontAddButton = (container: HTMLElement) =>
+			container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_DONT_ADD_TOKEN_BUTTON}]`);
+
+		it('says nothing more about a token already in the list', async () => {
+			const { container } = await renderWithToken({
+				ledger: ledgerCanisterId,
+				symbol: 'ckTEST',
+				name: 'ckTEST'
+			});
+
+			expect(warning(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).not.toBeInTheDocument();
+		});
+
+		it('says nothing more about a saved token whose details did not load', async () => {
+			// Missing from the loaded stores, yet saved: the rows the backend returned still have it.
+			backendCustomTokens.set([
+				{ ...mockCustomTokens[0], token: { Icrc: { ledger_id: unlistedLedger, index_id: [] } } }
+			]);
+
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			// The symbol shows once the ledger's details are in, and with them any note.
+			await waitFor(() => expect(container).toHaveTextContent('TOK'));
+
+			expect(warning(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).not.toBeInTheDocument();
+		});
+
+		it('names the token in the list that a new one copies', async () => {
+			// A Cyrillic S in place of the Latin one.
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'ckTE\u{405}T',
+				name: 'Mine'
+			});
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(
+					replacePlaceholders(get(i18n).tip.text.added_token_copies, { $token: 'ckTEST' })
+				)
+			);
+
+			expect(dontAddButton(container)).toBeInTheDocument();
+		});
+
+		it.each([
+			{ copy: 'the symbol OISY shows', symbol: 'BITCAT' },
+			{ copy: 'the ledger symbol', symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN' }
+		])('names a token by the symbol OISY shows, for a copy of $copy', async ({ symbol }) => {
+			const { container } = await renderWithToken({ ledger: unlistedLedger, symbol, name: 'Mine' });
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(
+					replacePlaceholders(get(i18n).tip.text.added_token_copies, { $token: 'BITCAT' })
+				)
+			);
+		});
+
+		it('says OISY does not list a new token that copies none', async () => {
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(get(i18n).tip.text.added_token_not_listed)
+			);
+		});
+
+		it('keeps the wallet button off until the list lands, then names the new token', async () => {
+			tokensInitialized.set(false);
+
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			const walletButton = () =>
+				container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`);
+
+			expect(walletButton()).toBeDisabled();
+			expect(warning(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).toHaveTextContent(get(i18n).core.text.close);
+
+			tokensInitialized.set(true);
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(get(i18n).tip.text.added_token_not_listed)
+			);
+
+			expect(dontAddButton(container)).toHaveTextContent(get(i18n).tip.text.dont_add_token);
+			expect(walletButton()).toBeEnabled();
+			expect(setCustomTokenApi).not.toHaveBeenCalled();
+		});
+
+		it('offers Close while the list is missing, and closing leaves the token out', async () => {
+			// The list may never land: when its fetch fails, `LoaderTokens` only shows a toast.
+			tokensInitialized.set(false);
+
+			const closeSpy = vi.spyOn(modalStore, 'close');
+
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			const closeButton = dontAddButton(container);
+
+			expect(closeButton).toHaveTextContent(get(i18n).core.text.close);
+			expect(closeButton).toBeEnabled();
+			expect(closeSpy).not.toHaveBeenCalled();
+
+			closeButton?.click();
+
+			expect(closeSpy).toHaveBeenCalledOnce();
+			expect(setCustomTokenApi).not.toHaveBeenCalled();
+		});
+
+		it('leaves a new token out of the list when the claimer says so', async () => {
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			await waitFor(() => expect(dontAddButton(container)).toBeInTheDocument());
+
+			dontAddButton(container)?.click();
+
+			await waitFor(() => expect(get(modalStore)).toBeFalsy());
+
+			expect(setCustomTokenApi).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('the token logo', () => {
@@ -441,7 +640,13 @@ describe('TipClaimModal', () => {
 			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
 		);
 
-		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+		const walletButton = () =>
+			container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`);
+
+		// Off until the list lands, so a tap cannot start a handover on an unloaded list.
+		expect(walletButton()).toBeDisabled();
+
+		walletButton()?.click();
 
 		await vi.advanceTimersByTimeAsync(600);
 
@@ -462,6 +667,10 @@ describe('TipClaimModal', () => {
 				certified: true
 			}
 		]);
+
+		await vi.waitFor(() => expect(walletButton()).toBeEnabled());
+
+		walletButton()?.click();
 
 		await vi.advanceTimersByTimeAsync(1_000);
 
@@ -626,6 +835,44 @@ describe('TipClaimModal', () => {
 
 			// An update, not an insert.
 			expect(token).toMatchObject({ version: [3n] });
+		});
+
+		it('carries the version and index canister of a saved row whose details did not load', async () => {
+			// Missing from the loaded store, yet saved: only the rows the backend returned still hold
+			// the version, without which the save collides with the row the canister already has.
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+
+			const saved = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			backendCustomTokens.set([
+				{
+					...mockCustomTokens[0],
+					token: {
+						Icrc: { ledger_id: saved, index_id: [Principal.fromText(mockIndexCanisterId)] }
+					},
+					enabled: false,
+					version: [4n]
+				}
+			]);
+
+			mockDetailsFor(saved);
+			mockClaimFor(saved);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalledOnce());
+
+			const [[{ token }]] = vi.mocked(setCustomTokenApi).mock.calls;
+
+			// An update of the saved row, which keeps its index canister.
+			expect(token).toMatchObject({ enabled: true, version: [4n] });
+			expect(
+				(token.token as { Icrc: { index_id: [] | [Principal] } }).Icrc.index_id[0]?.toText()
+			).toBe(mockIndexCanisterId);
 		});
 
 		it('does not start a second handover on a double tap', async () => {

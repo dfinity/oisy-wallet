@@ -13,6 +13,7 @@
 	import type { TipDetails } from '$declarations/backend/backend.did';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { LISTED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens.listed.env';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import { icrcCustomTokensInitialized, icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -26,10 +27,17 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
-	import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		TIP_ADDED_TOKEN_WARNING,
+		TIP_CLAIM_RETRY_BUTTON,
+		TIP_DONT_ADD_TOKEN_BUTTON,
+		TIP_RECEIVED_BUTTON
+	} from '$lib/constants/test-ids.constants';
+	import { allFungibleTokens, allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
 	import {
@@ -39,6 +47,7 @@
 	import { toTipErrorType, trackTip } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails, tipRateLimit } from '$lib/services/tip.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
+	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -49,12 +58,14 @@
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { findLookalike } from '$lib/utils/lookalike.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
 	import {
 		hasSeenTipWelcome,
 		isTipUnavailable,
 		rememberTipWelcomeSeen
 	} from '$lib/utils/tip.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		pending: PendingTipClaim;
@@ -98,6 +109,7 @@
 	// link may never have held this token, so the list is the wrong place to look
 	// for how to render it.
 	let symbol = $state<string | undefined>();
+	let name = $state<string | undefined>();
 	let decimals = $state<number | undefined>();
 	let logo = $state<string | undefined>();
 	// Derived rather than assigned once: `claimedAmount` is set the instant the
@@ -115,6 +127,58 @@
 	let claimedLedgerId = $state<Principal | undefined>();
 	// True while the handover is running its canister writes.
 	let handingOff = $state(false);
+
+	/**
+	 * The ledger's row in the list the backend returned, with the version and index canister a save
+	 * of it has to carry. A saved token whose details did not load is missing from the loaded
+	 * stores, but not from these rows.
+	 */
+	const findSavedRow = (
+		ledgerCanisterId: string
+	): { version: bigint | undefined; indexCanisterId: string | undefined } | undefined => {
+		for (const { token, version } of $backendCustomTokens) {
+			if ('Icrc' in token && token.Icrc.ledger_id.toText() === ledgerCanisterId) {
+				return {
+					version: fromNullable(version),
+					indexCanisterId: fromNullable(token.Icrc.index_id)?.toText()
+				};
+			}
+		}
+
+		return undefined;
+	};
+
+	/**
+	 * Whether the claim brings a token the claimer's wallet does not know: neither one OISY lists
+	 * nor one already in their list, on or off. Read only once their list has loaded, so a token
+	 * they have is never called new.
+	 *
+	 * The rows the backend returned count too: a saved token whose details did not load is missing
+	 * from the loaded stores, but it is still in their list.
+	 *
+	 * Such a token is only added on the way to the wallet (`enableClaimedToken`), so they can still
+	 * leave it out.
+	 */
+	let newToken = $derived.by(() => {
+		if (isNullish(claimedLedgerId) || !$icrcCustomTokensInitialized) {
+			return false;
+		}
+
+		const ledgerCanisterId = claimedLedgerId.toText();
+
+		return (
+			!LISTED_ICRC_LEDGER_CANISTER_IDS.has(ledgerCanisterId) &&
+			![...$allIcrcTokens, ...($icrcCustomTokensStore ?? []).map(({ data }) => data)].some(
+				(token) => token.ledgerCanisterId === ledgerCanisterId
+			) &&
+			isNullish(findSavedRow(ledgerCanisterId))
+		);
+	});
+
+	// A new token whose name or symbol looks like one the claimer's wallet knows, on any network.
+	let copied = $derived(
+		newToken ? findLookalike({ token: { symbol, name }, among: $allFungibleTokens }) : undefined
+	);
 
 	const close = () => modalStore.close();
 
@@ -172,13 +236,15 @@
 		// mismatch rather than refusing politely (`token/service.rs`). `icrcTokens`
 		// hides testnet tokens whenever testnets are off, so a row the claimer
 		// really has can be missing from the lookup above — and a versionless save
-		// for it would take down the call. Asked of the unfiltered store, which is
-		// the closest thing on this side to what the canister holds, and its
-		// version is carried through so the upsert is an update rather than a
-		// collision.
-		const registered = ($icrcCustomTokensStore ?? [])
-			.map(({ data }) => data)
-			.find((token) => token.ledgerCanisterId === ledgerCanisterId);
+		// for it would take down the call. Asked of the unfiltered store, and then
+		// of the rows the backend returned, which still hold a saved token whose
+		// details did not load; its version is carried through so the upsert is
+		// an update rather than a collision.
+		const registered =
+			($icrcCustomTokensStore ?? [])
+				.map(({ data }) => data)
+				.find((token) => token.ledgerCanisterId === ledgerCanisterId) ??
+			findSavedRow(ledgerCanisterId);
 
 		// Not in their list at all, which is the case that used to end in silence:
 		// `icrcTokens` is the defaults plus the claimer's *own* imports, so a token
@@ -316,7 +382,7 @@
 			);
 
 			if (nonNullish(meta)) {
-				({ symbol, decimals } = meta);
+				({ symbol, name, decimals } = meta);
 				// Without a logo the hero spells out the symbol instead.
 				logo = nonNullish(meta.icon) && isEmbeddedImage(meta.icon) ? meta.icon : undefined;
 			}
@@ -557,6 +623,16 @@
 				<p class="mb-6 text-center italic">“{message}”</p>
 			{/if}
 
+			{#if newToken}
+				<MessageBox level="warning" styleClass="mb-4" testId={TIP_ADDED_TOKEN_WARNING}>
+					{nonNullish(copied)
+						? replacePlaceholders($i18n.tip.text.added_token_copies, {
+								$token: getTokenDisplaySymbol(copied)
+							})
+						: $i18n.tip.text.added_token_not_listed}
+				</MessageBox>
+			{/if}
+
 			<div class="mb-2">
 				<ModalValue>
 					{#snippet label()}{$i18n.tip.text.network}{/snippet}
@@ -599,15 +675,30 @@
 					first one's freshly written row with no version, which
 					`set_custom_token` answers by trapping.
 				-->
-				<Button
-					colorStyle="secondary-light"
-					disabled={handingOff}
-					fullWidth
-					onclick={leaveForWallet}
-					testId={TIP_RECEIVED_BUTTON}
-				>
-					{$i18n.tip.text.take_me_to_wallet}
-				</Button>
+				<div class="flex w-full gap-3">
+					<!-- Closing here skips `enableClaimedToken`, so the token stays out of the list. -->
+					{#if newToken || !$icrcCustomTokensInitialized}
+						<Button
+							colorStyle="secondary-light"
+							disabled={handingOff}
+							fullWidth
+							onclick={close}
+							testId={TIP_DONT_ADD_TOKEN_BUTTON}
+						>
+							{newToken ? $i18n.tip.text.dont_add_token : $i18n.core.text.close}
+						</Button>
+					{/if}
+
+					<Button
+						colorStyle="secondary-light"
+						disabled={handingOff || !$icrcCustomTokensInitialized}
+						fullWidth
+						onclick={leaveForWallet}
+						testId={TIP_RECEIVED_BUTTON}
+					>
+						{$i18n.tip.text.take_me_to_wallet}
+					</Button>
+				</div>
 			{:else if claimState !== 'claiming'}
 				<!--
 					Close is always here. The failed state used to offer "Try again" and

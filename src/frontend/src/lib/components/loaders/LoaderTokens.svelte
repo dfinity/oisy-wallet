@@ -51,6 +51,7 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -124,6 +125,11 @@
 				if (generation !== fetchGeneration) {
 					return;
 				}
+
+				// A cached answer sets the rows too, so they stand until the backend answers. Set
+				// here rather than where the cache is read: `queryAndUpdate` skips a cached answer
+				// that lands after the fresh one, so it never overwrites fresher rows.
+				backendCustomTokens.set(tokens);
 
 				loadParams = { tokens, certified, identity };
 			},
