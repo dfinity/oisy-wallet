@@ -25,6 +25,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Interface } from 'ethers/abi';
+import { keccak256 } from 'ethers/crypto';
 import { get } from 'svelte/store';
 
 const { mockSendTransaction } = vi.hoisted(() => ({
@@ -332,6 +333,88 @@ describe('send.services', () => {
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSend.DONE);
+		});
+
+		describe('beforeBroadcast', () => {
+			// A signed transaction is hex: the hook is handed the hash of its bytes.
+			const signed = `0x${'ab'.repeat(110)}`;
+
+			const sendWith = (
+				beforeBroadcast: (params: { hash: string; nonce: number }) => Promise<void>
+			) =>
+				send({
+					progress: mockProgress,
+					token: mockValidErc20Token,
+					identity: mockIdentity,
+					to: '0xRecipient',
+					amount: 1_000_000n,
+					from: '0xSender',
+					sourceNetwork: ETHEREUM_NETWORK,
+					targetNetwork: ETHEREUM_NETWORK,
+					maxFeePerGas: 200n,
+					maxPriorityFeePerGas: 100n,
+					gas: 21_000n,
+					minterInfo: undefined,
+					beforeBroadcast
+				});
+
+			beforeEach(() => {
+				vi.mocked(signerApi.signTransaction).mockResolvedValue(signed);
+				vi.mocked(approveServices.approve).mockResolvedValue({
+					transactionNeededApproval: false,
+					nonce: 5
+				});
+			});
+
+			it("runs with the signed transaction's hash and nonce, before the broadcast", async () => {
+				const beforeBroadcast = vi.fn().mockResolvedValue(undefined);
+
+				await sendWith(beforeBroadcast);
+
+				expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({
+					hash: keccak256(signed),
+					nonce: 5
+				});
+				expect(beforeBroadcast.mock.invocationCallOrder[0]).toBeLessThan(
+					mockSendTransaction.mock.invocationCallOrder[0]
+				);
+			});
+
+			it('broadcasts nothing when it rejects', async () => {
+				const err = new Error('no row');
+
+				await expect(sendWith(vi.fn().mockRejectedValue(err))).rejects.toThrow(err);
+
+				expect(mockSendTransaction).not.toHaveBeenCalled();
+				expect(ethTransactionServices.processTransactionSent).not.toHaveBeenCalled();
+			});
+
+			// An approval is a transaction of its own, which the hook is not about.
+			it('runs for the send only, with its nonce after an approval', async () => {
+				vi.mocked(approveServices.approve).mockResolvedValue({
+					transactionNeededApproval: true,
+					nonce: 5
+				});
+				const beforeBroadcast = vi.fn().mockResolvedValue(undefined);
+
+				await sendWith(beforeBroadcast);
+
+				expect(approveServices.approve).toHaveBeenCalledWith(
+					expect.not.objectContaining({ beforeBroadcast: expect.anything() })
+				);
+				expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ nonce: 6 })
+				);
+			});
+
+			// The prepared request goes to the signer canister, whose Candid has no function.
+			it('stays out of the transaction it signs', async () => {
+				await sendWith(vi.fn().mockResolvedValue(undefined));
+
+				expect(prepareServices.prepare).toHaveBeenCalledWith(
+					expect.not.objectContaining({ beforeBroadcast: expect.anything() })
+				);
+			});
 		});
 
 		describe('conversions to the Internet Computer', () => {
