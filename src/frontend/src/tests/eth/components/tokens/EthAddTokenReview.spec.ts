@@ -278,7 +278,7 @@ describe('EthAddTokenReview', () => {
 		});
 	});
 
-	it('should render an error if metadata are duplicated', async () => {
+	it('should not error when another token has the same symbol on the same network', async () => {
 		erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 
 		const mockErc20Provider = {
@@ -311,9 +311,9 @@ describe('EthAddTokenReview', () => {
 		});
 
 		await vi.waitFor(() => {
-			expect(toastsError).toHaveBeenCalledWith({
-				msg: { text: en.tokens.error.duplicate_metadata }
-			});
+			expect(mockErc721Provider.metadata).toHaveBeenCalled();
 		});
+
+		expect(toastsError).not.toHaveBeenCalled();
 	});
 });

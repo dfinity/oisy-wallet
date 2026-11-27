@@ -4,7 +4,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { assertExistingTokens } from '$lib/utils/tokens.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -53,16 +52,6 @@ export const loadAndAssertAddCustomToken = ({
 				msg: { text: get(i18n).tokens.import.error.no_metadata }
 			});
 
-			return { result: 'error' };
-		}
-
-		const { valid } = assertExistingTokens({
-			existingTokens: extTokens,
-			token,
-			errorMsg: get(i18n).tokens.error.duplicate_metadata
-		});
-
-		if (!valid) {
 			return { result: 'error' };
 		}
 
