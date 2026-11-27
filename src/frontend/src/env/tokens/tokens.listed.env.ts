@@ -1,3 +1,4 @@
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { ADDITIONAL_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.env';
@@ -6,6 +7,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SUPPORTED_ICP_TOKENS } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
+import { SUPPORTED_XRP_TOKENS } from '$env/tokens/tokens.xrp.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { Token } from '$lib/types/token';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
@@ -42,7 +44,9 @@ export const LISTED_TOKEN_LABELS: readonly ListedTokenLabel[] = [
 		...ADDITIONAL_ICRC_TOKENS,
 		...SUPPORTED_BITCOIN_TOKENS,
 		...SUPPORTED_ETHEREUM_TOKENS,
-		...SUPPORTED_SOLANA_TOKENS
+		...SUPPORTED_SOLANA_TOKENS,
+		...SUPPORTED_XRP_TOKENS,
+		...SUPPORTED_EVM_TOKENS
 	].map(({ symbol, name }) => ({ symbol, name })),
 	...[...PUBLIC_ICRC_TOKENS, ...ICRC_CK_TOKENS]
 		.map(({ twinToken }) => twinTokenSymbol(twinToken))

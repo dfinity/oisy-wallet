@@ -17,9 +17,12 @@ describe('tokens.listed.env', () => {
 		);
 	});
 
-	it.each(['ICP', 'BTC', 'ETH', 'SOL'])('should know the symbol %s', (symbol) => {
-		expect(LISTED_TOKEN_LABELS.some((label) => label.symbol === symbol)).toBeTruthy();
-	});
+	it.each(['ICP', 'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'POL'])(
+		'should know the symbol %s',
+		(symbol) => {
+			expect(LISTED_TOKEN_LABELS.some((label) => label.symbol === symbol)).toBeTruthy();
+		}
+	);
 
 	it('should know the symbol of every ck token from its twin token', () => {
 		const twinSymbols = [...PUBLIC_ICRC_TOKENS, ...ICRC_CK_TOKENS]
