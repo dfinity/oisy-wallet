@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -23,6 +24,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -174,6 +176,31 @@ describe('manage-tokens.services', () => {
 				token: {
 					network: ETHEREUM_NETWORK.id.description,
 					address: mockEthAddress
+				},
+				sourceLocation: 'manage_tokens',
+				resultStatus: 'success'
+			});
+		});
+
+		it('should derive token_manage fields for an XRP Ledger trust-line token', async () => {
+			const customTokens: SaveCustomTokenWithKey[] = [
+				{
+					enabled: true,
+					networkKey: 'XrpTrustLineMainnet',
+					currency: mockRlusdCurrencyCode,
+					issuer: mockRlusdIssuer
+				}
+			];
+
+			mockSave.mockResolvedValueOnce(undefined);
+
+			await saveTokens({ ...params, tokens: customTokens, tokenManageModifier: 'import' });
+
+			expect(trackTokenManage).toHaveBeenCalledExactlyOnceWith({
+				modifier: 'import',
+				token: {
+					network: XRP_MAINNET_NETWORK_ID.description,
+					address: `${mockRlusdCurrencyCode}.${mockRlusdIssuer}`
 				},
 				sourceLocation: 'manage_tokens',
 				resultStatus: 'success'

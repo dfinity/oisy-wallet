@@ -41,6 +41,7 @@ import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { filterEnabledToken, standardLabel } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
+import { isTokenXrpTrustLineCustomToken } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 type SortableTokenId = TokenId;
@@ -630,6 +631,10 @@ const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined
 			...token,
 			networkKey: isNetworkIdSOLDevnet(token.network.id) ? 'SplDevnet' : 'SplMainnet'
 		};
+	}
+
+	if (isTokenXrpTrustLineCustomToken(token)) {
+		return { ...token, networkKey: 'XrpTrustLineMainnet' };
 	}
 };
 

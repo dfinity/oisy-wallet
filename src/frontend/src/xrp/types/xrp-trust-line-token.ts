@@ -15,3 +15,8 @@ export type XrpTrustLineToken = Token & XrpTrustLineTokenIdentity;
 export type RequiredXrpTrustLineToken = RequiredToken<XrpTrustLineToken>;
 
 export type XrpTrustLineCustomToken = TokenToggleable<XrpTrustLineToken>;
+
+// A restriction an issuer's account places on the holders of its tokens.
+export type XrpIssuerPower =
+	| { type: 'freeze' | 'global_freeze' | 'clawback' | 'approval' | 'no_rippling' }
+	| { type: 'transfer_fee'; percent: number };

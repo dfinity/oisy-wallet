@@ -764,6 +764,54 @@ describe('xrpl.rest', () => {
 			});
 		});
 
+		it('returns an issuer’s transfer rate when it charges one', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 0,
+							TransferRate: 1_005_000_000
+						}
+					}
+				}
+			});
+
+			const info = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'validated'
+			});
+
+			expect(info.transferRate).toBe(1_005_000_000);
+		});
+
+		it('refuses a transfer rate that is not a ledger UInt32', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 0,
+							TransferRate: -1
+						}
+					}
+				}
+			});
+
+			await expect(
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'validated' })
+			).rejects.toThrow('does not match the expected shape');
+		});
+
 		// The answer has to be about the account that was asked for. Nothing else in the response
 		// identifies it, so a stale or misrouted snapshot is otherwise read as this account's state
 		// — and each field then misleads a different guard: a foreign `Sequence` signs a payment the
