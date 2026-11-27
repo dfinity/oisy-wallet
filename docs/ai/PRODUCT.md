@@ -385,6 +385,10 @@ Two sets of curated tokens are enabled without the user switching them on. They 
 - **Fixed** tokens are always enabled; Manage tokens does not let the user switch them off. On ICP these are ICP, ckBTC, ckETH and ckUSDC.
 - **Suggested** tokens are enabled unless the user has switched them off, and OISY saves one as enabled to the user's token list once the wallet shows a balance in it and the list has no entry for it. A choice the user already made stays, and once saved, the token stays enabled for that user even after it leaves the set. Taking a token out of the suggested set hides it again only from users it was never saved for, such as those who held no balance in it while it was suggested and never switched it on or off.
 
+### Logos of Internet Computer tokens
+
+An ICRC ledger names its own logo. OISY shows it only when the image is embedded in it (a `data:image` URL), so showing a token never loads an image the ledger chose. Any other logo is not loaded: the token lists use OISY's own icon for that ledger instead, and the tip claim screens spell out the symbol. OISY's own icons for the tokens it lists are not affected.
+
 ### Asset types
 
 Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether. Send and Swap opened from the assets page start their token lists on the asset type selected there, as they do on its network; opened from any other page, where the filter is not shown, they start on All asset types.

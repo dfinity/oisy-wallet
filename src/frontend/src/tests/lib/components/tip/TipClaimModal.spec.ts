@@ -17,7 +17,7 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
-import { render, waitFor } from '@testing-library/svelte';
+import { render, waitFor, within } from '@testing-library/svelte';
 import { get, type Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -215,6 +215,50 @@ describe('TipClaimModal', () => {
 		await waitFor(() => expect(getByText(get(i18n).tip.text.claimed_title)).toBeInTheDocument());
 
 		expect(queryByText(/500000/)).not.toBeInTheDocument();
+	});
+
+	describe('the token logo', () => {
+		const renderWithLogo = async (logo: string) => {
+			mockDetails();
+			mockClaim();
+			const { metadata } = await import('$icp/api/icrc-ledger.api');
+			vi.mocked(metadata).mockResolvedValue([
+				[IcrcMetadataResponseEntries.SYMBOL, { Text: 'ICP' }],
+				[IcrcMetadataResponseEntries.NAME, { Text: 'Internet Computer' }],
+				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
+				[IcrcMetadataResponseEntries.FEE, { Nat: 10_000n }],
+				[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+			]);
+
+			return render(TipClaimModal, { props: { pending } });
+		};
+
+		it('shows a logo the ledger carries inline', async () => {
+			const logo = 'data:image/png;base64,iVBORw0KGgo=';
+
+			const { container, getByText } = await renderWithLogo(logo);
+
+			await waitFor(() => expect(getByText(/0\.005 ICP Received!/)).toBeInTheDocument());
+
+			expect(container.querySelector(`img[src="${logo}"]`)).toBeInTheDocument();
+		});
+
+		it.each(['//host.example/logo.png', '/icons/icrc/logo.png'])(
+			'spells out the symbol instead of loading a logo the ledger does not embed: %s',
+			async (logo) => {
+				const { container, getByText } = await renderWithLogo(logo);
+
+				await waitFor(() => expect(getByText(/0\.005 ICP Received!/)).toBeInTheDocument());
+
+				expect(container.querySelector(`img[src="${logo}"]`)).not.toBeInTheDocument();
+
+				const hero = container.querySelector(
+					`[aria-label="${get(i18n).tip.alt.claim_illustration}"]`
+				) as HTMLElement;
+
+				expect(within(hero).getByText('ICP')).toBeInTheDocument();
+			}
+		);
 	});
 
 	it('says a link is unavailable without ever attempting a payout', async () => {
