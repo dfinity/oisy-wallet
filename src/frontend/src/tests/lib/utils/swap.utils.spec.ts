@@ -1356,7 +1356,8 @@ describe('swap utils', () => {
 				recipientType: 'DESTINATION_CHAIN',
 				refundTo: mockEthAddress,
 				refundType: 'ORIGIN_CHAIN',
-				deadline: expect.any(String)
+				deadline: expect.any(String),
+				confidentiality: 'advanced'
 			});
 		});
 

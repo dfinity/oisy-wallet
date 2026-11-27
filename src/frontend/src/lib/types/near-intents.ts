@@ -14,6 +14,8 @@ export type NearIntentsDepositType = 'ORIGIN_CHAIN' | 'INTENTS';
 
 export type NearIntentsRecipientType = 'DESTINATION_CHAIN' | 'INTENTS';
 
+export type NearIntentsConfidentiality = 'public' | 'basic' | 'advanced';
+
 export interface NearIntentsQuoteRequest {
 	dry: boolean;
 	swapType: NearIntentsSwapType;
@@ -27,6 +29,7 @@ export interface NearIntentsQuoteRequest {
 	refundTo: string;
 	refundType: NearIntentsDepositType;
 	deadline: string;
+	confidentiality?: NearIntentsConfidentiality;
 	quoteWaitingTimeMs?: number;
 	referral?: string;
 	virtualChainRecipient?: string;

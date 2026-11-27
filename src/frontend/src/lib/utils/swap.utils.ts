@@ -410,7 +410,11 @@ export const buildNearIntentsQuoteRequest = ({
 	recipientType: 'DESTINATION_CHAIN',
 	refundTo: userAddress,
 	refundType: 'ORIGIN_CHAIN',
-	deadline: new Date(Date.now() + deadlineMs).toISOString()
+	deadline: new Date(Date.now() + deadlineMs).toISOString(),
+	// Settles on Confidential Intents, so the deposit and the payout cannot be matched on-chain.
+	// The user still deposits and receives on the chains themselves. Needs `NEAR_INTENTS_API_KEY`.
+	// https://docs.near-intents.org/integration/distribution-channels/1click-api/quickstart/confidential-swaps
+	confidentiality: 'advanced'
 });
 
 export const geSwapEthTokenAddress = (token: ErcFungibleToken) => {
