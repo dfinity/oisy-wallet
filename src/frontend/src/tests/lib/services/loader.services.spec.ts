@@ -7,8 +7,9 @@ import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { loadAddresses } from '$lib/services/addresses.services';
-import { trackRateLimited } from '$lib/services/analytics.services';
+import { trackEvent, trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
 import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -107,6 +108,17 @@ describe('loader.services', () => {
 			expect(trackRateLimited).toHaveBeenCalledExactlyOnceWith(
 				mockRateLimitedOutcome.rateLimitInfo
 			);
+		});
+
+		it('should count the request at load with its answer', async () => {
+			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
+
+			await initSignerAllowance();
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.OISY_ALLOWANCE_REQUEST,
+				metadata: { event_trigger: 'load', event_key: 'granted' }
+			});
 		});
 
 		it('should resolve when the request fails', async () => {

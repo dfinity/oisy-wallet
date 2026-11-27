@@ -22,6 +22,7 @@ import {
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import * as appConstants from '$lib/constants/app.constants';
+import { trackChargedCallInsufficientAllowance } from '$lib/services/allowance-analytics.services';
 import { requestAllowanceAfterInsufficientAllowance } from '$lib/services/allowance-request.services';
 import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type {
@@ -41,6 +42,10 @@ import { mock } from 'vitest-mock-extended';
 
 vi.mock('$lib/services/allowance-request.services', () => ({
 	requestAllowanceAfterInsufficientAllowance: vi.fn()
+}));
+
+vi.mock('$lib/services/allowance-analytics.services', () => ({
+	trackChargedCallInsufficientAllowance: vi.fn()
 }));
 
 describe('signer.api', () => {
@@ -531,6 +536,9 @@ describe('signer.api', () => {
 			});
 			expect(signerCanisterMock.personalSign).toHaveBeenCalledTimes(2);
 			expect(toastSpy).not.toHaveBeenCalled();
+			expect(trackChargedCallInsufficientAllowance).toHaveBeenCalledExactlyOnceWith({
+				method: 'eth_personal_sign'
+			});
 		});
 
 		it('should throw the error as it was, without a repeat, when no new allowance came through', async () => {
@@ -553,6 +561,7 @@ describe('signer.api', () => {
 			await expect(signMessage(signParams)).rejects.toBe(repeatErr);
 
 			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
+			expect(trackChargedCallInsufficientAllowance).toHaveBeenCalledTimes(2);
 			expect(requestAllowanceAfterInsufficientAllowance).toHaveBeenCalledOnce();
 		});
 
@@ -585,6 +594,9 @@ describe('signer.api', () => {
 			).resolves.toEqual(signature);
 
 			expect(requestAllowanceAfterInsufficientAllowance).toHaveBeenCalledOnce();
+			expect(trackChargedCallInsufficientAllowance).toHaveBeenCalledExactlyOnceWith({
+				method: 'schnorr_sign'
+			});
 		});
 
 		it('should pass any other payment error through without a request', async () => {
@@ -596,6 +608,7 @@ describe('signer.api', () => {
 			await expect(signMessage(signParams)).rejects.toBe(insufficientFunds);
 
 			expect(requestAllowanceAfterInsufficientAllowance).not.toHaveBeenCalled();
+			expect(trackChargedCallInsufficientAllowance).not.toHaveBeenCalled();
 		});
 
 		it('should pass any other error through without a request', async () => {

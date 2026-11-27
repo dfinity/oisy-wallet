@@ -1,5 +1,9 @@
 import { allowSigning } from '$lib/api/backend.api';
 import { ALLOWANCE_REQUEST_COOLDOWN_MILLIS } from '$lib/constants/app.constants';
+import {
+	type AllowanceRequestTrigger,
+	trackOisyAllowanceRequest
+} from '$lib/services/allowance-analytics.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
 import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
@@ -17,7 +21,7 @@ const inCooldown = (): boolean => {
 	return nonNullish(issue) && Date.now() - issue.refusedAt < ALLOWANCE_REQUEST_COOLDOWN_MILLIS;
 };
 
-const sendAllowanceRequest = async (identity: NullishIdentity): Promise<AllowanceRequestAnswer> => {
+const askForAllowance = async (identity: NullishIdentity): Promise<AllowanceRequestAnswer> => {
 	try {
 		const { response, rateLimitInfo } = await allowSigning({
 			identity,
@@ -49,6 +53,26 @@ const sendAllowanceRequest = async (identity: NullishIdentity): Promise<Allowanc
 };
 
 /**
+ * Sends one allowance request (AR) and counts it, with what triggered it. It sets no state:
+ * `requestAllowance` and `requestAllowanceAtLoad` handle the allowance issue.
+ *
+ * It never throws: a request that fails counts as refused.
+ */
+const sendAllowanceRequest = async ({
+	identity,
+	trigger
+}: {
+	identity: NullishIdentity;
+	trigger: AllowanceRequestTrigger;
+}): Promise<AllowanceRequestAnswer> => {
+	const result = await askForAllowance(identity);
+
+	trackOisyAllowanceRequest({ trigger, answer: result.answer });
+
+	return result;
+};
+
+/**
  * Sends an allowance request (AR) and keeps the allowance issue state in line with its answer: a
  * refused AR sets it, a granted or skipped one clears it.
  *
@@ -66,17 +90,19 @@ export const requestAllowance = (identity: NullishIdentity): Promise<AllowanceRe
 		return Promise.resolve({ answer: 'refused' });
 	}
 
-	pendingRequest = sendAllowanceRequest(identity).then((result) => {
-		if (result.answer === 'refused') {
-			allowanceIssueStore.setRefused();
-		} else {
-			allowanceIssueStore.clear();
+	pendingRequest = sendAllowanceRequest({ identity, trigger: 'insufficient_allowance' }).then(
+		(result) => {
+			if (result.answer === 'refused') {
+				allowanceIssueStore.setRefused();
+			} else {
+				allowanceIssueStore.clear();
+			}
+
+			pendingRequest = undefined;
+
+			return result;
 		}
-
-		pendingRequest = undefined;
-
-		return result;
-	});
+	);
 
 	return pendingRequest;
 };
@@ -89,7 +115,7 @@ export const requestAllowance = (identity: NullishIdentity): Promise<AllowanceRe
  * It never throws: a request that fails counts as refused.
  */
 export const requestAllowanceAtLoad = async (identity: NullishIdentity): Promise<void> => {
-	const { answer } = await sendAllowanceRequest(identity);
+	const { answer } = await sendAllowanceRequest({ identity, trigger: 'load' });
 
 	if (answer !== 'refused') {
 		allowanceIssueStore.clear();
