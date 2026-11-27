@@ -21,13 +21,10 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN,
 	TOKEN_INPUT_SELECT_TOKEN_BUTTON
 } from '$lib/constants/test-ids.constants';
-import * as currencyDerived from '$lib/derived/currency.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
-import { Currency } from '$lib/enums/currency';
 import { trackSwapTwoSwapsHint } from '$lib/services/swap-two-swaps-hint-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
-import * as currencyExchangeStoreModule from '$lib/stores/currency-exchange.store';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
 	initSwapAmountsStore,
@@ -580,22 +577,6 @@ describe('SwapForm', () => {
 			vi.restoreAllMocks();
 		});
 
-		const mockCurrency = ({
-			currency,
-			exchangeRateToUsd
-		}: {
-			currency: Currency;
-			exchangeRateToUsd: number | null;
-		}) => {
-			vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue(readable(currency));
-			vi.spyOn(currencyExchangeStoreModule, 'currencyExchangeStore', 'get').mockReturnValue({
-				...readable({ currency, exchangeRateToUsd, exchangeRate24hChangeMultiplier: null }),
-				setExchangeRate: vi.fn(),
-				setExchangeRateCurrency: vi.fn(),
-				setExchangeRate24hChangeMultiplier: vi.fn()
-			});
-		};
-
 		it('should show error when swap is not offered', () => {
 			setupSwapAmountsStore({
 				amountForSwap: 1,
@@ -730,7 +711,9 @@ describe('SwapForm', () => {
 			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
 		});
 
-		it('should show a fiat provider minimum in the display currency', () => {
+		// The fiat chain limit has a standing notice of its own, so this slot — which sits
+		// under the receive field — stays silent rather than stating the same figure twice.
+		it('should say nothing here when the refusal is the fiat chain limit', () => {
 			setupSwapAmountsStore({
 				amountForSwap: 1,
 				swaps: [],
@@ -739,7 +722,7 @@ describe('SwapForm', () => {
 			});
 			setupIcTokenFeeStore();
 
-			const { getByText, queryByText } = render(SwapForm, {
+			const { queryByText } = render(SwapForm, {
 				props: {
 					swapAmount: '1',
 					receiveAmount: undefined,
@@ -753,82 +736,9 @@ describe('SwapForm', () => {
 				context: mockContext
 			});
 
-			expect(
-				getByText(
-					replacePlaceholders(en.swap.text.swap_amount_too_low_minimum_fiat, {
-						$amount: '$1,000.00'
-					})
-				)
-			).toBeInTheDocument();
+			expect(queryByText(en.swap.text.swap_amount_too_low)).not.toBeInTheDocument();
 			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
-		});
-
-		it('should convert a fiat provider minimum into the selected currency', () => {
-			mockCurrency({ currency: Currency.EUR, exchangeRateToUsd: 1.25 });
-
-			setupSwapAmountsStore({
-				amountForSwap: 1,
-				swaps: [],
-				selectedProvider: undefined,
-				quoteError: { type: 'amount-too-low', minimum: { type: 'usd', value: 1000 } }
-			});
-			setupIcTokenFeeStore();
-
-			const { getByText } = render(SwapForm, {
-				props: {
-					swapAmount: '1',
-					receiveAmount: undefined,
-					slippageValue: undefined,
-					isSwapAmountsLoading: false,
-					onCustomValidate: vi.fn(),
-					onShowTokensList: vi.fn(),
-					onClose: vi.fn(),
-					onNext: vi.fn()
-				},
-				context: mockContext
-			});
-
-			// $1,000 at 1.25 USD per EUR
-			expect(
-				getByText(
-					replacePlaceholders(en.swap.text.swap_amount_too_low_minimum_fiat, {
-						$amount: '€800.00'
-					})
-				)
-			).toBeInTheDocument();
-		});
-
-		it('should omit the figure entirely while the exchange rate lags a currency switch', () => {
-			// Switching currency nulls the rate until the worker refreshes it, which makes
-			// formatCurrency return undefined. A bare number with no currency on it would be
-			// worse than saying nothing.
-			mockCurrency({ currency: Currency.EUR, exchangeRateToUsd: null });
-
-			setupSwapAmountsStore({
-				amountForSwap: 1,
-				swaps: [],
-				selectedProvider: undefined,
-				quoteError: { type: 'amount-too-low', minimum: { type: 'usd', value: 1000 } }
-			});
-			setupIcTokenFeeStore();
-
-			const { getByText, queryByText } = render(SwapForm, {
-				props: {
-					swapAmount: '1',
-					receiveAmount: undefined,
-					slippageValue: undefined,
-					isSwapAmountsLoading: false,
-					onCustomValidate: vi.fn(),
-					onShowTokensList: vi.fn(),
-					onClose: vi.fn(),
-					onNext: vi.fn()
-				},
-				context: mockContext
-			});
-
-			expect(getByText(en.swap.text.swap_amount_too_low)).toBeInTheDocument();
 			expect(queryByText(/1,000/)).not.toBeInTheDocument();
-			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
 		});
 
 		it('should show the amount-too-low message without a minimum when the provider named none', () => {
