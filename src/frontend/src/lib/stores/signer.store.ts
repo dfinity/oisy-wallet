@@ -155,7 +155,7 @@ export const initSignerContext = (): SignerContext => {
 	);
 
 	const init = ({ owner }: { owner: Identity }) => {
-		// The auth store can emit the same identity again (e.g. when another tab signs in); the running signer stays.
+		// The auth store can emit the same identity object again (e.g. when another tab signs in, `forceSync()` reuses the cached auth client); the running signer stays.
 		if (nonNullish(signer) && signerOwner === owner) {
 			return;
 		}
