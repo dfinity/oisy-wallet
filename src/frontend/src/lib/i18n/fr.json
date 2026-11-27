@@ -108,13 +108,13 @@
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
 			"standalone_mode": "Des problèmes de connexion connus surviennent lorsqu'une application et $oisy_short sont tous deux installés sur l'écran d'accueil. Si vous rencontrez des problèmes de connexion à $oisy_short ou de signature de transactions, veuillez lancer l'application depuis un navigateur classique. Nous travaillons sur un correctif qui sera bientôt disponible. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">En savoir plus</a>",
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo.",
-			"oisy_allowance_used_up_title": "",
-			"oisy_allowance_used_up": "",
-			"oisy_allowance_exceeded": ""
+			"oisy_allowance_used_up_title": "Crédits d'utilisation gratuits épuisés",
+			"oisy_allowance_used_up": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature de certaines transactions peut donc échouer.",
+			"oisy_allowance_exceeded": "Cette transaction coûte plus que ce que couvre votre quota gratuit $oisy_name."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": ""
+			"usage_credits_insufficient": "Votre transaction n'a pas pu être signée, car il ne vous reste pas assez de crédits d'utilisation."
 		}
 	},
 	"progress": {
