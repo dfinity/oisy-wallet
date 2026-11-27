@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Storica</title>
+  <desc id="desc">An onchain storage orbit forming the letter S inside a secure container.</desc>
+  <defs>
+    <linearGradient id="shell" x1="10" y1="7" x2="55" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#252B31"/>
+      <stop offset="1" stop-color="#0D1014"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="15" y1="14" x2="51" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E9FF90"/>
+      <stop offset="1" stop-color="#A8FF22"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 3 55 16v32L32 61 9 48V16L32 3Z" fill="url(#shell)" stroke="#46505A" stroke-width="1.5"/>
+  <path d="M46.5 20.2c-3.7-4.1-9-6.2-14.8-5.8-7.1.5-12.9 4.6-14.1 9.9-1.4 6.2 4.1 9.4 13.8 9.2 7.3-.1 10.9 1.1 10.3 4.1-.6 3-4.6 5.7-9.6 6.1-5.1.4-9.6-1.4-12.1-4.5" fill="none" stroke="url(#signal)" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="47" cy="20" r="3.25" fill="#C9FF3D"/>
+  <circle cx="19.7" cy="39.3" r="2" fill="#EEF9D5"/>
+  <path d="M32 7.5 51.1 18.3v27.4L32 56.5 12.9 45.7V18.3L32 7.5Z" fill="none" stroke="#C9FF3D" stroke-opacity=".16"/>
+</svg>
