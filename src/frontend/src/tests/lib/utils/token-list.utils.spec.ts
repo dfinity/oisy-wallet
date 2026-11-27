@@ -14,7 +14,8 @@ import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import {
 	getDisabledOrModifiedTokens,
 	getFilteredTokenGroup,
-	getFilteredTokenList
+	getFilteredTokenList,
+	getTokenRowKey
 } from '$lib/utils/token-list.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -265,5 +266,40 @@ describe('token-list.utils', () => {
 				tokens[1].id
 			]);
 		});
+	});
+
+	describe('getTokenRowKey', () => {
+		it('should keep apart two ledgers with the same symbol on the same network', () => {
+			const other = {
+				...mockValidIcrcToken,
+				id: parseTokenId(mockValidIcrcToken.symbol),
+				ledgerCanisterId: 'rrkah-fqaaa-aaaaa-aaaaq-cai'
+			};
+
+			expect(getTokenRowKey(other)).not.toBe(getTokenRowKey(mockValidIcrcToken));
+		});
+
+		it('should give a token loaded again the same key', () => {
+			const reloaded = { ...mockValidIcrcToken, id: parseTokenId(mockValidIcrcToken.symbol) };
+
+			expect(getTokenRowKey(reloaded)).toBe(getTokenRowKey(mockValidIcrcToken));
+		});
+
+		it('should keep apart the same address on two networks', () => {
+			const onIcp = { ...mockValidErc20Token, network: ICP_NETWORK };
+
+			expect(getTokenRowKey(onIcp)).not.toBe(getTokenRowKey(mockValidErc20Token));
+		});
+
+		it.each([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, SOLANA_TOKEN, ICP_TOKEN, mockValidSplToken])(
+			'should give $symbol a key of its own',
+			(token) => {
+				const keys = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, SOLANA_TOKEN, ICP_TOKEN, mockValidSplToken]
+					.filter((other) => other !== token)
+					.map(getTokenRowKey);
+
+				expect(keys).not.toContain(getTokenRowKey(token));
+			}
+		);
 	});
 });

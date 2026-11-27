@@ -16,7 +16,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
-	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
+	import { getFilteredTokenGroup, getTokenRowKey } from '$lib/utils/token-list.utils.js';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import { slide } from '$lib/utils/transitions.utils';
@@ -121,7 +121,7 @@
 
 	{#if isExpanded}
 		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
-			{#each tokensToShow as token (`token:${token.id.description}:${token.network.id.description}`)}
+			{#each tokensToShow as token (getTokenRowKey(token))}
 				<div
 					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-150 ease-out hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}

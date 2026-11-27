@@ -5,7 +5,9 @@ import { tokenListStore } from '$lib/stores/token-list.store';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { filterTokenGroups } from '$lib/utils/token-group.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -64,6 +66,23 @@ describe('TokensList', () => {
 
 		mockStores.setSortedTokens([]);
 		mockStores.setAllFungibleNetworkTokens([]);
+	});
+
+	describe('two tokens with the same symbol on one network', () => {
+		it('should show both', async () => {
+			const listed = { ...mockValidIcrcToken, id: parseTokenId('ckBTC'), symbol: 'ckBTC' };
+			const other = {
+				...listed,
+				id: parseTokenId('ckBTC'),
+				ledgerCanisterId: 'rrkah-fqaaa-aaaaa-aaaaq-cai'
+			};
+
+			mockStores.setSortedTokens([{ token: listed }, { token: other }]);
+
+			const { getAllByText } = render(TokensList);
+
+			await waitFor(() => expect(getAllByText('ckBTC').length).toBeGreaterThanOrEqual(2));
+		});
 	});
 
 	describe('category filter placeholder', () => {
