@@ -265,6 +265,53 @@ describe('rift.utils', () => {
 		});
 	});
 
+	// From an EVM network: the deposit address is an EVM one, the refund EVM and the payout BTC.
+	describe('isRiftOrderForReview from an EVM network', () => {
+		const now = Date.parse(mockRiftOrder.deposit_deadline) - 86_400_000;
+		const userEvmAddress = mockRiftOrderToAddress;
+		const userBtcAddress = mockRiftOrderRefundAddress;
+		const quote = {
+			...mockRiftQuote,
+			from: 'evm:1.0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+			to: 'bitcoin.btc'
+		};
+		const order: RiftOrder = {
+			...mockRiftOrder,
+			from: quote.from,
+			to: quote.to,
+			deposit_address: '0x2222222222222222222222222222222222222222',
+			to_address: userBtcAddress,
+			refund_address: userEvmAddress
+		};
+
+		const isForReview = (overrides: Partial<RiftOrder> = {}) =>
+			isRiftOrderForReview({
+				order: { ...order, ...overrides },
+				quote,
+				toAddress: userBtcAddress,
+				refundAddress: userEvmAddress,
+				now
+			});
+
+		it('accepts the order, comparing the EVM refund address without case', () => {
+			expect(isForReview()).toBeTruthy();
+			expect(
+				isForReview({ refund_address: userEvmAddress.toUpperCase().replace('0X', '0x') })
+			).toBeTruthy();
+		});
+
+		it.each([
+			{ label: 'a Bitcoin deposit address', overrides: { deposit_address: userBtcAddress } },
+			{ label: "the user's own EVM address", overrides: { deposit_address: userEvmAddress } },
+			{
+				label: 'a BTC payout address in another case',
+				overrides: { to_address: userBtcAddress.toUpperCase() }
+			}
+		])('refuses $label', ({ overrides }) => {
+			expect(isForReview(overrides)).toBeFalsy();
+		});
+	});
+
 	describe('riftSwapRefusedMessage', () => {
 		it.each([
 			{ reason: 'quoteExpired' as const, expected: en.swap.error.rift_quote_expired },

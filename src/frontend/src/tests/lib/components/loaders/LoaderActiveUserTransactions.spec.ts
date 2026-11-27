@@ -431,8 +431,9 @@ describe('LoaderActiveUserTransactions', () => {
 			);
 		});
 
-		it('polls Rift rows on each tick when present', async () => {
+		it('polls Rift rows on each tick when present, with the address its EVM deposits came from', async () => {
 			const riftSpy = vi.spyOn(riftPoller, 'pollRiftActiveUserTransactions').mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			const rift = pendingRift('rift-a');
 
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
@@ -444,7 +445,8 @@ describe('LoaderActiveUserTransactions', () => {
 
 			expect(riftSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				transactions: [rift]
+				transactions: [rift],
+				userAddress: mockEthAddress
 			});
 		});
 

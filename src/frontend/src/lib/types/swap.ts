@@ -578,6 +578,20 @@ export interface SwapLifiSolParams {
 	reviewedCeiling: bigint;
 }
 
+export interface SwapRiftEvmParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: ErcFungibleToken;
+	destinationToken: Token;
+	swapAmount: Amount;
+	sourceNetwork: EthereumNetwork;
+	// The user's EVM address: the deposit's sender, and the order's refund address.
+	userAddress: EthAddress;
+	// The user's Bitcoin address, where Rift pays out.
+	recipientAddress: BtcAddress;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.RIFT }>;
+}
+
 export interface SwapRiftBtcParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;

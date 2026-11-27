@@ -6,6 +6,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import { RIFT_MAX_ORDER_READS_PER_TICK } from '$lib/constants/swap.constants';
 import { getRiftOrder, isRiftRateLimited } from '$lib/rest/rift.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import {
 	pollRiftActiveUserTransactions,
 	reloadRiftEvmBalances,
@@ -16,6 +17,7 @@ import { RIFT_EXTERNAL_REF_KEYS, type RiftOrder } from '$lib/types/rift';
 import { toRiftExternalRefsMap } from '$lib/utils/rift-active-tx.utils';
 import { mockRiftActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRiftOrder } from '$tests/mocks/rift.mock';
@@ -27,6 +29,10 @@ vi.mock('$lib/rest/rift.rest', () => ({
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn()
+}));
+
+vi.mock('$lib/services/evm-source-tx.services', () => ({
+	readEvmSourceTxOutcome: vi.fn()
 }));
 
 vi.mock('$eth/services/eth-balance.services', async (importOriginal) => ({
@@ -67,7 +73,11 @@ describe('rift-active-tx.services', () => {
 
 	describe('pollRiftActiveUserTransactions', () => {
 		const poll = (transactions = [mockRiftActiveUserTransaction]) =>
-			pollRiftActiveUserTransactions({ identity: mockIdentity, transactions });
+			pollRiftActiveUserTransactions({
+				identity: mockIdentity,
+				transactions,
+				userAddress: mockEthAddress
+			});
 
 		it('reads the order the row pays', async () => {
 			answer({ status: 'awaiting_deposit' });
@@ -159,6 +169,90 @@ describe('rift-active-tx.services', () => {
 
 			expect(getRiftOrder).toHaveBeenCalledTimes(2);
 			expect(applyActiveUserTransactionPollUpdate).toHaveBeenCalledOnce();
+		});
+
+		describe('a deposit from an EVM network', () => {
+			const evmRow: ActiveUserTransaction = {
+				...mockRiftActiveUserTransaction,
+				external_refs: [
+					...mockRiftActiveUserTransaction.external_refs.filter(
+						({ key }) => key !== RIFT_EXTERNAL_REF_KEYS.DEPOSIT_TX
+					),
+					{ key: RIFT_EXTERNAL_REF_KEYS.DEPOSIT_TX, value: `0x${'ef'.repeat(32)}` },
+					{ key: RIFT_EXTERNAL_REF_KEYS.DEPOSIT_NONCE, value: '7' },
+					{ key: RIFT_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID, value: '1' }
+				]
+			};
+
+			it('fails the row once the deposit reverted, while Rift waits for it', async () => {
+				answer({ status: 'awaiting_deposit' });
+				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('reverted');
+
+				await poll([evmRow]);
+
+				expect(readEvmSourceTxOutcome).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						rowId: evmRow.id,
+						hash: `0x${'ef'.repeat(32)}`,
+						txNonce: 7,
+						userAddress: mockEthAddress
+					})
+				);
+				expect(lastUpdate()).toMatchObject({
+					status: { Failed: null },
+					error: en.swap.error.failed_unexpectedly
+				});
+			});
+
+			// The source chain names the cause.
+			it("fails a replaced deposit as such, over Rift's expired", async () => {
+				answer({ status: 'expired' });
+				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('replaced');
+
+				await poll([evmRow]);
+
+				expect(lastUpdate()).toMatchObject({
+					status: { Failed: null },
+					error: en.swap.error.swap_replaced_or_dropped
+				});
+			});
+
+			it("follows Rift's status while the deposit is still pending", async () => {
+				answer({ status: 'expired' });
+				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('pending');
+
+				await poll([evmRow]);
+
+				expect(lastUpdate()).toMatchObject({
+					status: { Failed: null },
+					error: en.swap.error.rift_deposit_expired
+				});
+			});
+
+			it("follows Rift's status when the source chain cannot be read", async () => {
+				answer({ status: 'expired' });
+				vi.mocked(readEvmSourceTxOutcome).mockRejectedValue(new Error('rpc down'));
+
+				await poll([evmRow]);
+
+				expect(lastUpdate()).toMatchObject({ error: en.swap.error.rift_deposit_expired });
+			});
+
+			it('reads no source chain once Rift has seen the deposit', async () => {
+				answer({ status: 'funded' });
+
+				await poll([evmRow]);
+
+				expect(readEvmSourceTxOutcome).not.toHaveBeenCalled();
+			});
+
+			it('reads no source chain for a BTC deposit', async () => {
+				answer({ status: 'awaiting_deposit' });
+
+				await poll();
+
+				expect(readEvmSourceTxOutcome).not.toHaveBeenCalled();
+			});
 		});
 
 		it('reads at most a few rows per round, the least recently read first', async () => {

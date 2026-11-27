@@ -90,6 +90,25 @@ describe('rift-active-tx.utils', () => {
 			});
 		});
 
+		it("records an EVM deposit's nonce and chain", () => {
+			expect(
+				toRiftCreationRefs({
+					order: mockRiftOrder,
+					depositTx: `0x${'ef'.repeat(32)}`,
+					evmDeposit: { nonce: 7, chainId: 8453n },
+					sourceToken: usdc,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: '100'
+				})
+			).toMatchObject({
+				rift_deposit_tx: `0x${'ef'.repeat(32)}`,
+				rift_deposit_nonce: '7',
+				rift_deposit_chain_id: '8453',
+				rift_source_decimals: '6',
+				rift_dest_decimals: '8'
+			});
+		});
+
 		it("truncates a custom token's long symbol to the backend's limit", () => {
 			const refs = toRiftCreationRefs({
 				order: mockRiftOrder,

@@ -178,7 +178,7 @@
 			if (rift.length > 0 && !riftInflight) {
 				riftInflight = true;
 
-				pollRiftActiveUserTransactions({ identity, transactions: rift })
+				pollRiftActiveUserTransactions({ identity, transactions: rift, userAddress: $ethAddress })
 					.catch(consoleError)
 					.finally(() => {
 						riftInflight = false;

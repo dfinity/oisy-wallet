@@ -1,4 +1,6 @@
 import type * as lifiEnv from '$env/rest/lifi.env';
+import type * as riftEnv from '$env/rest/rift.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { SwapProvider } from '$lib/types/swap';
 import { assertNonNullish } from '@dfinity/utils';
@@ -79,6 +81,55 @@ describe('evm-swap.providers', () => {
 						findProviderSourceTokens: () => undefined
 					})
 				).toStrictEqual({ evm: 'any' });
+			});
+		});
+	});
+
+	describe('Rift entry', () => {
+		// On in the test env, as on local and staging builds.
+		it('should be registered last, enabled and without a source list, by default', () => {
+			const rift = evmSwapProviders.at(-1);
+
+			assertNonNullish(rift);
+
+			expect(rift.key).toBe(SwapProvider.RIFT);
+			expect(rift.isEnabled).toBeTruthy();
+			expect(rift).not.toHaveProperty('getSupportedTokens');
+		});
+
+		// The destinations themselves are `riftEvmSupportedDestinations`'s, tested with its service.
+		it('should offer native BTC from a token Rift is asked about', () => {
+			const rift = evmSwapProviders.find(({ key }) => key === SwapProvider.RIFT);
+
+			assertNonNullish(rift);
+
+			expect(
+				rift.getSupportedDestinations({
+					sourceToken: ETHEREUM_TOKEN,
+					supportedSourceTokens: undefined,
+					findProviderSourceTokens: () => undefined
+				})
+			).toEqual({ btc: expect.any(Set) });
+		});
+
+		describe('with the flag off', () => {
+			beforeEach(() => {
+				vi.resetModules();
+				vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+					...(await importOriginal<typeof riftEnv>()),
+					RIFT_SWAP_ENABLED: false
+				}));
+			});
+
+			afterEach(() => {
+				vi.doUnmock('$env/rest/rift.env');
+				vi.resetModules();
+			});
+
+			it('should not be registered', async () => {
+				const { evmSwapProviders: providers } = await import('$lib/providers/evm-swap.providers');
+
+				expect(providers.find(({ key }) => key === SwapProvider.RIFT)).toBeUndefined();
 			});
 		});
 	});

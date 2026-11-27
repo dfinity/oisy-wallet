@@ -42,12 +42,13 @@
 	} from '$lib/constants/analytics.constants';
 	import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 	import { SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE } from '$lib/constants/test-ids.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { fungibleTokens } from '$lib/derived/tokens.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
+	import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -58,6 +59,7 @@
 		lifiQuoteFeeCeiling
 	} from '$lib/services/lifi-evm-swap.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
+	import { fetchRiftEvmSwap } from '$lib/services/rift-swap.services';
 	import {
 		enableSwapDestinationToken,
 		fetchNearIntentsEvmSwap,
@@ -73,7 +75,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
-	import { LifiFeeChangedError } from '$lib/types/errors';
+	import { LifiFeeChangedError, RiftSwapRefusedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
@@ -91,6 +93,7 @@
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
+	import { riftSwapRefusedMessage } from '$lib/utils/rift.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -249,6 +252,10 @@
 
 	const isOneSecProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+	);
+
+	const isRiftProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.RIFT
 	);
 
 	const lifiOffer = $derived(
@@ -423,7 +430,7 @@
 		});
 	});
 
-	// Velora, OneSec, NEAR Intents, Chain Fusion and LI.FI all close the modal at initiation
+	// Velora, OneSec, NEAR Intents, Chain Fusion, LI.FI and Rift all close the modal at initiation
 	// and settle in the background via the Active User Transactions store. Only the
 	// ICP-native providers still complete inside the modal.
 	const isActiveTransactionSwap = $derived(
@@ -431,6 +438,7 @@
 			isOneSecProvider ||
 			isChainFusionProvider ||
 			isLifiProvider ||
+			isRiftProvider ||
 			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
 	);
 
@@ -448,7 +456,8 @@
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
-	const isTransferNeeded = $derived(isNearIntentsProvider);
+	// A NEAR Intents or Rift deposit is a plain transfer to the address its order names.
+	const isTransferNeeded = $derived(isNearIntentsProvider || isRiftProvider);
 
 	const isGasless = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
@@ -693,6 +702,33 @@
 							identity: $authIdentity
 						})
 				});
+			} else if (selectedProvider?.provider === SwapProvider.RIFT) {
+				// Rift pays out to the user's Bitcoin address, which the order binds.
+				if (isNullish($btcAddressMainnet)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchRiftEvmSwap({
+					identity: $authIdentity,
+					progress: (step: ProgressStep) => (swapProgressStep = step),
+					sourceToken: $sourceToken as Erc20Token,
+					destinationToken: $destinationToken,
+					swapAmount,
+					sourceNetwork: $sourceToken.network,
+					userAddress: $ethAddress,
+					recipientAddress: $btcAddressMainnet,
+					offer: selectedProvider,
+					gas,
+					maxFeePerGas,
+					maxPriorityFeePerGas
+				});
 			} else {
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
@@ -733,10 +769,12 @@
 				metadata: {
 					...swapTrackingMetadata,
 					// LI.FI's error text can carry the user's addresses or signed transaction: only an
-					// allow-listed category is reported.
+					// allow-listed category is reported. So can Rift's, which its refusals wrap.
 					...(selectedProvider?.provider === SwapProvider.LIFI
 						? { result_error_type: toLifiSwapErrorType(err) }
-						: { error: errorDetail ?? '' })
+						: err instanceof RiftSwapRefusedError
+							? { result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED }
+							: { error: errorDetail ?? '' })
 				}
 			});
 
@@ -777,6 +815,7 @@
 			} else {
 				failedSwapError.set({
 					message:
+						riftSwapRefusedMessage({ err, i18n: $i18n }) ??
 						nearIntentsQuoteRejectedMessage(err) ??
 						mapEthereumErrorMsg(err) ??
 						$i18n.swap.error.failed_unexpectedly,
