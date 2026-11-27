@@ -117,5 +117,12 @@ export interface WalletConnectEthTypedDataAllowance {
 	// each schema says it differently: a saturated `uint160` for Permit2's allowances, a saturated
 	// `uint256` for ERC-2612 and Permit2's transfers, and a bare `allowed` bool for DAI.
 	unlimited?: boolean;
+	// When the signature stops letting the tokens move, in seconds: when the allowance ends, or
+	// when the transfer can no longer be submitted.
 	expiration?: number;
+	// `true` when nothing ends what the signature grants. Carried as a fact, like `unlimited`,
+	// because it is said in different ways: an ERC-2612 or DAI allowance has no end at all, their
+	// deadline only limits when the permit can be submitted, and a deadline past the last second a
+	// date can hold is never reached.
+	neverExpires?: boolean;
 }

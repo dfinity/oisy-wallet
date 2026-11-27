@@ -1991,7 +1991,7 @@ describe('wallet-connect.utils', () => {
 			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
 		});
 
-		it('summarizes an ERC-2612 permit from its value, deadline and verifying contract', () => {
+		it('summarizes an ERC-2612 permit from its value and verifying contract', () => {
 			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({
 				spender: SPENDER,
 				allowances: [
@@ -2000,7 +2000,8 @@ describe('wallet-connect.utils', () => {
 						token: DAI,
 						amount: 1000000n,
 						unlimited: false,
-						expiration: 1893456000
+						// The deadline only limits when the permit can be submitted: the allowance has no end.
+						neverExpires: true
 					}
 				]
 			});
@@ -2013,22 +2014,27 @@ describe('wallet-connect.utils', () => {
 
 			expect(getEthTypedDataApproval(typedData)).toEqual({
 				spender: SPENDER,
-				allowances: [{ token: DAI, amount: MAX_UINT_256, unlimited: true, expiration: 1893456000 }]
+				allowances: [{ token: DAI, amount: MAX_UINT_256, unlimited: true, neverExpires: true }]
 			});
 		});
 
 		// "Never expires" is written as a saturated uint256, which is not a moment in time.
-		it('states no expiration for a deadline no date can hold', () => {
-			const typedData = structuredClone(erc2612Permit);
-			typedData.message.deadline = MAX_UINT_256.toString();
+		it('states a deadline no date can hold as never reached', () => {
+			const transfer = structuredClone(permit2Transfer);
+			transfer.message.deadline = MAX_UINT_256.toString();
 
-			expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
-				expect.objectContaining({ expiration: undefined })
+			const authorization = transferWithAuthorization({ validBefore: MAX_UINT_256.toString() });
+
+			expect(getEthTypedDataApproval(transfer)?.allowances).toEqual([
+				{ token: USDC, amount: 250000000n, unlimited: false, neverExpires: true }
+			]);
+			expect(getEthTypedDataApproval(authorization)?.allowances).toEqual([
+				{ token: USDC, amount: 5000000000n, neverExpires: true }
 			]);
 		});
 
 		// A saturated `uint48` is a safe integer, and still past the last second a `Date` holds.
-		it('states no expiration for a Permit2 expiration at the uint48 maximum', () => {
+		it('states a Permit2 expiration at the uint48 maximum as never reached', () => {
 			const maxUint48 = ((1n << 48n) - 1n).toString();
 
 			const single = structuredClone(permit2);
@@ -2037,14 +2043,45 @@ describe('wallet-connect.utils', () => {
 			const batch = structuredClone(permit2Batch);
 			(batch.message.details as Record<string, unknown>[])[1].expiration = maxUint48;
 
-			expect(getEthTypedDataApproval(single)?.allowances[0].expiration).toBeUndefined();
-			expect(
-				getEthTypedDataApproval(batch)?.allowances.map(({ expiration }) => expiration)
-			).toEqual([1761743754, undefined]);
+			expect(getEthTypedDataApproval(single)?.allowances).toEqual([
+				{ token: DAI, amount: 123456789n, unlimited: false, neverExpires: true }
+			]);
+			expect(getEthTypedDataApproval(batch)?.allowances).toEqual([
+				{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1761743754 },
+				{ token: USDC, amount: MAX_UINT_160, unlimited: true, neverExpires: true }
+			]);
+		});
+
+		// Permit2 stores an expiration of 0 as the time of the block that submits the permit, so the
+		// allowance can be used until the signature's deadline.
+		it('states the signature deadline for a Permit2 expiration of 0', () => {
+			const single = structuredClone(permit2);
+			(single.message.details as Record<string, unknown>).expiration = '0';
+
+			const batch = structuredClone(permit2Batch);
+			(batch.message.details as Record<string, unknown>[])[1].expiration = '0';
+
+			expect(getEthTypedDataApproval(single)?.allowances).toEqual([
+				{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1759153554 }
+			]);
+			expect(getEthTypedDataApproval(batch)?.allowances).toEqual([
+				{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1761743754 },
+				{ token: USDC, amount: MAX_UINT_160, unlimited: true, expiration: 1759153554 }
+			]);
+		});
+
+		it('states a Permit2 expiration of 0 as never reached when the signature deadline is not', () => {
+			const typedData = structuredClone(permit2);
+			(typedData.message.details as Record<string, unknown>).expiration = '0';
+			typedData.message.sigDeadline = MAX_UINT_256.toString();
+
+			expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
+				{ token: DAI, amount: 123456789n, unlimited: false, neverExpires: true }
+			]);
 		});
 
 		it('states an expiration up to the last second a date can hold', () => {
-			const typedData = structuredClone(erc2612Permit);
+			const typedData = structuredClone(permit2Transfer);
 
 			typedData.message.deadline = '8640000000000';
 
@@ -2053,21 +2090,33 @@ describe('wallet-connect.utils', () => {
 			typedData.message.deadline = '8640000000001';
 
 			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBeUndefined();
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].neverExpires).toBeTruthy();
 		});
 
 		// DAI carries no amount: `allowed` is the allowance, and it is an unlimited one.
 		it('summarizes an allowed DAI permit as unlimited', () => {
 			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({
 				spender: SPENDER,
-				allowances: [{ token: DAI, amount: undefined, unlimited: true, expiration: 1893456000 }]
+				allowances: [{ token: DAI, amount: undefined, unlimited: true, neverExpires: true }]
 			});
 		});
 
 		it('summarizes a cleared DAI permit as a revocation', () => {
 			expect(getEthTypedDataApproval(daiPermit(false))).toEqual({
 				spender: SPENDER,
-				allowances: [{ token: DAI, amount: ZERO, unlimited: false, expiration: 1893456000 }]
+				allowances: [{ token: DAI, amount: ZERO, unlimited: false, neverExpires: true }]
 			});
+		});
+
+		// `expiry` only limits when the permit can be submitted, and 0 lets it be submitted at any
+		// time: neither is when the allowance ends, which is never.
+		it('states a DAI allowance as never expiring, whatever its expiry', () => {
+			const typedData = daiPermit(true);
+			typedData.message.expiry = '0';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
+				{ token: DAI, amount: undefined, unlimited: true, neverExpires: true }
+			]);
 		});
 
 		describe('ERC-3009 authorizations', () => {

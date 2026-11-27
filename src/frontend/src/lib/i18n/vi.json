@@ -1915,6 +1915,7 @@
 			"events": "Sự kiện",
 			"message": "Tin nhắn",
 			"expiration": "Hết hạn",
+			"expiration_never": "",
 			"token": "Token",
 			"network": "Mạng",
 			"networks": "Mạng lưới",

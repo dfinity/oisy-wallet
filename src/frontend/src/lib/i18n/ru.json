@@ -1915,6 +1915,7 @@
 			"events": "События",
 			"message": "Сообщение",
 			"expiration": "Истечение срока",
+			"expiration_never": "",
 			"token": "Токен",
 			"network": "Сеть",
 			"networks": "Сети",

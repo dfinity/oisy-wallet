@@ -1915,6 +1915,7 @@
 			"events": "الأحداث",
 			"message": "الرسالة",
 			"expiration": "",
+			"expiration_never": "",
 			"token": "",
 			"network": "",
 			"networks": "",

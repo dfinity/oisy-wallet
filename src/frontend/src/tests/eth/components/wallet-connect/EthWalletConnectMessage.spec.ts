@@ -971,6 +971,20 @@ describe('EthWalletConnectMessage', () => {
 			);
 		});
 
+		// The deadline only limits when the permit can be submitted: the allowance it sets has no end.
+		it('should state that the allowance never expires rather than its deadline', () => {
+			const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
+				props: { request: erc2612Request({ value: '1000000' }) }
+			});
+
+			expect(getByTestId('wallet-connect-typed-data-expiration')).toHaveTextContent(
+				en.wallet_connect.text.expiration_never
+			);
+			expect(
+				queryByText(formatSecondsToDate({ seconds: 1893456000, language: Languages.ENGLISH }))
+			).not.toBeInTheDocument();
+		});
+
 		// A domain may state its chain in any uint256 form, and all of them hash the same.
 		it.each([1, '1', '0x1', '01'])(
 			'should resolve the token when the domain states its chain as %s',
@@ -1086,15 +1100,35 @@ describe('EthWalletConnectMessage', () => {
 			).toBeInTheDocument();
 		});
 
-		// A saturated `uint48` is past the last second a date can hold, so that row is left out
-		// rather than rendered as an invalid date.
-		it('should leave out an expiration no date can hold', () => {
-			const { getAllByText, queryByText } = render(EthWalletConnectMessage, {
+		// A saturated `uint48` is past the last second a date can hold, so it is never reached: that
+		// row says so rather than rendering an invalid date.
+		it('should state that an expiration no date can hold never comes', () => {
+			const { getAllByTestId, queryByText } = render(EthWalletConnectMessage, {
 				props: { request: permitBatchRequest(((1n << 48n) - 1n).toString()) }
 			});
 
-			expect(getAllByText(en.wallet_connect.text.expiration)).toHaveLength(1);
+			expect(
+				getAllByTestId('wallet-connect-typed-data-expiration').map((el) => el.textContent)
+			).toEqual([
+				formatSecondsToDate({ seconds: 1761743754, language: Languages.ENGLISH }),
+				en.wallet_connect.text.expiration_never
+			]);
 			expect(queryByText('Invalid Date')).not.toBeInTheDocument();
+		});
+
+		// Permit2 stores an expiration of 0 as the time of the block that submits the permit, so the
+		// spender can take the tokens until the signature's deadline.
+		it('should state the signature deadline for an expiration of 0', () => {
+			const { getAllByTestId } = render(EthWalletConnectMessage, {
+				props: { request: permitBatchRequest('0') }
+			});
+
+			expect(
+				getAllByTestId('wallet-connect-typed-data-expiration').map((el) => el.textContent)
+			).toEqual([
+				formatSecondsToDate({ seconds: 1761743754, language: Languages.ENGLISH }),
+				formatSecondsToDate({ seconds: 1759153554, language: Languages.ENGLISH })
+			]);
 		});
 
 		// Every allowance in the batch is for the same spender, so it is stated once.

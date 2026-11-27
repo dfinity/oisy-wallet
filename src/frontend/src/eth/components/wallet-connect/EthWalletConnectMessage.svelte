@@ -202,16 +202,19 @@
 	// One row group per allowance, each resolved on its own: a single signature can cover tokens
 	// OISY lists beside ones it does not, each with its own amount and expiry.
 	let allowanceRows = $derived(
-		allowances.map(({ token: address, amount, unlimited, expiration }) => {
+		allowances.map(({ token: address, amount, unlimited, expiration, neverExpires }) => {
 			const token = findToken(address);
 
 			return {
 				address,
 				token,
 				amountText: toAmountText({ token, amount, unlimited }),
-				expirationDate: nonNullish(expiration)
-					? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
-					: undefined
+				expirationText:
+					neverExpires === true
+						? $i18n.wallet_connect.text.expiration_never
+						: nonNullish(expiration)
+							? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
+							: undefined
 			};
 		})
 	);
@@ -328,7 +331,7 @@
 		{/if}
 
 		<!-- Keyed by position: a batch may list the same token twice, and each entry is signed. -->
-		{#each allowanceRows as { address, token, amountText, expirationDate }, index (index)}
+		{#each allowanceRows as { address, token, amountText, expirationText }, index (index)}
 			{#if nonNullish(token)}
 				<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
 				<p class="mb-4 font-normal">{token.symbol}</p>
@@ -344,9 +347,11 @@
 				<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
 			{/if}
 
-			{#if nonNullish(expirationDate)}
+			{#if nonNullish(expirationText)}
 				<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
-				<p class="mb-4 font-normal">{expirationDate}</p>
+				<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-expiration"
+					>{expirationText}</p
+				>
 			{/if}
 		{/each}
 

@@ -1915,6 +1915,7 @@
 			"events": "イベント",
 			"message": "メッセージ",
 			"expiration": "有効期限",
+			"expiration_never": "",
 			"token": "トークン",
 			"network": "ネットワーク",
 			"networks": "ネットワーク",

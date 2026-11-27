@@ -1591,6 +1591,7 @@ interface I18nWallet_connect {
 		events: string;
 		message: string;
 		expiration: string;
+		expiration_never: string;
 		token: string;
 		network: string;
 		networks: string;
