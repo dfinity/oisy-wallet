@@ -287,12 +287,18 @@ Until the no-slippage redesign:
   file later).
 - `SwapDetailsRift.svelte` in the provider sheet (`SwapProviderDetails.svelte`):
   - the estimated receive amount, labelled as an estimate (`swap.text.you_receive_estimate`);
-  - the route, as the venues of `route[]` in order, under `swap.text.rift_route_via`. Rift's own
-    venue ids are shown (`rift_otc`, `velora`, …), since Rift publishes no display names for them;
+  - the quote's token path under **Swap route**, with the venue for each hop centered under its
+    arrow. The disclosure starts expanded and shows the hop count when collapsed. It uses the same
+    route in the selected offer and in Review provider details. The final delivery entry adds no
+    hop. Known assets show their token icon and symbol. Unknown assets show a shortened raw ID.
+    Known venue IDs show their display names, such as "Rift OTC" and "LI.FI". New venue IDs are
+    shown as received.
+    Symbols never truncate: when the path does not fit the card on one line, it shows one hop per
+    row;
   - the network cost Rift deducts (`estimated_execution_cost`, in the destination token), under
     `swap.text.included_network_fees`;
-  - no minimum-received row;
-  - the disclosure below, in a `MessageBox`.
+  - an "Expected minimum: None" row, parallel to the protected providers' minimum.
+  - the existing provider warning remains available while the generic protection UI is pending.
 - The form's fee row (`SwapBtcFees.svelte`) shows the Bitcoin network fee of the deposit for a Rift
   offer, as for NEAR Intents. The deposit is a plain transfer, which the UTXO fee loader prices.
 - `SwapRiftEstimateWarning.svelte` on Review: a `MessageBox` (pattern: `SwapLifiBtcRelayWarning`)

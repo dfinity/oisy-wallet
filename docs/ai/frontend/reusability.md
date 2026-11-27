@@ -103,10 +103,14 @@ as Swap does for clearing the receive token.
 | `SwapProvider`                          | `$lib/components/swap/`           | Review's static provider label; its disclosure shows the offer's `SwapProviderDetails`.                                                                   |
 | `SwapProviderCell`                      | `$lib/components/swap/`           | The swap forms' Smart Swap cell: status, gain vs. lowest quote, opens the provider step.                                                                  |
 | `SwapProviderDetails`                   | `$lib/components/swap/`           | One offer's website and provider details, for `SwapProvider`'s disclosure and the provider step's card (`showWebsite={false}` there).                     |
+| `SwapRiftRoute`                         | `$lib/components/swap/`           | The initially open route disclosure used by Rift provider details. Pair each venue with its input and output asset IDs before rendering the hops.         |
 | `SwapReceiveShortcuts`                  | `$lib/components/swap/`           | The empty receive card's shortcuts (`getListedReceiveShortcuts`), led by `SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY` from `SwapModalWizardSteps`.                |
 | `BestRateBadge`                         | `$lib/components/ui/`             | Filled best-rate indicator: a star, with the "Best Rate" label from `md`.                                                                                 |
 | `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned loop of the asked providers, then the `swapProviderPool`; reveals the real winner once; reduced motion built in.                            |
 | `SwapFeeRow`                            | `$lib/components/swap/`           | A swap form's fee row: slides in, shows a "Total fee" skeleton during a foreground comparison, cross-fades to the form's fees.                            |
+
+For a custom `Collapsible` trigger, use a native button with `aria-expanded` and call the
+snippet’s `toggle` handler. Pass the content `id` to the button’s `aria-controls`.
 
 `Logo` defaults to lazy loading and its existing readiness opacity/fade, with transitions
 suppressed on iOS. Set `animateReadiness={false}` when a parent owns the whole reveal;

@@ -11,7 +11,8 @@ export interface CollapsibleProps {
 	expandButton?: boolean;
 	externalToggle?: boolean;
 	wrapHeight?: boolean;
-	header: Snippet;
+	header?: Snippet;
+	trigger?: Snippet<[{ expanded: boolean; toggle: () => void }]>;
 	children: Snippet;
 	onToggle?: OnToggle;
 	expanded?: boolean;

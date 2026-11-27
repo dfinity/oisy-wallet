@@ -8,6 +8,8 @@
 		feeAmount?: bigint;
 		symbol: string;
 		decimals: number;
+		// Defaults to every decimal of the token.
+		displayDecimals?: number;
 		exchangeRate?: number;
 		displayExchangeRate?: boolean;
 		zeroAmountLabel?: string;
@@ -18,6 +20,7 @@
 		feeAmount,
 		symbol,
 		decimals,
+		displayDecimals = decimals,
 		exchangeRate,
 		displayExchangeRate = true,
 		zeroAmountLabel,
@@ -26,7 +29,7 @@
 
 	let formattedFeeAmount = $derived(
 		nonNullish(feeAmount)
-			? formatToken({ value: feeAmount, unitName: decimals, displayDecimals: decimals })
+			? formatToken({ value: feeAmount, unitName: decimals, displayDecimals })
 			: undefined
 	);
 </script>

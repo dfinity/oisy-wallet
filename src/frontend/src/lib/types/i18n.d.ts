@@ -1149,6 +1149,7 @@ interface I18nSwap {
 		included_liquidity_fees: string;
 		best_rate: string;
 		expected_minimum: string;
+		no_minimum: string;
 		you_receive: string;
 		you_receive_estimate: string;
 		select_swap_provider: string;
@@ -1186,7 +1187,10 @@ interface I18nSwap {
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;
-		rift_route_via: string;
+		rift_route_one_hop: string;
+		rift_route_hops: string;
+		rift_route_asset: string;
+		rift_route_hop: string;
 		rift_estimate_warning: string;
 		near_intents_tos: string;
 		onesec_transfer_fee: string;

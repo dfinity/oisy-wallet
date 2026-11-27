@@ -17,6 +17,7 @@
 		wrapHeight = false,
 		children,
 		header,
+		trigger,
 		onToggle,
 		expanded = $bindable(initiallyExpanded)
 	}: CollapsibleProps = $props();
@@ -63,51 +64,68 @@
 	// recalculate max-height after DOM update
 	$effect(updateMaxHeight);
 
+	// Nested disclosures can change the measured height while this one is open.
+	$effect(() => {
+		if (!expanded || isNullish(container) || typeof ResizeObserver === 'undefined') {
+			return;
+		}
+
+		const observer = new ResizeObserver(updateMaxHeight);
+		observer.observe(container);
+
+		return () => observer.disconnect();
+	});
+
 	const toggle = () => (externalToggle ? undefined : toggleContent());
 </script>
 
 <TestIdWrapper {testId}>
-	<div
-		id={nonNullish(id) ? `heading${id}` : undefined}
-		class={`header ${externalToggle ? 'external' : ''}`}
-		data-tid="collapsible-header"
-		onclick={toggle}
-		onkeypress={($event) => handleKeyPress({ $event, callback: toggle })}
-		role="button"
-		tabindex={externalToggle ? -1 : 0}
-	>
-		<div class="header-content">
-			{@render header()}
+	{#if nonNullish(trigger)}
+		{@render trigger({ expanded, toggle: toggleContent })}
+	{:else}
+		<div
+			id={nonNullish(id) ? `heading${id}` : undefined}
+			class={`header ${externalToggle ? 'external' : ''}`}
+			data-tid="collapsible-header"
+			onclick={toggle}
+			onkeypress={($event) => handleKeyPress({ $event, callback: toggle })}
+			role="button"
+			tabindex={externalToggle ? -1 : 0}
+		>
+			<div class="header-content">
+				{@render header?.()}
+			</div>
+			{#if expandButton}
+				<button
+					class="collapsible-expand-icon"
+					class:expanded
+					class:size-medium={iconSize === 'medium'}
+					aria-controls={id}
+					aria-expanded={expanded}
+					data-tid="collapsible-expand-button"
+					tabindex="-1"
+					title={expanded ? $i18n.core.text.collapse : $i18n.core.text.expand}
+					type="button"
+				>
+					<IconExpandMore />
+				</button>
+			{/if}
 		</div>
-		{#if expandButton}
-			<button
-				class="collapsible-expand-icon"
-				class:expanded
-				class:size-medium={iconSize === 'medium'}
-				aria-controls={id}
-				aria-expanded={expanded}
-				data-tid="collapsible-expand-button"
-				tabindex="-1"
-				title={expanded ? $i18n.core.text.collapse : $i18n.core.text.expand}
-				type="button"
-			>
-				<IconExpandMore />
-			</button>
-		{/if}
-	</div>
+	{/if}
 	<div
 		style={`${maxHeightStyle(maxHeight)}${overflowYStyle(maxHeight)}`}
 		class="wrapper"
 		class:expanded
 		data-tid="collapsible-content"
-		role="definition"
+		inert={nonNullish(trigger) && !expanded}
+		role={isNullish(trigger) ? 'definition' : undefined}
 	>
 		<div
 			bind:this={container}
 			{id}
 			class="content"
 			class:wrapHeight
-			aria-labelledby={nonNullish(id) ? `heading${id}` : undefined}
+			aria-labelledby={isNullish(trigger) && nonNullish(id) ? `heading${id}` : undefined}
 		>
 			{@render children()}
 		</div>
