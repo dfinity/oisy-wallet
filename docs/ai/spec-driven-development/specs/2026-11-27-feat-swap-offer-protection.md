@@ -94,11 +94,15 @@ without exposing `receiveOutMinimum` on the offer, so that field can't be the si
 - The gain compares protected offers only: `calculateSwapGainUsd` ignores unprotected offers, both
   as the selected offer and as the lowest quote.
 - "Best of $count offers" counts protected offers only, so it never claims to beat a higher
-  estimate it left out. "$count offers compared" keeps counting all offers.
+  estimate it left out. With fewer than two protected offers it falls back to "$count offers
+  compared", which counts all offers, so the card never reads "Best of 1 offers".
+- "$count offers compared" keeps counting all offers.
 - The screen-reader announcement (`SwapProviderCell.svelte:195`) adds the status after the provider
-  name when the selected offer is unprotected, for example "Rift, Estimate · no minimum".
+  name when the selected offer is unprotected, for example "Rift, Estimate · no minimum", through
+  one parameterised key (`swap.text.provider_with_status`).
 - A manual pick still resets when the amount changes (existing store behaviour), so an unprotected
-  offer is opted into again after every amount edit.
+  offer is opted into again after every amount edit. An unprotected pick also resets when Max
+  applies a different amount again, which a protected pick survives.
 
 ### Provider list
 
@@ -123,6 +127,8 @@ When the selected offer is unprotected:
   "$provider guarantees no minimum. It swaps at the best price it finds once your deposit arrives,
   so you may receive more or less than shown. Your max slippage setting doesn't apply to this
   offer."
+  If the provider has no metadata entry, the warning names it by its provider id rather than
+  disappearing, so Review never hides the slippage row without saying why.
 - No confirmation checkbox: picking the offer by hand is the consent. The existing value-difference
   checkbox still applies as it does today.
 
@@ -208,6 +214,9 @@ All made 2026-11-27 by Artem.
 - Made while writing the spec, from the answers above: the status line overrides compact mode for
   a single unprotected offer; "Best of $count offers" counts protected offers; the high-slippage
   box is hidden with the row; the announcement includes the status.
+- From code review, 2026-11-27: "Best of" falls back to "$count offers compared" with fewer than
+  two protected offers; an unprotected pick resets when Max re-applies a new amount; the warning
+  and announcement fall back to the provider id when metadata is missing.
 
 ## Open questions (facts to confirm)
 
