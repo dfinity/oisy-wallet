@@ -1142,6 +1142,8 @@ interface I18nSwap {
 		smart_swap_gain: string;
 		smart_swap_best_of_offers: string;
 		smart_swap_offers_compared: string;
+		unprotected_offer_status: string;
+		provider_with_status: string;
 		smart_swap_offers: string;
 		smart_swap_selected_offer: string;
 		swap_provider_website: string;
@@ -1149,8 +1151,10 @@ interface I18nSwap {
 		included_network_fees: string;
 		included_liquidity_fees: string;
 		best_rate: string;
+		estimate: string;
 		expected_minimum: string;
 		you_receive: string;
+		you_receive_estimate: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
 		open_instructions_link: string;
@@ -1162,6 +1166,8 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		lifi_btc_relay_recipient_warning: string;
+		unprotected_offer_warning: string;
+		unprotected_offers_note: string;
 		receive_shortcut_same_network: string;
 		receive_shortcut_other_network: string;
 		receive_shortcut_token_on_network: string;

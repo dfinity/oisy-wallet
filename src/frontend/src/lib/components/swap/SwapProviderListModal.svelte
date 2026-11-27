@@ -9,7 +9,8 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import {
 		SWAP_MODAL_SELECT_PROVIDER_STEP,
-		SWAP_SELECTED_PROVIDER_DETAILS
+		SWAP_SELECTED_PROVIDER_DETAILS,
+		SWAP_UNPROTECTED_OFFERS_NOTE
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -24,7 +25,7 @@
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { findSwapProvider } from '$lib/utils/swap.utils';
+	import { findSwapProvider, isBestRateOffer, isUnprotectedOffer } from '$lib/utils/swap.utils';
 
 	interface Props {
 		slippageValue?: OptionAmount;
@@ -45,6 +46,7 @@
 	let offerCount = $derived($swapAmountsStore?.swaps.length ?? 0);
 	// With one offer the card is the whole list, so the list would only repeat it.
 	let showOffers = $derived(isNullish(selectedDApp) || offerCount > 1);
+	let hasUnprotectedOffer = $derived(($swapAmountsStore?.swaps ?? []).some(isUnprotectedOffer));
 
 	const getUsdBalance = ({
 		amount,
@@ -123,7 +125,8 @@
 							amount={swap.receiveAmount}
 							dapp={findSwapProvider(swap.provider)}
 							destinationToken={$destinationToken as IcTokenToggleable}
-							isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+							isBestRate={isBestRateOffer({ offer: swap, swaps: $swapAmountsStore.swaps })}
+							isUnprotected={isUnprotectedOffer(swap)}
 							onClick={() =>
 								swap.provider === selectedProvider?.provider
 									? onCloseProviderList()
@@ -138,6 +141,14 @@
 				{/if}
 			{/each}
 		</ul>
+
+		<!-- The higher number further down is how an estimate is found, so the list says why it sits
+		there: once, under the list, in the header's grey. -->
+		{#if hasUnprotectedOffer}
+			<p class="mt-2 px-2 text-sm text-tertiary" data-tid={SWAP_UNPROTECTED_OFFERS_NOTE}>
+				{$i18n.swap.text.unprotected_offers_note}
+			</p>
+		{/if}
 	{/if}
 </div>
 

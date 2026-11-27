@@ -131,6 +131,7 @@ import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import {
 	mockVeloraCrossChainSwapResponse,
 	mockVeloraDeltaPrice,
@@ -1486,6 +1487,126 @@ describe('swap.services', () => {
 					slippage: 0.5
 				});
 			});
+		});
+	});
+
+	describe('offer protection', () => {
+		const sources = [
+			{
+				network: 'ICP',
+				first: SwapProvider.ICP_SWAP,
+				second: SwapProvider.KONG_SWAP,
+				quote: ({ first, second }: { first: bigint; second: bigint }) => {
+					vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValueOnce({
+						receiveAmount: first + mockValidIcrcToken.fee
+					});
+					vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValueOnce({
+						receive_amount: second,
+						slippage: 0.5
+					} as SwapAmountsReply);
+
+					return fetchSwapAmounts({
+						identity: mockIdentity,
+						sourceToken: mockValidIcToken,
+						destinationToken: mockValidIcrcToken,
+						amount: 1000,
+						tokens: [mockValidIcToken, mockValidIcrcToken],
+						slippage: 0.5,
+						isSourceTokenIcrc2: true,
+						userEthAddress: undefined,
+						userSolAddress: undefined,
+						userBtcAddress: undefined,
+						userXrpAddress: undefined
+					});
+				}
+			},
+			{
+				network: 'EVM',
+				first: SwapProvider.VELORA,
+				second: SwapProvider.NEAR_INTENTS,
+				quote: ({ first, second }: { first: bigint; second: bigint }) => {
+					mockVeloraGetQuote.mockResolvedValueOnce({
+						provider: SwapProvider.VELORA,
+						receiveAmount: first,
+						swapDetails: mockVeloraDeltaPrice,
+						type: VeloraSwapTypes.DELTA
+					});
+					mockEvmNearIntentsGetQuote.mockResolvedValueOnce({
+						provider: SwapProvider.NEAR_INTENTS,
+						receiveAmount: second,
+						swapDetails: mockNearIntentsQuoteResponse
+					});
+
+					return fetchSwapAmounts({
+						identity: mockIdentity,
+						sourceToken: mockValidErc20Token,
+						destinationToken: mockValidErc20Token,
+						amount: '10',
+						tokens: [],
+						slippage: 0.5,
+						userEthAddress: mockEthAddress,
+						userSolAddress: undefined,
+						userBtcAddress: undefined,
+						userXrpAddress: undefined
+					});
+				}
+			}
+		];
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		afterEach(() => {
+			restoreProtection();
+		});
+
+		describe.each(sources)('from $network', ({ first, second, quote }) => {
+			const providers = (offers: SwapMappedResult[]) => offers.map(({ provider }) => provider);
+
+			it('ranks protected offers by receive amount', async () => {
+				const offers = await quote({ first: 900_000n, second: 950_000n });
+
+				expect(providers(offers)).toEqual([second, first]);
+			});
+
+			it('ranks an unprotected offer below a protected one that receives less', async () => {
+				markUnprotected(first);
+
+				const offers = await quote({ first: 950_000n, second: 900_000n });
+
+				expect(providers(offers)).toEqual([second, first]);
+			});
+
+			it('ranks an unprotected offer that receives less below the protected one', async () => {
+				markUnprotected(second);
+
+				const offers = await quote({ first: 950_000n, second: 900_000n });
+
+				expect(providers(offers)).toEqual([first, second]);
+			});
+
+			it('ranks unprotected offers by receive amount when none is protected', async () => {
+				markUnprotected(first, second);
+
+				const offers = await quote({ first: 900_000n, second: 950_000n });
+
+				expect(providers(offers)).toEqual([second, first]);
+			});
+
+			it.each([
+				{ unprotected: first, expected: [second, first] },
+				{ unprotected: second, expected: [first, second] }
+			])(
+				'ranks the protected offer first when both receive the same ($unprotected unprotected)',
+				async ({ unprotected, expected }) => {
+					markUnprotected(unprotected);
+
+					const offers = await quote({ first: 900_000n, second: 900_000n });
+
+					expect(providers(offers)).toEqual(expected);
+				}
+			);
 		});
 	});
 

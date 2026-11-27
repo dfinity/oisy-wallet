@@ -11,9 +11,11 @@ import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.stor
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as swapUtils from '$lib/utils/swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import {
 	mockNearIntentsProvider,
 	mockOneSecProvider,
@@ -112,7 +114,10 @@ describe('SwapProviderCell', () => {
 		vi.clearAllMocks();
 	});
 
-	afterEach(() => vi.useRealTimers());
+	afterEach(() => {
+		vi.useRealTimers();
+		restoreProtection();
+	});
 
 	it("draws the form's one separator under the cell, and none without a cell", async () => {
 		const { container, getByTestId } = render(SwapProviderCell, { props, context });
@@ -427,6 +432,118 @@ describe('SwapProviderCell', () => {
 
 		expect(getByText(twoOffersCompared)).toBeInTheDocument();
 		expect(queryByText(gainSentence)).not.toBeInTheDocument();
+	});
+
+	it('counts only protected offers in the best of the offers', () => {
+		const higherEstimate: SwapMappedResult = {
+			...mockVeloraMarketProvider,
+			receiveAmount: 200_000_000n
+		};
+		markUnprotected(SwapProvider.VELORA);
+		store.setSwaps({
+			swaps: [bestOffer, lowestOffer, higherEstimate],
+			selectedProvider: bestOffer,
+			amountForSwap: '1'
+		});
+		const { getByText, queryByText } = render(SwapProviderCell, { props, context });
+
+		expect(getByText(bestOfTwoOffers)).toBeInTheDocument();
+		expect(queryByText(en.swap.text.unprotected_offer_status)).not.toBeInTheDocument();
+	});
+
+	it('says a manually picked unprotected offer is an estimate instead of counting offers', () => {
+		const higherEstimate: SwapMappedResult = {
+			...mockVeloraMarketProvider,
+			receiveAmount: 200_000_000n
+		};
+		markUnprotected(SwapProvider.VELORA);
+		store.setSwaps({
+			swaps: [bestOffer, lowestOffer, higherEstimate],
+			selectedProvider: bestOffer,
+			amountForSwap: '1'
+		});
+		store.setManualProvider(higherEstimate);
+		const { getByText, queryByText } = render(SwapProviderCell, {
+			props,
+			context: contextWithRate(2)
+		});
+
+		expect(getByText(en.swap.text.unprotected_offer_status)).toHaveClass('text-tertiary');
+		expect(
+			queryByText(replacePlaceholders(en.swap.text.smart_swap_offers_compared, { $count: '3' }))
+		).not.toBeInTheDocument();
+		expect(queryByText(gainSentence)).not.toBeInTheDocument();
+	});
+
+	it('announces an unprotected offer as an estimate after its name', async () => {
+		markUnprotected(SwapProvider.ICP_SWAP);
+		const { getByTestId } = render(SwapProviderCell, { props, context });
+
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		await tick();
+
+		expect(getByTestId(SWAP_PROVIDER_STATUS).textContent).toBe(
+			replacePlaceholders(en.swap.text.provider_with_status, {
+				$provider: 'ICPSwap',
+				$status: en.swap.text.unprotected_offer_status
+			})
+		);
+	});
+
+	it('announces a protected offer by its name alone', async () => {
+		const { getByTestId } = render(SwapProviderCell, { props, context });
+
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		await tick();
+
+		expect(getByTestId(SWAP_PROVIDER_STATUS).textContent).toBe('ICPSwap');
+	});
+
+	it('counts every offer as compared when only one offer is protected', () => {
+		const higherEstimate: SwapMappedResult = {
+			...mockVeloraMarketProvider,
+			receiveAmount: 200_000_000n
+		};
+		markUnprotected(SwapProvider.VELORA);
+		store.setSwaps({
+			swaps: [bestOffer, higherEstimate],
+			selectedProvider: bestOffer,
+			amountForSwap: '1'
+		});
+		const { getByText, queryByText } = render(SwapProviderCell, {
+			props,
+			context: contextWithRate(2)
+		});
+
+		expect(getByText(twoOffersCompared)).toBeInTheDocument();
+		expect(
+			queryByText(replacePlaceholders(en.swap.text.smart_swap_best_of_offers, { $count: '1' }))
+		).not.toBeInTheDocument();
+	});
+
+	describe('without metadata for the provider', () => {
+		beforeEach(() => {
+			vi.spyOn(swapUtils, 'findSwapProvider').mockReturnValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('announces an unprotected offer by its provider id', async () => {
+			markUnprotected(SwapProvider.ICP_SWAP);
+			const { getByTestId } = render(SwapProviderCell, { props, context });
+
+			store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+			await tick();
+
+			expect(getByTestId(SWAP_PROVIDER_STATUS).textContent).toBe(
+				replacePlaceholders(en.swap.text.provider_with_status, {
+					$provider: SwapProvider.ICP_SWAP,
+					$status: en.swap.text.unprotected_offer_status
+				})
+			);
+		});
 	});
 
 	it('does not replay confirmation when a completed cell disappears and mounts again', async () => {
@@ -846,6 +963,31 @@ describe('SwapProviderCell', () => {
 		expect(cell).not.toHaveTextContent(gainSentence);
 		expect(cell).not.toHaveTextContent(/offer/i);
 		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
+	});
+
+	it('keeps the line under the title for a single unprotected offer, its only mark', () => {
+		markUnprotected(SwapProvider.ICP_SWAP);
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		const { getByText, queryByText } = render(SwapProviderCell, { props, context });
+
+		expect(getByText(en.swap.text.unprotected_offer_status)).toBeInTheDocument();
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
+	});
+
+	it('shows the status line once the first round finds a single unprotected offer', async () => {
+		vi.useFakeTimers();
+		markUnprotected(SwapProvider.ICP_SWAP);
+		const { getByText, queryByText } = render(SwapProviderCell, { props, context });
+
+		activity.start({ requestId: 22, background: false });
+		await tick();
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		activity.complete({ requestId: 22 });
+		await tick();
+		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION + 1_000);
+
+		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
+		expect(getByText(en.swap.text.unprotected_offer_status)).toBeInTheDocument();
 	});
 
 	it('shrinks the first round to one row when it finds a single offer', async () => {

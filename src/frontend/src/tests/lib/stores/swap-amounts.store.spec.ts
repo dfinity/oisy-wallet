@@ -1,5 +1,6 @@
 import { initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SwapProvider } from '$lib/types/swap';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import {
 	mockNearIntentsProvider,
 	mockSwapProviders,
@@ -515,6 +516,85 @@ describe('swap-amounts.store', () => {
 
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
+		});
+
+		describe('with an unprotected selection', () => {
+			beforeEach(() => {
+				markUnprotected(SwapProvider.NEAR_INTENTS);
+			});
+
+			afterEach(() => {
+				restoreProtection();
+			});
+
+			it('should release it for a round at another amount', () => {
+				const store = initSwapAmountsStore();
+
+				store.setSwaps({
+					swaps: evmSwaps,
+					amountForSwap: '1000000',
+					selectedProvider: evmSwaps[0]
+				});
+
+				store.setManualProvider(evmSwaps[1]);
+
+				store.setSwaps({
+					swaps: evmSwaps,
+					amountForSwap: '2000000',
+					selectedProvider: evmSwaps[0]
+				});
+
+				const state = get(store);
+
+				expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
+				expect(state?.manuallySelectedProviderKey).toBeUndefined();
+			});
+
+			it('should release it when Max applies another amount', () => {
+				const amountSetToMax = writable(true);
+				const store = initSwapAmountsStore({ amountSetToMax });
+
+				store.setSwaps({
+					swaps: evmSwaps,
+					amountForSwap: '1000000',
+					selectedProvider: evmSwaps[0]
+				});
+
+				store.setManualProvider(evmSwaps[1]);
+
+				// Max lowered its amount for the picked provider's fee.
+				store.setSwaps({
+					swaps: evmSwaps,
+					amountForSwap: '990000',
+					selectedProvider: evmSwaps[0]
+				});
+
+				const state = get(store);
+
+				expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
+				expect(state?.manuallySelectedProviderKey).toBeUndefined();
+			});
+
+			it('should keep it when Max quotes the same amount again', () => {
+				const amountSetToMax = writable(true);
+				const store = initSwapAmountsStore({ amountSetToMax });
+
+				store.setSwaps({
+					swaps: evmSwaps,
+					amountForSwap: '1000000',
+					selectedProvider: evmSwaps[0]
+				});
+
+				store.setManualProvider(evmSwaps[1]);
+
+				store.setSwaps({
+					swaps: evmSwaps,
+					amountForSwap: 1000000,
+					selectedProvider: evmSwaps[0]
+				});
+
+				expect(get(store)?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
+			});
 		});
 
 		it('should release a selection made before Max on the first Max press', () => {

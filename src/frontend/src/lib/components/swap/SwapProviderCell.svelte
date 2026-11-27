@@ -25,7 +25,13 @@
 	import type { TokenId } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { calculateSwapGainUsd, findSwapProvider } from '$lib/utils/swap.utils';
+	import {
+		calculateSwapGainUsd,
+		findSwapProvider,
+		isBestRateOffer,
+		isProtectedOffer,
+		isUnprotectedOffer
+	} from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -118,7 +124,15 @@
 		}
 	});
 	let offerCount = $derived($swapAmountsStore?.swaps.length ?? 0);
-	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
+	let isBestRate = $derived(
+		isBestRateOffer({ offer: selectedProvider, swaps: $swapAmountsStore?.swaps })
+	);
+	// "Best of" claims the selected offer beat each one counted, and it is only measured against
+	// protected offers, so a higher estimate left out of the comparison is left out of the count.
+	// Alone among estimates, a protected offer beat none, so the label counts what was compared.
+	let protectedOfferCount = $derived($swapAmountsStore?.swaps.filter(isProtectedOffer).length ?? 0);
+	let isBestOfOffers = $derived(isBestRate && protectedOfferCount > 1);
+	let isUnprotected = $derived(isUnprotectedOffer(selectedProvider));
 	let swapDApp = $derived(
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
@@ -156,10 +170,10 @@
 	});
 	let offersLabel = $derived(
 		replacePlaceholders(
-			isBestRate
+			isBestOfOffers
 				? $i18n.swap.text.smart_swap_best_of_offers
 				: $i18n.swap.text.smart_swap_offers_compared,
-			{ $count: `${offerCount}` }
+			{ $count: `${isBestOfOffers ? protectedOfferCount : offerCount}` }
 		)
 	);
 
@@ -177,12 +191,15 @@
 					: undefined;
 		}
 	});
+	// An unprotected offer keeps the line, even alone: it is the only place the form says the
+	// amount is an estimate.
 	let compact = $derived(
-		settled
-			? offerCount === 1
-			: nonNullish(singleOfferPair) &&
+		!isUnprotected &&
+			(settled
+				? offerCount === 1
+				: nonNullish(singleOfferPair) &&
 					singleOfferPair[0] === $sourceToken?.id &&
-					singleOfferPair[1] === $destinationToken?.id
+					singleOfferPair[1] === $destinationToken?.id)
 	);
 
 	// The cell opens the offers and the selected provider's details once there is something to
@@ -192,13 +209,26 @@
 	// One region for screen readers, mounted before any round and outside the cell, a button whose
 	// children are presentational. Only its text changes, so each change is heard: the status while
 	// comparing, then the provider the comparison picked.
-	let announcement = $derived(
-		comparing
-			? $i18n.swap.text.finding_best_rate
-			: nonNullish(swapDApp)
-				? resolveText({ i18n: $i18n, path: swapDApp.name })
-				: ''
-	);
+	let announcement = $derived.by(() => {
+		if (comparing) {
+			return $i18n.swap.text.finding_best_rate;
+		}
+
+		const providerName = nonNullish(swapDApp)
+			? resolveText({ i18n: $i18n, path: swapDApp.name })
+			: undefined;
+
+		// The status is the only way a screen reader hears the offer is an estimate, so it is said
+		// even when the provider has no metadata to name it by.
+		if (isUnprotected && nonNullish(selectedProvider)) {
+			return replacePlaceholders($i18n.swap.text.provider_with_status, {
+				$provider: providerName ?? selectedProvider.provider,
+				$status: $i18n.swap.text.unprotected_offer_status
+			});
+		}
+
+		return providerName ?? '';
+	});
 
 	// The title and the status line run one band: `smart-thinking` sizes it in rem, not per line, so
 	// it has the same speed and position on both, and here the status line, which mounts a fade
@@ -270,7 +300,9 @@
 									class:opacity-0={comparing}
 									in:fade={labelIn}
 								>
-									{#if nonNullish(gainParts)}
+									{#if isUnprotected}
+										<span class="text-tertiary">{$i18n.swap.text.unprotected_offer_status}</span>
+									{:else if nonNullish(gainParts)}
 										<span class="text-tertiary"
 											>{gainParts.before}<span class="font-semibold text-primary"
 												>{gainParts.amount}</span

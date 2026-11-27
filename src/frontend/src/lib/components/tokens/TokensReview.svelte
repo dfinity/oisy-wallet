@@ -12,6 +12,8 @@
 		destinationToken?: Token;
 		sourceTokenExchangeRate?: number;
 		destinationTokenExchangeRate?: number;
+		// Replaces "You receive", e.g. when the amount is an estimate with no minimum.
+		destinationTitle?: string;
 	}
 
 	let {
@@ -20,7 +22,8 @@
 		sourceToken,
 		destinationToken,
 		sourceTokenExchangeRate,
-		destinationTokenExchangeRate
+		destinationTokenExchangeRate,
+		destinationTitle
 	}: Props = $props();
 </script>
 
@@ -43,7 +46,7 @@
 		token={destinationToken}
 	>
 		{#snippet title()}
-			{$i18n.tokens.text.destination_token_title}
+			{destinationTitle ?? $i18n.tokens.text.destination_token_title}
 		{/snippet}
 	</SwapToken>
 </div>

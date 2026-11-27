@@ -1,7 +1,8 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 import {
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
-	SWAP_SELECTED_PROVIDER_DETAILS
+	SWAP_SELECTED_PROVIDER_DETAILS,
+	SWAP_UNPROTECTED_OFFERS_NOTE
 } from '$lib/constants/test-ids.constants';
 import * as ExchangeDerived from '$lib/derived/exchange.derived';
 import { i18n } from '$lib/stores/i18n.store';
@@ -9,7 +10,9 @@ import { screensStore } from '$lib/stores/screens.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { SwapProvider } from '$lib/types/swap';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, queryAllByTestId, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -35,6 +38,9 @@ vi.mock('$env/dapp-descriptions.env', () => ({
 describe('SwapProviderListModal', () => {
 	let mockContext: Map<symbol, unknown>;
 
+	const offerRows = (container: HTMLElement) =>
+		Array.from(container.querySelectorAll<HTMLElement>('[data-testid="provider-item"]'));
+
 	beforeEach(() => {
 		screensStore.set('xs');
 
@@ -52,6 +58,10 @@ describe('SwapProviderListModal', () => {
 				selectedProvider: mockSwapProviders[0]
 			})
 		});
+	});
+
+	afterEach(() => {
+		restoreProtection();
 	});
 
 	it('renders all provider modal titles', () => {
@@ -92,6 +102,63 @@ describe('SwapProviderListModal', () => {
 		expect(container.querySelector('[data-testid="provider-item"]')).toHaveTextContent(
 			get(i18n).swap.text.best_rate
 		);
+	});
+
+	it('marks no offer as an estimate when every offer is protected', () => {
+		const { container, queryByTestId } = render(SwapProviderListModal, { context: mockContext });
+
+		expect(container).not.toHaveTextContent(get(i18n).swap.text.estimate);
+		expect(queryByTestId(SWAP_UNPROTECTED_OFFERS_NOTE)).not.toBeInTheDocument();
+	});
+
+	it('explains the estimate once, under the offers, while one is listed', () => {
+		markUnprotected(SwapProvider.KONG_SWAP);
+
+		const { container, getAllByTestId } = render(SwapProviderListModal, { context: mockContext });
+		const [note] = getAllByTestId(SWAP_UNPROTECTED_OFFERS_NOTE);
+		const rows = offerRows(container);
+		const lastRow = rows[rows.length - 1];
+
+		expect(getAllByTestId(SWAP_UNPROTECTED_OFFERS_NOTE)).toHaveLength(1);
+		expect(note).toHaveTextContent(get(i18n).swap.text.unprotected_offers_note);
+		expect(lastRow.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it.each(['xs', 'lg'] as const)(
+		'marks a higher unprotected offer below the best protected one as an estimate on %s screens',
+		(screen) => {
+			screensStore.set(screen);
+			// The mock lists the protected ICP Swap first and the higher Kong Swap offer second, the
+			// order the ranking gives them once Kong Swap is unprotected.
+			markUnprotected(SwapProvider.KONG_SWAP);
+
+			const { container } = render(SwapProviderListModal, { context: mockContext });
+			const [protectedRow, unprotectedRow] = offerRows(container);
+
+			expect(protectedRow).toHaveTextContent('ICP Swap');
+			expect(protectedRow).not.toHaveTextContent(get(i18n).swap.text.estimate);
+			// On phones the badge is a star, still named for screen readers.
+			expect(protectedRow).toHaveTextContent(get(i18n).swap.text.best_rate);
+
+			expect(unprotectedRow).toHaveTextContent('Kong Swap');
+			expect(unprotectedRow).toHaveTextContent(get(i18n).swap.text.estimate);
+			expect(unprotectedRow).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		}
+	);
+
+	it('gives no offer Best Rate when every offer is an estimate', () => {
+		screensStore.set('lg');
+		markUnprotected(SwapProvider.ICP_SWAP, SwapProvider.KONG_SWAP);
+
+		const { container } = render(SwapProviderListModal, { context: mockContext });
+		const rows = offerRows(container);
+
+		expect(rows).toHaveLength(2);
+
+		rows.forEach((row) => {
+			expect(row).toHaveTextContent(get(i18n).swap.text.estimate);
+			expect(row).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		});
 	});
 
 	it('goes back instead of pinning the offer already in use', async () => {
