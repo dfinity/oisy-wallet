@@ -14,9 +14,16 @@ export interface XrpTrustLine {
 	limit: string;
 	limitPeer: string;
 	noRipple: boolean;
+	// The issuer's side blocks rippling. When both lines of a payment between two holders have it,
+	// the payment cannot pass through the issuer.
+	noRipplePeer: boolean;
 	// The issuer approved this line, which an issuer requiring approval must do before the account
 	// can hold the token.
 	peerAuthorized: boolean;
+	// The account froze this line, or deep-froze it, on its own side. OISY never does; another
+	// account can, which stops it receiving the token.
+	freeze: boolean;
+	deepFreeze: boolean;
 	// The issuer froze this line, or deep-froze it.
 	freezePeer: boolean;
 	deepFreezePeer: boolean;

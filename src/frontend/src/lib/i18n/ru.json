@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Отправить",
 			"xrp_sent": "Ваш платёж XRP прошёл.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Платёж отправлен. Обычно он завершается за несколько секунд — можно закрыть это и продолжить.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Исходная сеть",
 			"destination_network": "Сеть получателя",
 			"xrp_destination_tag": "Тег назначения XRP",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Инициализация транзакции",
 			"convert_to_native_icp": "Конвертировать в нативный ICP",
 			"open_qr_modal": "Начать сканирование QR-кода для получения информации о транзакции",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "Тег назначения XRP должен быть целым числом от 0 до 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Недостаточно средств: сумма должна оставить достаточно для покрытия сбора и требуемого резерва аккаунта XRP.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Недостаточно средств Ethereum для покрытия комиссий",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "У этого адреса пока нет счёта XRP. Для его создания нужен первый платёж не менее $reserve XRP. Ничего не отправлено — увеличьте сумму или отправьте на уже активированный адрес.",
 			"xrp_destination_tag_required": "Этот адрес требует тег назначения XRP. Ничего не отправлено — добавьте тег, выданный сервисом, которому вы платите, и отправьте снова.",
 			"xrp_destination_is_source": "Это ваш собственный адрес XRP. Ничего не отправлено — выберите другого получателя.",
-			"xrp_account_state_unavailable": "Кошелёк не смог прочитать данные вашего счёта, поэтому сумму не удалось проверить. Ничего не отправлено — повторите попытку через минуту."
+			"xrp_account_state_unavailable": "Кошелёк не смог прочитать данные вашего счёта, поэтому сумму не удалось проверить. Ничего не отправлено — повторите попытку через минуту.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

@@ -26,7 +26,6 @@
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 	import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
-	import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		destination: string;
@@ -141,8 +140,7 @@
 		bind:amount
 		bind:sendProgressStep
 	/>
-{:else if isNetworkIdXrp($sendToken.network.id) && !isTokenXrpTrustLine($sendToken)}
-	<!-- Native XRP only: this wizard would move XRP for a trust-line token, so one reaches nothing. -->
+{:else if isNetworkIdXrp($sendToken.network.id)}
 	<XrpSendTokenWizard
 		{currentStep}
 		{destination}

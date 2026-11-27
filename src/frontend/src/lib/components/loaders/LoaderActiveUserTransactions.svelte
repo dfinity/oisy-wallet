@@ -81,7 +81,9 @@
 		buildXrpSendTrackingMetadata,
 		buildXrpTrustSetTrackingMetadata,
 		isXrpActiveUserTransaction,
+		isXrpTokenPaymentActiveUserTransaction,
 		isXrpTrustSetActiveUserTransaction,
+		xrpActiveUserTransactionDisplay,
 		xrpTrustSetActiveUserTransactionDisplay
 	} from '$xrp/utils/xrp-active-tx.utils';
 	import { isXrpPaymentInFlight, makesXrpPayment } from '$xrp/utils/xrp-in-flight.utils';
@@ -409,7 +411,15 @@
 				// failures need different advice — nothing was sent, or the fee was charged — and
 				// only the resolver knows which one it wrote.
 				if (isSucceeded) {
-					toastsShow({ text: $i18n.send.text.xrp_sent, level: 'success', duration: 4000 });
+					toastsShow({
+						text: isXrpTokenPaymentActiveUserTransaction(tx)
+							? replacePlaceholders($i18n.send.text.xrp_token_sent, {
+									$symbol: xrpActiveUserTransactionDisplay(tx)?.symbol ?? ''
+								})
+							: $i18n.send.text.xrp_sent,
+						level: 'success',
+						duration: 4000
+					});
 				} else {
 					toastsError({ msg: { text: tx.error[0] ?? $i18n.send.error.unexpected } });
 				}

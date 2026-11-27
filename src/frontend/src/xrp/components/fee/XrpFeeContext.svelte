@@ -4,7 +4,11 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import type { Token } from '$lib/types/token';
-	import { XRP_DEFAULT_FEE_DROPS, XRP_MAX_FEE_DROPS } from '$xrp/constants/xrp.constants';
+	import {
+		XRP_DEFAULT_FEE_DROPS,
+		XRP_MAX_FEE_DROPS,
+		XRP_TRANSFER_RATE_NO_FEE
+	} from '$xrp/constants/xrp.constants';
 	import {
 		XrpAccountNotFoundError,
 		loadXrpAccountInfo,
@@ -13,6 +17,7 @@
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
+	import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		token: Token;
@@ -22,7 +27,8 @@
 
 	let { token, observe, children }: Props = $props();
 
-	const { feeStore, reserveStore }: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+	const { feeStore, reserveStore, transferRateStore }: XrpFeeContext =
+		getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
 
 	// The reserve depends on how many ledger objects the account owns, which only
 	// `account_info` reports. It is fetched once per account rather than on the fee timer:
@@ -113,6 +119,53 @@
 			// by the same check above. Cleared at the top of every attempt, so success ends it and a
 			// run of failures never stacks up timers.
 			reserveRetry = setTimeout(() => void loadReserve(id), POLL_INTERVAL_MS);
+		}
+	};
+
+	let transferRateRetry = $state<NodeJS.Timeout | undefined>();
+
+	const clearTransferRateRetry = () => clearTimeout(transferRateRetry);
+
+	// A trust-line token's issuer can charge a fee on every transfer between holders. Read once per
+	// token, like the reserve — it does not move while a send is composed — and asked again on the
+	// reserve's cadence after a failure, since an unknown rate blocks the form.
+	const loadTransferRate = async (id: number) => {
+		if (id !== generation || isNullish(transferRateStore)) {
+			return;
+		}
+
+		clearTransferRateRetry();
+
+		transferRateStore.setTransferRate(undefined);
+
+		if (!observe || isNullish(token) || !isTokenXrpTrustLine(token)) {
+			return;
+		}
+
+		const network = mapNetworkIdToNetwork(token.network.id);
+
+		if (isNullish(network)) {
+			return;
+		}
+
+		try {
+			const { transferRate } = await loadXrpAccountInfo({
+				address: token.issuer,
+				network,
+				ledgerIndex: 'validated'
+			});
+
+			if (id !== generation) {
+				return;
+			}
+
+			transferRateStore.setTransferRate(transferRate ?? XRP_TRANSFER_RATE_NO_FEE);
+		} catch (_: unknown) {
+			if (id !== generation) {
+				return;
+			}
+
+			transferRateRetry = setTimeout(() => void loadTransferRate(id), POLL_INTERVAL_MS);
 		}
 	};
 
@@ -207,6 +260,7 @@
 
 			void updateFee(id);
 			void loadReserve(id);
+			void loadTransferRate(id);
 		});
 	});
 
@@ -214,6 +268,7 @@
 		generation++;
 		clearTimer();
 		clearReserveRetry();
+		clearTransferRateRetry();
 	});
 </script>
 

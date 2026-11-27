@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Send",
 			"xrp_sent": "Your XRP payment went through.",
+			"xrp_token_sent": "Your $symbol payment went through.",
 			"xrp_submitted": "Payment submitted. It usually settles within seconds — you can close this and carry on.",
 			"send_token": "Send $token",
 			"send_unknown_token": "Send unknown token",
@@ -1051,6 +1052,7 @@
 			"source_network": "Source network",
 			"destination_network": "Destination network",
 			"xrp_destination_tag": "XRP destination tag",
+			"xrp_transfer_fee": "Transfer fee",
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "XRP destination tag must be a whole number between 0 and 4294967295.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
 			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the required XRP account reserve.",
+			"xrp_token_amount_too_precise": "This amount has too many digits: a token amount on the XRP Ledger has at most 16 significant digits.",
+			"xrp_insufficient_funds_for_transfer_fee": "Insufficient funds: the amount must leave enough to cover the issuer’s transfer fee.",
+			"xrp_insufficient_xrp_for_fee": "Not enough XRP to pay the network fee.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "This address has no XRP account yet. Creating one needs a first payment of at least $reserve XRP. Nothing was sent — raise the amount, or send to an address that is already funded.",
 			"xrp_destination_tag_required": "This address requires an XRP destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
 			"xrp_destination_is_source": "This is your own XRP address. Nothing was sent — choose a different recipient.",
-			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment."
+			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment.",
+			"xrp_ledger_state_unavailable": "The wallet could not read the XRP Ledger, so this payment could not be checked. Nothing was sent — try again in a moment.",
+			"xrp_token_insufficient_balance": "The amount no longer fits your $symbol balance, including any transfer fee. Nothing was sent — lower the amount.",
+			"xrp_insufficient_xrp_for_fee": "Your XRP balance no longer covers the network fee. Nothing was sent — receive more XRP, then send again.",
+			"xrp_destination_not_found": "This address has no XRP Ledger account yet, and a token payment cannot create one. Nothing was sent.",
+			"xrp_deposit_not_authorized": "This address accepts payments only from accounts it has approved, and yours is not one of them. Nothing was sent.",
+			"xrp_no_trust_line": "This address has not added $symbol from this issuer, so it cannot receive it. Nothing was sent.",
+			"xrp_trust_line_limit": "This address cannot receive this much $symbol: it would go over the limit the address set. Nothing was sent — lower the amount.",
+			"xrp_destination_frozen": "This address cannot receive $symbol right now: its $symbol is frozen. Nothing was sent.",
+			"xrp_destination_not_authorized": "This address is still waiting for the issuer to approve it for $symbol. Nothing was sent.",
+			"xrp_token_frozen": "The issuer froze your $symbol, so you can only send it back to the issuer. Nothing was sent.",
+			"xrp_token_deep_frozen": "The issuer deep-froze your $symbol, so you can only send it back to the issuer. Nothing was sent.",
+			"xrp_no_rippling": "The issuer of $symbol does not allow sending it between holders, only back to the issuer. Nothing was sent.",
+			"xrp_transfer_fee_changed": "The issuer of $symbol raised its transfer fee. Nothing was sent — review the payment again."
 		}
 	},
 	"mint": {

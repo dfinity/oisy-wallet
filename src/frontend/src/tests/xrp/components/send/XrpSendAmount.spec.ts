@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -9,6 +10,7 @@ import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
 	initReserveStore,
+	initTransferRateStore,
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
@@ -212,5 +214,67 @@ describe('XrpSendAmount', () => {
 				replacePlaceholders(en.tokens.text.on_network_label, { $network: XRP_TOKEN.network.name })
 			)
 		).toBeInTheDocument();
+	});
+
+	// A token's max is in the token: its balance, less room for the issuer's transfer fee. The XRP
+	// fee and reserve do not come out of it.
+	describe('a trust-line token', () => {
+		const token = { ...RLUSD_TOKEN, enabled: true };
+		const holder = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe';
+
+		const transferRateStore = initTransferRateStore();
+
+		const renderTokenAmount = (destination = holder) => {
+			const context = new Map();
+
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
+			context.set(
+				XRP_FEE_CONTEXT_KEY,
+				initXrpFeeContext({
+					feeStore,
+					reserveStore,
+					transferRateStore,
+					feeSymbolStore: writable(XRP_TOKEN.symbol),
+					feeDecimalsStore: writable(XRP_TOKEN.decimals),
+					feeTokenIdStore: writable(XRP_TOKEN.id),
+					feeExchangeRateStore: writable(0.5)
+				})
+			);
+
+			return render(XrpSendAmount, {
+				props: { amount: undefined, destination, onTokensList: vi.fn() },
+				context
+			});
+		};
+
+		beforeEach(() => {
+			balancesStore.reset(token.id);
+			// 100.5 RLUSD, in base units of 10^-18.
+			balancesStore.set({ id: token.id, data: { data: 1005n * 10n ** 17n, certified: true } });
+
+			transferRateStore.setTransferRate(1_000_000_000);
+		});
+
+		it('offers the whole balance without a transfer fee', () => {
+			expect(maxAmount(renderTokenAmount().container)).toBe(100.5);
+		});
+
+		it('leaves room for the transfer fee', () => {
+			transferRateStore.setTransferRate(1_005_000_000);
+
+			expect(maxAmount(renderTokenAmount().container)).toBe(100);
+		});
+
+		it('offers the whole balance to the issuer, which charges no fee', () => {
+			transferRateStore.setTransferRate(1_005_000_000);
+
+			expect(maxAmount(renderTokenAmount(token.issuer).container)).toBe(100.5);
+		});
+
+		it('offers nothing while the transfer rate is unknown', () => {
+			transferRateStore.setTransferRate(undefined);
+
+			expect(maxAmount(renderTokenAmount().container)).toBe(0);
+		});
 	});
 });

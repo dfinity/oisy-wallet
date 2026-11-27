@@ -14,6 +14,7 @@
 	import { type XrpFeeContext, XRP_FEE_CONTEXT_KEY } from '$xrp/stores/xrp-fee.store';
 	import type { XrpAmountAssertionError } from '$xrp/types/xrp-send';
 	import { invalidXrpAddress } from '$xrp/utils/xrp-address.utils';
+	import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		amount: OptionAmount;
@@ -35,15 +36,21 @@
 		cancel
 	}: Props = $props();
 
-	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const {
 		feeDecimalsStore,
 		feeStore: fee,
 		feeSymbolStore,
 		feeTokenIdStore,
-		reserveStore: reserve
+		reserveStore: reserve,
+		transferRateStore
 	}: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+
+	// A token's transfer rate is a fourth figure its amount is measured against.
+	let unknownTransferRate = $derived(
+		nonNullish($sendToken) && isTokenXrpTrustLine($sendToken) && isNullish($transferRateStore)
+	);
 
 	let amountError = $state<XrpAmountAssertionError | undefined>();
 
@@ -74,6 +81,7 @@
 			isNullish($reserve) ||
 			isNullish($fee) ||
 			isNullish($sendBalance) ||
+			unknownTransferRate ||
 			nonNullish(amountError) ||
 			invalidAmount(amount)
 	);
@@ -93,7 +101,7 @@
 	{/snippet}
 
 	{#snippet sendAmount()}
-		<XrpSendAmount {onTokensList} bind:amount bind:amountError />
+		<XrpSendAmount {destination} {onTokensList} bind:amount bind:amountError />
 		<XrpSendDestinationTag bind:invalidDestinationTag />
 	{/snippet}
 

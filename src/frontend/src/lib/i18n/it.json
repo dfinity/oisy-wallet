@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Invia",
 			"xrp_sent": "Il tuo pagamento XRP è andato a buon fine.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Pagamento inviato. Di solito si regola in pochi secondi — puoi chiudere e continuare.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Rete di origine",
 			"destination_network": "Rete di destinazione",
 			"xrp_destination_tag": "Tag di destinazione XRP",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Inizializzazione transazione",
 			"convert_to_native_icp": "Converti in ICP nativo",
 			"open_qr_modal": "Avvia scansione codice QR per dettagli transazione",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "Il tag di destinazione XRP deve essere un numero intero compreso tra 0 e 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Saldo insufficiente: l’importo deve lasciare abbastanza per coprire la commissione e la riserva di conto XRP richiesta.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Saldo insufficiente per il gas",
 			"insufficient_funds_for_amount": "Saldo insufficiente",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Saldo Ethereum insufficiente per coprire le fee",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "Questo indirizzo non ha ancora un conto XRP. Per crearlo serve un primo pagamento di almeno $reserve XRP. Non è stato inviato nulla: aumenta l’importo oppure invia a un indirizzo già finanziato.",
 			"xrp_destination_tag_required": "Questo indirizzo richiede un tag di destinazione XRP. Non è stato inviato nulla: aggiungi il tag fornito dal servizio a cui stai pagando e invia di nuovo.",
 			"xrp_destination_is_source": "Questo è il tuo indirizzo XRP. Non è stato inviato nulla: scegli un altro destinatario.",
-			"xrp_account_state_unavailable": "Il wallet non è riuscito a leggere i dati del tuo conto, quindi l’importo non ha potuto essere verificato. Non è stato inviato nulla: riprova tra un momento."
+			"xrp_account_state_unavailable": "Il wallet non è riuscito a leggere i dati del tuo conto, quindi l’importo non ha potuto essere verificato. Non è stato inviato nulla: riprova tra un momento.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

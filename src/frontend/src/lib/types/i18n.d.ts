@@ -759,6 +759,7 @@ interface I18nSend {
 	text: {
 		send: string;
 		xrp_sent: string;
+		xrp_token_sent: string;
 		xrp_submitted: string;
 		send_token: string;
 		send_unknown_token: string;
@@ -781,6 +782,7 @@ interface I18nSend {
 		source_network: string;
 		destination_network: string;
 		xrp_destination_tag: string;
+		xrp_transfer_fee: string;
 		initializing_transaction: string;
 		convert_to_native_icp: string;
 		open_qr_modal: string;
@@ -837,6 +839,9 @@ interface I18nSend {
 		xrp_destination_tag_invalid: string;
 		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_reserve: string;
+		xrp_token_amount_too_precise: string;
+		xrp_insufficient_funds_for_transfer_fee: string;
+		xrp_insufficient_xrp_for_fee: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
@@ -902,6 +907,19 @@ interface I18nSend {
 		xrp_destination_tag_required: string;
 		xrp_destination_is_source: string;
 		xrp_account_state_unavailable: string;
+		xrp_ledger_state_unavailable: string;
+		xrp_token_insufficient_balance: string;
+		xrp_insufficient_xrp_for_fee: string;
+		xrp_destination_not_found: string;
+		xrp_deposit_not_authorized: string;
+		xrp_no_trust_line: string;
+		xrp_trust_line_limit: string;
+		xrp_destination_frozen: string;
+		xrp_destination_not_authorized: string;
+		xrp_token_frozen: string;
+		xrp_token_deep_frozen: string;
+		xrp_no_rippling: string;
+		xrp_transfer_fee_changed: string;
 	};
 }
 

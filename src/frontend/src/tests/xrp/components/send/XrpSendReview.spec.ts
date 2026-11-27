@@ -1,4 +1,5 @@
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
@@ -9,6 +10,7 @@ import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
 	initReserveStore,
+	initTransferRateStore,
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
 import { render } from '@testing-library/svelte';
@@ -107,6 +109,59 @@ describe('XrpSendReview', () => {
 			});
 
 			expect(getByText(/Alice/)).toHaveTextContent('Cold wallet');
+		});
+	});
+
+	// The fee a token's issuer charges is paid in the token, on top of the amount, so the review
+	// states it in the token.
+	describe('a trust-line token', () => {
+		const transferRateStore = initTransferRateStore();
+
+		const renderTokenReview = (destination = props.destination) => {
+			const context = new Map();
+
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token: RLUSD_TOKEN }));
+			context.set(
+				XRP_FEE_CONTEXT_KEY,
+				initXrpFeeContext({
+					reserveStore: initReserveStore(),
+					feeStore,
+					transferRateStore,
+					feeSymbolStore: writable(XRP_TOKEN.symbol),
+					feeDecimalsStore: writable(XRP_TOKEN.decimals),
+					feeTokenIdStore: writable(XRP_TOKEN.id),
+					feeExchangeRateStore: writable(0.5)
+				})
+			);
+
+			return render(XrpSendReview, { props: { ...props, destination }, context });
+		};
+
+		it('states the transfer fee in the token', () => {
+			transferRateStore.setTransferRate(1_005_000_000);
+
+			const { getByTestId } = renderTokenReview();
+
+			// 0.5 % of 22.
+			expect(getByTestId('xrp-review-transfer-fee')).toHaveTextContent(
+				`${en.send.text.xrp_transfer_fee} 0.11 ${RLUSD_TOKEN.symbol}`
+			);
+		});
+
+		it('states no transfer fee when the issuer charges none', () => {
+			transferRateStore.setTransferRate(1_000_000_000);
+
+			const { queryByTestId } = renderTokenReview();
+
+			expect(queryByTestId('xrp-review-transfer-fee')).toBeNull();
+		});
+
+		it('states no transfer fee on a payment to the issuer', () => {
+			transferRateStore.setTransferRate(1_005_000_000);
+
+			const { queryByTestId } = renderTokenReview(RLUSD_TOKEN.issuer);
+
+			expect(queryByTestId('xrp-review-transfer-fee')).toBeNull();
 		});
 	});
 });
