@@ -1,11 +1,22 @@
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { doesTokenMatchFilter } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { SvelteMap } from 'svelte/reactivity';
+
+/**
+ * The key of a token's row in a list: the token's address on its network (its ledger, for an
+ * Internet Computer token), or its id for a native coin, which has no address.
+ *
+ * Not the symbol: two tokens can share one, and a keyed list throws on a repeated key. Not the id
+ * itself either: it is a new `Symbol` each time the token is loaded, which would redraw the row.
+ */
+export const getTokenRowKey = (token: Token): string =>
+	`token:${token.network.id.description}:${getTokenIdentifier(token) ?? token.id.description}`;
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }): boolean =>
 	doesTokenMatchFilter({ token, filter });
