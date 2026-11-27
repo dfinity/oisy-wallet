@@ -147,6 +147,7 @@
 
 <ContentWithToolbar>
 	<TokensReview
+		destinationTitle={isUnprotected ? $i18n.swap.text.you_receive_estimate : undefined}
 		destinationToken={$destinationToken}
 		destinationTokenExchangeRate={$destinationTokenExchangeRate}
 		{receiveAmount}
@@ -189,6 +190,9 @@
 		</ModalValue>
 	{/if}
 
+	<!-- Where the hidden Max slippage row was, so it stays above the buttons on short phones. -->
+	<SwapUnprotectedOfferWarning />
+
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
 		{@render swapFees()}
@@ -201,8 +205,6 @@
 	{/if}
 
 	<SwapLifiBtcRelayWarning />
-
-	<SwapUnprotectedOfferWarning />
 
 	{#if isSlippageWarning}
 		<div class="mt-4">

@@ -1,7 +1,8 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 import {
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
-	SWAP_SELECTED_PROVIDER_DETAILS
+	SWAP_SELECTED_PROVIDER_DETAILS,
+	SWAP_UNPROTECTED_OFFERS_NOTE
 } from '$lib/constants/test-ids.constants';
 import * as ExchangeDerived from '$lib/derived/exchange.derived';
 import { i18n } from '$lib/stores/i18n.store';
@@ -104,9 +105,23 @@ describe('SwapProviderListModal', () => {
 	});
 
 	it('marks no offer as an estimate when every offer is protected', () => {
-		const { container } = render(SwapProviderListModal, { context: mockContext });
+		const { container, queryByTestId } = render(SwapProviderListModal, { context: mockContext });
 
 		expect(container).not.toHaveTextContent(get(i18n).swap.text.estimate);
+		expect(queryByTestId(SWAP_UNPROTECTED_OFFERS_NOTE)).not.toBeInTheDocument();
+	});
+
+	it('explains the estimate once, under the offers, while one is listed', () => {
+		markUnprotected(SwapProvider.KONG_SWAP);
+
+		const { container, getAllByTestId } = render(SwapProviderListModal, { context: mockContext });
+		const [note] = getAllByTestId(SWAP_UNPROTECTED_OFFERS_NOTE);
+		const rows = offerRows(container);
+		const lastRow = rows[rows.length - 1];
+
+		expect(getAllByTestId(SWAP_UNPROTECTED_OFFERS_NOTE)).toHaveLength(1);
+		expect(note).toHaveTextContent(get(i18n).swap.text.unprotected_offers_note);
+		expect(lastRow.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 
 	it.each(['xs', 'lg'] as const)(

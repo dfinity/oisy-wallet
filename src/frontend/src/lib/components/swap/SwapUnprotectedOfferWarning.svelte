@@ -9,11 +9,13 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { findSwapProvider, isUnprotectedOffer } from '$lib/utils/swap.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 
@@ -36,7 +38,8 @@
 	<div class="mt-4" transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="!mb-0" testId={SWAP_UNPROTECTED_OFFER_WARNING}>
 			{replacePlaceholders($i18n.swap.text.unprotected_offer_warning, {
-				$provider: providerName
+				$provider: providerName,
+				$token: $sourceToken?.symbol ?? ''
 			})}
 		</MessageBox>
 	</div>

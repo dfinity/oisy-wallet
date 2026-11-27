@@ -253,6 +253,7 @@ export const SWAP_FEE_ROW = 'swap-fee-row';
 export const SWAP_INSUFFICIENT_FEE_INFO = 'swap-insufficient-fee-info';
 export const SWAP_LIFI_BTC_RELAY_WARNING = 'swap-lifi-btc-relay-warning';
 export const SWAP_UNPROTECTED_OFFER_WARNING = 'swap-unprotected-offer-warning';
+export const SWAP_UNPROTECTED_OFFERS_NOTE = 'swap-unprotected-offers-note';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
 export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
 export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';

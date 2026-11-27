@@ -13,17 +13,17 @@ provider's protocol or OISY's pre-sign check enforces (exact offers count as pro
 only on unprotected offers.
 
 The UI stays extremely minimal: no badge, colour, icon or banner for protected offers, and no hint
-on the form while a protected offer is selected. The exception is marked in one place per surface,
-in grey text that already exists on that surface.
+on the form while a protected offer is selected. The exception is marked in grey text that already
+exists on each surface, and only Review carries a warning box.
 
 Source: Artem, 2026-11-27, grilled in Claude Code. Every decision is listed in
 [Decisions](#decisions).
 
-This is the "no-slippage form redesign" that
-[`2026-11-25-feat-rift-swap-provider.md`](./2026-11-25-feat-rift-swap-provider.md) (on
-`origin/docs/ai/rift-spec`) defers ranking and presentation to, and that gates Rift's production
-flag. Rift is the first unprotected provider. This spec ships on `main` first, provider-agnostic:
-every provider on `main` is protected, so nothing changes visibly until Rift merges on top.
+This spec defines ranking and presentation for unprotected offers and covers the Swap form changes
+required by the [Rift spec PR](https://github.com/dfinity/oisy-wallet/pull/14774). Rift is the first
+unprotected provider. The provider-agnostic changes and Rift's local and staging integration can
+land independently. Rift's production flag can be enabled once these changes have shipped and the
+other production gates are met.
 
 ## Background
 
@@ -113,8 +113,12 @@ without exposing `receiveOutMinimum` on the offer, so that field can't be the si
   holds the Best Rate badge on other rows (`SwapProviderListItem.svelte:80-88`), before the fiat
   value, in the same grey as the fiat value. No badge, colour, icon or "≈". It shows on phones too,
   where the Best Rate badge shrinks to a star.
-- The selected-offer card at the top of the list is unchanged; each provider's details component
-  (for Rift, `SwapDetailsRift.svelte`) already describes its terms.
+- While an unprotected offer is listed, one caption under the list, in the column header's grey
+  (`text-sm text-tertiary`), says why it sits there: "Estimate means no guaranteed minimum, so Smart
+  Swap ranks it last." (`swap.text.unprotected_offers_note`). None while every offer is protected.
+- The selected-offer card shows the provider's details. An unprotected offer's details carry an
+  "Expected minimum: None" row (`swap.text.expected_minimum`, `swap.text.no_minimum`), parallel to
+  the protected offers' "Expected minimum", and no warning box: the full warning is Review's.
 
 ### Review
 
@@ -122,18 +126,19 @@ When the selected offer is unprotected:
 
 - The "Max slippage" row is hidden.
 - The high-slippage `MessageBox` is hidden, since slippage doesn't apply.
+- The amount to receive at the top reads "You receive (estimate)" (`swap.text.you_receive_estimate`)
+  instead of "You receive", so it says so above the fold on short phones.
 - One warning `MessageBox` (new `SwapUnprotectedOfferWarning.svelte`, pattern:
-  `SwapLifiBtcRelayWarning.svelte`), with new key `swap.text.unprotected_offer_warning`:
-  "$provider guarantees no minimum. It swaps at the best price it finds once your deposit arrives,
-  so you may receive more or less than shown. Your max slippage setting doesn't apply to this
-  offer."
+  `SwapLifiBtcRelayWarning.svelte`), in the hidden Max slippage row's place, under Value difference
+  and above Swap provider, with new key `swap.text.unprotected_offer_warning`: "$provider doesn't
+  guarantee a minimum. The rate is set when $provider receives your $token, so you may receive more
+  or less than shown. Your max slippage doesn't apply." (`$token` is the token paid.)
   If the provider has no metadata entry, the warning names it by its provider id rather than
   disappearing, so Review never hides the slippage row without saying why.
 - No confirmation checkbox: picking the offer by hand is the consent. The existing value-difference
   checkbox still applies as it does today.
 
-When the Rift branches merge onto this, `SwapRiftEstimateWarning.svelte` and
-`swap.text.rift_estimate_warning` are deleted in favour of the generic warning.
+When Rift adopts this model, declare it unprotected and use the generic warning on Review.
 
 ### Unchanged
 
@@ -210,13 +215,19 @@ All made 2026-11-27 by Artem.
 - **Review**: hide the Max slippage row rather than replace it; one generic warning; no checkbox.
 - **Only unprotected offers**: picked automatically, no Best Rate.
 - **Gain** compares protected offers only.
-- **Ships provider-agnostic on `main`** before Rift.
+- From code review, 2026-11-27: the provider-agnostic changes and staging integration can land
+  independently. Ship the protection changes before enabling Rift in production.
 - Made while writing the spec, from the answers above: the status line overrides compact mode for
   a single unprotected offer; "Best of $count offers" counts protected offers; the high-slippage
   box is hidden with the row; the announcement includes the status.
 - From code review, 2026-11-27: "Best of" falls back to "$count offers compared" with fewer than
   two protected offers; an unprotected pick resets when Max re-applies a new amount; the warning
   and announcement fall back to the provider id when metadata is missing.
+- From the UX critique in the mock UI, 2026-11-27 (Artem): the offers list explains "Estimate" in
+  one grey caption under the list; the selected-offer card drops its info box for an "Expected
+  minimum: None" row; Review labels the amount "You receive (estimate)" and moves the warning to
+  the Max slippage slot, so both show above the fold on short phones; the warning drops "deposit"
+  and Rift's "best price it finds" for "the rate is set when $provider receives your $token".
 
 ## Open questions (facts to confirm)
 

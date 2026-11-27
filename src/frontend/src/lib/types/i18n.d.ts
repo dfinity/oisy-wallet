@@ -1154,6 +1154,7 @@ interface I18nSwap {
 		estimate: string;
 		expected_minimum: string;
 		you_receive: string;
+		you_receive_estimate: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
 		open_instructions_link: string;
@@ -1166,6 +1167,7 @@ interface I18nSwap {
 		cross_chain_networks_info: string;
 		lifi_btc_relay_recipient_warning: string;
 		unprotected_offer_warning: string;
+		unprotected_offers_note: string;
 		receive_shortcut_same_network: string;
 		receive_shortcut_other_network: string;
 		receive_shortcut_token_on_network: string;

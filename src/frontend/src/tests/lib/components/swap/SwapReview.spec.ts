@@ -775,7 +775,8 @@ describe('SwapReview', () => {
 
 	describe('unprotected offer', () => {
 		const warning = replacePlaceholders(en.swap.text.unprotected_offer_warning, {
-			$provider: 'ICPSwap'
+			$provider: 'ICPSwap',
+			$token: mockSourceToken.symbol
 		});
 
 		beforeEach(() => {
@@ -799,6 +800,38 @@ describe('SwapReview', () => {
 			expect(queryByText(en.swap.text.max_slippage)).not.toBeInTheDocument();
 			expect(queryByText('0.5%')).not.toBeInTheDocument();
 			expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+		});
+
+		it('should label the amount to receive as an estimate', () => {
+			const { context } = createSwapContext();
+
+			const { getByText, queryByText } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(getByText(en.swap.text.you_receive_estimate)).toBeInTheDocument();
+			expect(queryByText(en.tokens.text.destination_token_title)).not.toBeInTheDocument();
+		});
+
+		it('should put the warning where the max slippage row was, above the provider', () => {
+			const { context } = createSwapContext();
+
+			const { getByTestId, getByText } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			const warning = getByTestId(SWAP_UNPROTECTED_OFFER_WARNING);
+
+			expect(
+				getByText(en.swap.text.value_difference).compareDocumentPosition(warning) &
+					Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
+			expect(
+				warning.compareDocumentPosition(getByText(en.swap.text.swap_provider)) &
+					Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
 		});
 
 		it('should not warn about high slippage, which does not apply', () => {
@@ -838,6 +871,7 @@ describe('SwapReview', () => {
 
 			expect(queryByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).not.toBeInTheDocument();
 			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
+			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
 		});
 
 		it('should name the provider by its id when it has no metadata', () => {
@@ -851,7 +885,8 @@ describe('SwapReview', () => {
 
 			expect(getByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).toHaveTextContent(
 				replacePlaceholders(en.swap.text.unprotected_offer_warning, {
-					$provider: SwapProvider.ICP_SWAP
+					$provider: SwapProvider.ICP_SWAP,
+					$token: mockSourceToken.symbol
 				})
 			);
 		});
