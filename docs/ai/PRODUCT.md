@@ -380,7 +380,7 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ### Logos of Internet Computer tokens
 
-An ICRC ledger names its own logo. OISY shows it only when it loads from OISY itself or is carried inline (a `data:image` URL), so showing a token never contacts another host. Any other logo is not loaded: the token lists use OISY's shipped icon for that ledger instead, and the tip claim screens spell out the symbol.
+An ICRC ledger names its own logo. OISY shows it only when the image is embedded in it (a `data:image` URL), so showing a token never loads an image the ledger chose. Any other logo is not loaded: the token lists use OISY's own icon for that ledger instead, and the tip claim screens spell out the symbol. OISY's own icons for the tokens it lists are not affected.
 
 ### Asset types
 
