@@ -11,3 +11,10 @@ export const MAX_SAVE_USER_TRANSACTIONS_BATCH = 500;
 
 /** Maximum transactions the canister stores per (user, token) pair before trimming the oldest. */
 export const MAX_USER_TRANSACTIONS_PER_TOKEN = 10_000;
+
+/**
+ * Length the canister cuts the hex-encoded EVM input data to when it stores a transaction: `0x`, the
+ * function selector and the first two arguments, which is all the wallet reads from it. Cutting it
+ * before the save keeps the rest from being sent at all.
+ */
+export const MAX_STORED_USER_TRANSACTION_DATA_LEN = 138;

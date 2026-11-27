@@ -1,8 +1,9 @@
 import type { UserTransaction } from '$declarations/backend/backend.did';
+import * as backendApi from '$lib/api/backend.api';
 import * as userTransactionsServices from '$lib/services/user-transactions.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionUi, mockSignature } from '$tests/mocks/sol-transactions.mock';
 import {
 	mockSolNativeMainnetTokenId,
@@ -13,6 +14,10 @@ import { signature } from '@solana/kit';
 
 vi.mock('$lib/services/user-transactions.services', () => ({
 	saveFinalizedTransactions: vi.fn()
+}));
+
+vi.mock('$lib/api/backend.api', () => ({
+	saveUserTransactions: vi.fn()
 }));
 
 describe('sol-user-transactions.services', () => {
@@ -137,6 +142,43 @@ describe('sol-user-transactions.services', () => {
 			});
 
 			expect(result).toEqual({ success: true });
+		});
+
+		describe('when the canister refuses the save for its rate limit', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should send it again once the window has passed', async () => {
+				const { saveFinalizedTransactions } = await vi.importActual<
+					typeof userTransactionsServices
+				>('$lib/services/user-transactions.services');
+
+				vi.spyOn(userTransactionsServices, 'saveFinalizedTransactions').mockImplementation(
+					saveFinalizedTransactions
+				);
+
+				vi.mocked(backendApi.saveUserTransactions)
+					.mockRejectedValueOnce({
+						RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal }
+					})
+					.mockResolvedValue(undefined);
+
+				const result = saveSolFinalizedTransactions({
+					identity: mockIdentity,
+					tokenId: mockSolNativeMainnetTokenId,
+					transactions: [mockFinalizedTx]
+				});
+
+				await vi.advanceTimersByTimeAsync(60_000);
+
+				await expect(result).resolves.toEqual({ success: true });
+				expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(2);
+			});
 		});
 	});
 });

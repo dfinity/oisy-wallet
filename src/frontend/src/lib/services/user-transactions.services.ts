@@ -1,12 +1,17 @@
-import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
+import type {
+	TokenId as BackendTokenId,
+	UserTransaction,
+	UserTransactionError
+} from '$declarations/backend/backend.did';
 import { getUserTransactions, saveUserTransactions } from '$lib/api/backend.api';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { MAX_SAVE_USER_TRANSACTIONS_BATCH } from '$lib/constants/user-transactions.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Transaction as EthTransaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
 
@@ -48,6 +53,43 @@ export const loadUserTransactions = async <T extends EthTransaction | SolTransac
 	} catch (_: unknown) {
 		// We don't necessarily want to treat a failure to load transactions as an error worth surfacing to the user,
 		// since it's not critical to the functioning of the app (transactions can be re-loaded on demand).
+	}
+};
+
+const isRateLimited = (
+	err: unknown
+): err is Extract<UserTransactionError, { RateLimited: unknown }> =>
+	typeof err === 'object' && err !== null && 'RateLimited' in err;
+
+const saveBatch = async ({
+	identity,
+	tokenId,
+	batch
+}: {
+	identity: NullishIdentity;
+	tokenId: BackendTokenId;
+	batch: UserTransaction[];
+}): Promise<boolean> => {
+	try {
+		await saveUserTransactions({ identity, tokenId, transactions: batch });
+
+		return true;
+	} catch (err: unknown) {
+		// The canister limits how often a caller saves, and a caller may already have moved its cursor
+		// past these transactions, so a batch dropped here might never be sent again. It is held until
+		// the limit's window has passed and then sent again, before the batches after it.
+		if (isRateLimited(err)) {
+			await waitForMilliseconds(Number(err.RateLimited.window_ns / NANO_SECONDS_IN_MILLISECOND));
+
+			return saveBatch({ identity, tokenId, batch });
+		}
+
+		// Not worth surfacing to the user: the cache is a warm-up, and the transactions are already
+		// on screen. Worth logging, because a silent failure here is what kept a rejected batch
+		// invisible in the first place.
+		consoleError('Failed to save a batch of user transactions:', err);
+
+		return false;
 	}
 };
 
@@ -111,19 +153,14 @@ export const saveFinalizedTransactions = async <T>({
 	for (let index = 0; index < mapped.length; index += MAX_SAVE_USER_TRANSACTIONS_BATCH) {
 		const batch = mapped.slice(index, index + MAX_SAVE_USER_TRANSACTIONS_BATCH);
 
-		try {
-			await saveUserTransactions({ identity, tokenId, transactions: batch });
-		} catch (err: unknown) {
-			// Keep going rather than abandoning the rest. The canister validates a batch as a unit and
-			// refuses all of it on the first transaction that breaches a field bound, so bailing here
-			// would let one unusual transaction cost the user every later batch too. Saves are
-			// deduplicated by id, so retrying the survivors on a future load stays cheap.
-			allSaved = false;
+		// Keep going rather than abandoning the rest. The canister validates a batch as a unit and
+		// refuses all of it on the first transaction that breaches a field bound, so bailing here
+		// would let one unusual transaction cost the user every later batch too. Saves are
+		// deduplicated by id, so retrying the survivors on a future load stays cheap.
+		const saved = await saveBatch({ identity, tokenId, batch });
 
-			// Not worth surfacing to the user: the cache is a warm-up, and the transactions are already
-			// on screen. Worth logging, because a silent failure here is what kept a rejected batch
-			// invisible in the first place.
-			consoleError('Failed to save a batch of user transactions:', err);
+		if (!saved) {
+			allSaved = false;
 		}
 	}
 
