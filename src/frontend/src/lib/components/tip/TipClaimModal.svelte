@@ -647,7 +647,7 @@
 				-->
 				<div class="flex w-full gap-3">
 					<!-- Closing here skips `enableClaimedToken`, so the token stays out of the list. -->
-					{#if newToken}
+					{#if newToken || !$icrcCustomTokensInitialized}
 						<Button
 							colorStyle="secondary-light"
 							disabled={handingOff}
@@ -655,7 +655,7 @@
 							onclick={close}
 							testId={TIP_DONT_ADD_TOKEN_BUTTON}
 						>
-							{$i18n.tip.text.dont_add_token}
+							{newToken ? $i18n.tip.text.dont_add_token : $i18n.core.text.close}
 						</Button>
 					{/if}
 

@@ -316,7 +316,7 @@ describe('TipClaimModal', () => {
 
 			expect(walletButton()).toBeDisabled();
 			expect(warning(container)).not.toBeInTheDocument();
-			expect(dontAddButton(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).toHaveTextContent(get(i18n).core.text.close);
 
 			tokensInitialized.set(true);
 
@@ -324,8 +324,32 @@ describe('TipClaimModal', () => {
 				expect(warning(container)).toHaveTextContent(get(i18n).tip.text.added_token_not_listed)
 			);
 
-			expect(dontAddButton(container)).toBeInTheDocument();
+			expect(dontAddButton(container)).toHaveTextContent(get(i18n).tip.text.dont_add_token);
 			expect(walletButton()).toBeEnabled();
+			expect(setCustomTokenApi).not.toHaveBeenCalled();
+		});
+
+		it('offers Close while the list is missing, and closing leaves the token out', async () => {
+			// The list may never land: when its fetch fails, `LoaderTokens` only shows a toast.
+			tokensInitialized.set(false);
+
+			const closeSpy = vi.spyOn(modalStore, 'close');
+
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			const closeButton = dontAddButton(container);
+
+			expect(closeButton).toHaveTextContent(get(i18n).core.text.close);
+			expect(closeButton).toBeEnabled();
+			expect(closeSpy).not.toHaveBeenCalled();
+
+			closeButton?.click();
+
+			expect(closeSpy).toHaveBeenCalledOnce();
 			expect(setCustomTokenApi).not.toHaveBeenCalled();
 		});
 
