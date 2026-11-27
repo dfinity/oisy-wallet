@@ -98,3 +98,10 @@ const XRP_LEDGER_CLOSE_SECONDS = 4;
 // stall a rejected fetch, which the resolver already treats as an unanswered lookup: the record
 // stays `Pending` and the next tick asks again.
 export const XRP_RPC_TIMEOUT_MS = XRP_LEDGER_CLOSE_SECONDS * 2 * 1000;
+
+// The fixed scale a trust-line token's amounts are held in, in the wallet's integer base units. The
+// ledger writes these amounts as decimals with 15 significant digits at any exponent, so no scale is
+// exact for all of them; 18 is exact for every amount of at least 0.001. Where an exact figure
+// matters — sending the whole balance, removing a line only at zero — the reader uses the ledger's
+// own decimal string rather than this value.
+export const XRP_TRUST_LINE_TOKEN_DECIMALS = 18;

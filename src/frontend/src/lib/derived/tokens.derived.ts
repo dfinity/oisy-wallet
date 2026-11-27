@@ -33,6 +33,7 @@ import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
+import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -64,12 +65,13 @@ export const nativeTokens: Readable<Token[]> = derivedMemo(
 );
 
 export const fungibleTokens: Readable<Token[]> = derivedMemo(
-	[nativeTokens, ercFungibleTokens, icrcTokens, splTokens],
-	([$nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) => [
+	[nativeTokens, ercFungibleTokens, icrcTokens, splTokens, xrpTrustLineTokens],
+	([$nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens, $xrpTrustLineTokens]) => [
 		...$nativeTokens,
 		...$ercFungibleTokens,
 		...$icrcTokens,
-		...$splTokens
+		...$splTokens,
+		...$xrpTrustLineTokens
 	],
 	tokenListEqual
 );
