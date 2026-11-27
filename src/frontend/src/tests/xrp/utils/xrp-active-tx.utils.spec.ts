@@ -18,6 +18,7 @@ import {
 	mockXrpSwapData,
 	mockXrpTokenPaymentActiveUserTransaction,
 	mockXrpTokenPaymentData,
+	mockXrpTrustLineRemovalActiveUserTransaction,
 	mockXrpTrustSetActiveUserTransaction,
 	mockXrpTrustSetData,
 	mockXrpTxHash
@@ -30,6 +31,7 @@ import {
 	isXrpActiveUserTransaction,
 	isXrpAlreadyInFlightError,
 	isXrpTokenPaymentActiveUserTransaction,
+	isXrpTrustLineRemovalActiveUserTransaction,
 	isXrpTrustSetActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
@@ -94,6 +96,28 @@ describe('xrp-active-tx.utils', () => {
 		])('does not recognise %s', (...[, tx]) => {
 			expect(isXrpTrustSetActiveUserTransaction(tx)).toBeFalsy();
 		});
+
+		it('recognises removing one too', () => {
+			expect(
+				isXrpTrustSetActiveUserTransaction(mockXrpTrustLineRemovalActiveUserTransaction)
+			).toBeTruthy();
+		});
+	});
+
+	describe('isXrpTrustLineRemovalActiveUserTransaction', () => {
+		it('recognises removing a trust-line token', () => {
+			expect(
+				isXrpTrustLineRemovalActiveUserTransaction(mockXrpTrustLineRemovalActiveUserTransaction)
+			).toBeTruthy();
+		});
+
+		it.each([
+			['adding one', mockXrpTrustSetActiveUserTransaction],
+			['a send', mockXrpActiveUserTransaction],
+			['another flow', mockLiquidiumActiveUserTransaction]
+		])('does not recognise %s', (...[, tx]) => {
+			expect(isXrpTrustLineRemovalActiveUserTransaction(tx)).toBeFalsy();
+		});
 	});
 
 	describe('toXrpTrustSetData', () => {
@@ -102,9 +126,21 @@ describe('xrp-active-tx.utils', () => {
 				toXrpTrustSetData({
 					token: { ...RLUSD_TOKEN, enabled: true },
 					source: mockXrpSourceAddress,
+					change: 'add',
 					fee: 12n
 				})
 			).toEqual({ XrpTrustSet: mockXrpTrustSetData });
+		});
+
+		it('records a removal as such', () => {
+			expect(
+				toXrpTrustSetData({
+					token: { ...RLUSD_TOKEN, enabled: true },
+					source: mockXrpSourceAddress,
+					change: 'remove',
+					fee: 12n
+				})
+			).toEqual({ XrpTrustSet: { ...mockXrpTrustSetData, change: { Remove: null } } });
 		});
 
 		it('names a token added by its currency and issuer the same way', () => {
@@ -113,7 +149,9 @@ describe('xrp-active-tx.utils', () => {
 				network: XRP_MAINNET_NETWORK
 			});
 
-			expect(toXrpTrustSetData({ token, source: mockXrpSourceAddress, fee: 12n })).toEqual({
+			expect(
+				toXrpTrustSetData({ token, source: mockXrpSourceAddress, change: 'add', fee: 12n })
+			).toEqual({
 				XrpTrustSet: {
 					token: { XrpTrustLineMainnet: ['USD', mockXrpDestinationAddress] },
 					source_address: mockXrpSourceAddress,
@@ -131,7 +169,9 @@ describe('xrp-active-tx.utils', () => {
 				enabled: true
 			};
 
-			expect(toXrpTrustSetData({ token, source: mockXrpSourceAddress, fee: 12n })).toBeUndefined();
+			expect(
+				toXrpTrustSetData({ token, source: mockXrpSourceAddress, change: 'add', fee: 12n })
+			).toBeUndefined();
 		});
 	});
 

@@ -71,6 +71,7 @@
 			"paste": "Вставить",
 			"to": "Кому",
 			"add": "Добавить",
+			"remove": "",
 			"more_items": "+$items еще",
 			"select": "Выбрать",
 			"language": "Язык",
@@ -1682,7 +1683,13 @@
 				"xrp_reserve": "",
 				"xrp_reserve_after": "",
 				"xrp_add_submitted": "",
-				"xrp_token_added": ""
+				"xrp_token_added": "",
+				"xrp_remove_description": "",
+				"xrp_remove_reserve": "",
+				"xrp_remove_submitted": "",
+				"xrp_token_removed": "",
+				"xrp_token_kept": "",
+				"xrp_token_remove_settled": ""
 			},
 			"error": {
 				"loading_metadata": "Указанный адрес не является действительным токеном в выбранной сети.",
@@ -1711,7 +1718,12 @@
 				"xrp_trust_set_unfunded": "",
 				"xrp_add_failed": "",
 				"xrp_trust_set_failed": "",
-				"xrp_trust_set_expired": ""
+				"xrp_trust_set_expired": "",
+				"xrp_remove_not_held": "",
+				"xrp_remove_balance_not_zero": "",
+				"xrp_remove_failed": "",
+				"xrp_trust_set_remove_failed": "",
+				"xrp_trust_set_remove_expired": ""
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name подготавливает и защищает новые токены. Пожалуйста, не закрывайте эту вкладку, пока это не будет завершено.",

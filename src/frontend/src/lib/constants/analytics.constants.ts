@@ -55,10 +55,12 @@ export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error';
 // XRP Ledger
 export const TRACK_COUNT_XRP_SEND_SUCCESS = 'xrp_send_success';
 export const TRACK_COUNT_XRP_SEND_ERROR = 'xrp_send_error';
-// Adding an XRP Ledger trust-line token: fired, like the send's, once the ledger resolves its
-// `TrustSet`, and the error also when the add is refused before anything is sent.
+// Adding and removing an XRP Ledger trust-line token: fired, like the send's, once the ledger
+// resolves its `TrustSet`, and the error also when the change is refused before anything is sent.
 export const TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS = 'xrp_trust_line_add_success';
 export const TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR = 'xrp_trust_line_add_error';
+export const TRACK_COUNT_XRP_TRUST_LINE_REMOVE_SUCCESS = 'xrp_trust_line_remove_success';
+export const TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR = 'xrp_trust_line_remove_error';
 
 // WalletConnect
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code';

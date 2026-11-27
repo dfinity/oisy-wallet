@@ -71,6 +71,7 @@
 			"paste": "चिपकाएँ",
 			"to": "को",
 			"add": "जोड़ें",
+			"remove": "",
 			"more_items": "+$items अधिक",
 			"select": "चुनें",
 			"language": "भाषा",
@@ -1682,7 +1683,13 @@
 				"xrp_reserve": "",
 				"xrp_reserve_after": "",
 				"xrp_add_submitted": "",
-				"xrp_token_added": ""
+				"xrp_token_added": "",
+				"xrp_remove_description": "",
+				"xrp_remove_reserve": "",
+				"xrp_remove_submitted": "",
+				"xrp_token_removed": "",
+				"xrp_token_kept": "",
+				"xrp_token_remove_settled": ""
 			},
 			"error": {
 				"loading_metadata": "चयनित नेटवर्क में निर्दिष्ट पता एक वैध टोकन नहीं है।",
@@ -1711,7 +1718,12 @@
 				"xrp_trust_set_unfunded": "",
 				"xrp_add_failed": "",
 				"xrp_trust_set_failed": "",
-				"xrp_trust_set_expired": ""
+				"xrp_trust_set_expired": "",
+				"xrp_remove_not_held": "",
+				"xrp_remove_balance_not_zero": "",
+				"xrp_remove_failed": "",
+				"xrp_trust_set_remove_failed": "",
+				"xrp_trust_set_remove_expired": ""
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name नए टोकन तैयार और सुरक्षित कर रहा है। कृपया इसके पूरा होने तक इस टैब को बंद न करें।",

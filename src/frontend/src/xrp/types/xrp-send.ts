@@ -59,11 +59,25 @@ export class XrpSendAlreadyInFlightError extends Error {}
 export class XrpSendNotGuardedError extends Error {}
 
 /**
- * Adding a trust-line token refused before signing: the balance cannot pay the fee, or — once the
- * account owns two objects, where the ledger stops waiving it — cannot keep the reserve the new line
- * adds. Either way the ledger would apply the `TrustSet` as a failure and claim the fee.
+ * Adding or removing a trust-line token refused before signing: the balance cannot pay the fee, or —
+ * when adding, once the account owns two objects, where the ledger stops waiving it — cannot keep
+ * the reserve the new line adds. Either way the ledger would apply the `TrustSet` as a failure and
+ * claim the fee.
  */
 export class XrpTrustSetUnfundedError extends Error {}
+
+/**
+ * Removing a trust-line token refused before signing: the account no longer holds the token's line,
+ * so the ledger would fail the `TrustSet` as redundant (`tecNO_LINE_REDUNDANT`) and claim the fee.
+ */
+export class XrpTrustLineNotHeldError extends Error {}
+
+/**
+ * Removing a trust-line token refused before signing: its balance is no longer zero. The ledger would
+ * keep the line and its reserve, and set the limit to zero, so the account could no longer receive
+ * the token.
+ */
+export class XrpTrustLineBalanceNotZeroError extends Error {}
 
 /**
  * Why a payment is refused before signing: each reason is one the ledger would answer by applying

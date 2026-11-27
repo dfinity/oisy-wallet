@@ -122,6 +122,7 @@ describe('xrp-transaction.utils', () => {
 		const params = {
 			account: base.account,
 			token: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer },
+			change: 'add' as const,
 			fee: 12n,
 			sequence: 7,
 			signingPublicKey: base.signingPublicKey,
@@ -171,6 +172,27 @@ describe('xrp-transaction.utils', () => {
 		it('carries the ledger window its record is resolved over', () => {
 			expect(deriveXrpLedgerWindow(encode(buildXrpTrustSet(params)))).toEqual(
 				xrpLedgerSearchWindow(1020)
+			);
+		});
+
+		// A zero limit at a zero balance, with NoRipple still set, is the wallet's side at its default
+		// state: the one the ledger releases the reserve for and deletes the line at.
+		it('removes the token with a zero limit and NoRipple kept', () => {
+			expect(buildXrpTrustSet({ ...params, change: 'remove' })).toEqual({
+				TransactionType: 'TrustSet',
+				Account: base.account,
+				LimitAmount: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '0' },
+				Flags: XRP_TRUST_SET_FLAG_SET_NO_RIPPLE,
+				Fee: '12',
+				Sequence: 7,
+				SigningPubKey: base.signingPublicKey,
+				LastLedgerSequence: 1020
+			});
+		});
+
+		it('encodes the zero limit of a removal', () => {
+			expect(decode(encode(buildXrpTrustSet({ ...params, change: 'remove' }))).LimitAmount).toEqual(
+				{ currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '0' }
 			);
 		});
 	});
