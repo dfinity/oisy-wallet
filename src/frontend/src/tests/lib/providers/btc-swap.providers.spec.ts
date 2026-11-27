@@ -65,7 +65,8 @@ describe('btc-swap.providers', () => {
 			vi.resetModules();
 		});
 
-		it('should register LI.FI last once BTC is sent through the backend', async () => {
+		// Rift, on in the test env too, follows it on the same path.
+		it('should register LI.FI after Chain Fusion and NEAR Intents once BTC is sent through the backend', async () => {
 			btcSendViaBackend.enabled = true;
 
 			const providers = await loadProviders();
@@ -73,7 +74,8 @@ describe('btc-swap.providers', () => {
 			expect(providers.map(({ key }) => key)).toEqual([
 				SwapProvider.CHAIN_FUSION,
 				SwapProvider.NEAR_INTENTS,
-				SwapProvider.LIFI
+				SwapProvider.LIFI,
+				SwapProvider.RIFT
 			]);
 			expect(providers.every(({ isEnabled }) => isEnabled)).toBeTruthy();
 		});
@@ -146,7 +148,6 @@ describe('btc-swap.providers', () => {
 		});
 	});
 
-	// Rift's flag is off in every environment until it can execute a swap.
 	describe('Rift entry', () => {
 		const loadProviders = async ({ rift }: { rift: boolean }) => {
 			vi.resetModules();
@@ -168,6 +169,7 @@ describe('btc-swap.providers', () => {
 			vi.resetModules();
 		});
 
+		// The backend send path defaults off in the test env.
 		it('should leave Rift out under the default test env', () => {
 			expect(keys(btcSwapProviders)).not.toContain(SwapProvider.RIFT);
 		});

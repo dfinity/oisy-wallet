@@ -14,16 +14,27 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { RiftQuote } from '$lib/types/rift';
+import { RiftSwapRefusedError } from '$lib/types/errors';
+import type { RiftOrder, RiftQuote } from '$lib/types/rift';
 import {
 	isRiftBtcSource,
+	isRiftOrderAwaitingDeposit,
+	isRiftOrderForReview,
 	isRiftQuoteForRequest,
 	isSameRiftAssetId,
 	riftRouteVenues,
+	riftSwapRefusedMessage,
 	toRiftAssetId
 } from '$lib/utils/rift.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockRiftQuote, mockRiftQuoteRequest } from '$tests/mocks/rift.mock';
+import en from '$tests/mocks/i18n.mock';
+import {
+	mockRiftOrder,
+	mockRiftOrderRefundAddress,
+	mockRiftOrderToAddress,
+	mockRiftQuote,
+	mockRiftQuoteRequest
+} from '$tests/mocks/rift.mock';
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
@@ -177,6 +188,97 @@ describe('rift.utils', () => {
 	describe('riftRouteVenues', () => {
 		it('lists the venues in route order, without the delivery step', () => {
 			expect(riftRouteVenues(mockRiftQuote)).toEqual(['rift_otc', 'velora']);
+		});
+	});
+
+	describe('isRiftOrderAwaitingDeposit', () => {
+		it.each([
+			{ label: 'an order awaiting its deposit', order: {}, expected: true },
+			{ label: 'a funded order', order: { status: 'funded' as const }, expected: false },
+			{
+				label: 'an order that has seen a deposit',
+				order: { deposit_tx: 'abc' },
+				expected: false
+			}
+		])('is $expected for $label', ({ order, expected }) => {
+			expect(isRiftOrderAwaitingDeposit({ ...mockRiftOrder, ...order })).toBe(expected);
+		});
+	});
+
+	describe('isRiftOrderForReview', () => {
+		// A day before the order's deposit deadline.
+		const now = Date.parse(mockRiftOrder.deposit_deadline) - 86_400_000;
+
+		const isForReview = (order: Partial<RiftOrder> = {}) =>
+			isRiftOrderForReview({
+				order: { ...mockRiftOrder, ...order },
+				quote: mockRiftQuote,
+				toAddress: mockRiftOrderToAddress,
+				refundAddress: mockRiftOrderRefundAddress,
+				now
+			});
+
+		it('accepts the order created for the review', () => {
+			expect(isForReview()).toBeTruthy();
+		});
+
+		it('compares the EVM payout address and the ids without case', () => {
+			expect(
+				isForReview({
+					to_address: mockRiftOrderToAddress.toUpperCase().replace('0X', '0x'),
+					quote_id: mockRiftOrder.quote_id.toUpperCase()
+				})
+			).toBeTruthy();
+		});
+
+		it.each([
+			{ label: 'another quote', order: { quote_id: '01a2175a-1c83-75c3-a6d7-cf88de8274d5' } },
+			{ label: 'another source asset', order: { from: 'evm:1.eth' } },
+			{ label: 'another destination asset', order: { to: 'evm:8453.eth' } },
+			{ label: 'another amount', order: { amount_in: '200001' } },
+			{
+				label: 'another payout address',
+				order: { to_address: '0x0000000000000000000000000000000000000001' }
+			},
+			{
+				label: 'another refund address',
+				order: { refund_address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq' }
+			},
+			{ label: 'no refund address', order: { refund_address: null } },
+			{ label: 'a status past awaiting the deposit', order: { status: 'funded' as const } },
+			{ label: 'a deposit already seen', order: { deposit_tx: 'abc' } },
+			{ label: 'a deposit address that is not Bitcoin', order: { deposit_address: 'nope' } },
+			{
+				label: 'a testnet deposit address',
+				order: { deposit_address: 'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx' }
+			},
+			{
+				label: "the user's own refund address as the deposit address",
+				order: { deposit_address: mockRiftOrderRefundAddress }
+			},
+			{
+				label: 'a deadline that has passed',
+				order: { deposit_deadline: new Date(now).toISOString() }
+			}
+		])('refuses an order with $label', ({ order }) => {
+			expect(isForReview(order)).toBeFalsy();
+		});
+	});
+
+	describe('riftSwapRefusedMessage', () => {
+		it.each([
+			{ reason: 'quoteExpired' as const, expected: en.swap.error.rift_quote_expired },
+			{ reason: 'orderRefused' as const, expected: en.swap.error.rift_order_refused },
+			{ reason: 'orderUnverified' as const, expected: en.swap.error.rift_order_unverified },
+			{ reason: 'orderInFlight' as const, expected: en.swap.error.rift_order_in_flight }
+		])('tells the user why for $reason', ({ reason, expected }) => {
+			expect(riftSwapRefusedMessage({ err: new RiftSwapRefusedError(reason), i18n: en })).toBe(
+				expected
+			);
+		});
+
+		it('says nothing of any other failure', () => {
+			expect(riftSwapRefusedMessage({ err: new Error('boom'), i18n: en })).toBeUndefined();
 		});
 	});
 

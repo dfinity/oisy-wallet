@@ -187,6 +187,24 @@ export class RiftInvalidResponseError extends Error {}
 export class RiftRequestSupersededError extends Error {}
 
 /**
+ * Why a Rift swap stopped before its deposit was broadcast: `quoteExpired` when the reviewed quote
+ * expired, `orderRefused` when Rift refused the order or it could not be read again right before the
+ * broadcast, `orderUnverified` when the order does not match the review, and `orderInFlight` when the
+ * order already has a row or a deposit.
+ */
+export type RiftSwapRefusal = 'quoteExpired' | 'orderRefused' | 'orderUnverified' | 'orderInFlight';
+
+export class RiftSwapRefusedError extends Error {
+	readonly reason: RiftSwapRefusal;
+
+	constructor(reason: RiftSwapRefusal, options?: ErrorOptions) {
+		super(`Rift swap refused before its deposit: ${reason}`, options);
+
+		this.reason = reason;
+	}
+}
+
+/**
  * Why a SOL → ckSOL conversion stopped at the minter's `watch_deposit_address`, before any SOL was
  * sent: `inFlight` when a deposit of the account is already in flight, `changed` when the deposit
  * address, the minimum or the fee is not the one the offer was priced with, `quarantined` when an

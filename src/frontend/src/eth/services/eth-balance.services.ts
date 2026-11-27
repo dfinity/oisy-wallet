@@ -3,6 +3,8 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc4626Token } from '$eth/types/erc4626';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.constants';
@@ -16,6 +18,14 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+// What `reloadEthereumBalance` can load: native EVM coins, ERC-20s and ERC-4626 vaults. It hands
+// anything else to the ERC-20 loader, where an NFT collection fails and resets its balance.
+export const isReloadableEthereumBalanceToken = (token: Token): boolean =>
+	isSupportedEthTokenId(token.id) ||
+	isSupportedEvmNativeTokenId(token.id) ||
+	isTokenErc20(token) ||
+	isTokenErc4626(token);
 
 export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {

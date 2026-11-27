@@ -349,6 +349,10 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
 3. `enableSwapDestinationToken`, so the payout lands in a token the user can see.
 4. Track `TRACK_COUNT_SWAP_SUBMITTED`. The modal closes and the AUT poller takes over.
 
+A swap that stops before its deposit (`RiftSwapRefusedError`: an expired quote, a refused, unverified
+or in-flight order) says why, and the form comes back with a fresh quote. Its `TRACK_COUNT_SWAP_ERROR`
+event carries the `quote_rejected` category, never Rift's text, which can name the user's addresses.
+
 ### Execution: EVM → BTC
 
 `fetchRiftEvmSwap`; `SwapEthWizard.svelte` dispatches to it like NEAR Intents (`isTransferNeeded`).
@@ -409,8 +413,9 @@ strip it nor change it, since either would loosen the guard.
   frontend check cannot be atomic with the create.
 
 On that refusal, nothing is broadcast. The existing row is kept and **never deleted**, and the swap
-stops with `swap.error.rift_order_in_flight`. After any attempt whose outcome is unclear, the
-reviewed quote is dropped, so a new swap starts from a fresh quote and therefore a new order. A row
+stops with `swap.error.rift_order_in_flight`. After any attempt, whether its deposit went
+out, failed or is unclear, the reviewed quote is dropped, so a new swap, even one with the same
+inputs, starts from a fresh quote and therefore a new order. A row
 deleted after a definitive refusal no longer counts, so a retry on that order is allowed: nothing
 was sent.
 
@@ -424,7 +429,8 @@ once its row is created and right before broadcasting, the hook re-reads the ord
 - It broadcasts only if the order still reads `awaiting_deposit` with no `deposit_tx`.
 - Otherwise it deletes its own row (nothing was sent), broadcasts nothing, and stops with
   `swap.error.rift_order_in_flight`. If the order cannot be read, it does the same but stops with
-  `swap.error.rift_order_refused`.
+  `swap.error.rift_order_refused`. If the order's `deposit_deadline` has passed since its checks
+  (signing takes time), it does the same but stops with `swap.error.rift_quote_expired`.
 
 That closes the gap without new backend state. A row is only terminal once Rift or the source chain
 has settled the first deposit. If Rift saw it, the order no longer reads `awaiting_deposit` with no
@@ -450,7 +456,8 @@ retention policy.
 | `rift_payout_tx`        | learned (`delivered` / `refunded`) | `payout_tx`                            |
 
 `rift_amount_out` is stored **formatted** in the token it was paid in, as `lifi_received_amount` is:
-with `rift_dest_decimals` for a delivery and `rift_source_decimals` for a refund. The decimals are
+with `rift_dest_decimals` for a delivery and `rift_source_decimals` for a refund. It keeps the token's
+full precision, so a refund never reads, rounded, as the whole amount sent. The decimals are
 saved at creation because a disabled custom token's metadata may be gone by the time the order
 settles. An amount that fails to parse or format is left out. The row then shows the destination
 token's symbol with no received amount, as a LI.FI row does without its received pair; the quote's
@@ -473,13 +480,19 @@ disabled.
 The poller runs for every non-terminal Rift row, whatever `RIFT_SWAP_ENABLED` says.
 
 - Each row is read with one `GET /order/{rift_order_id}`, through the
-  [limiter](#rest-client-no-sdk-no-new-dependency), one after another.
+  [limiter](#rest-client-no-sdk-no-new-dependency), one after another. An answer about another
+  order is ignored. The last status seen is stored as `rift_status`, in the same write as any
+  status change, so a terminal row is never written again.
 - A tick (every 5 s, `ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS`) reads at most
   `RIFT_MAX_ORDER_READS_PER_TICK` (3) rows, **least recently read first**. The other providers'
   pollers run in the same tick, so one provider's round must stay short.
-- A 429 ends the round. The rows it did not reach are the least recently read, so the next round,
-  once `Retry-After` has elapsed, starts with them. No row is starved by one that keeps waiting for
-  its deposit.
+- A 429 ends the round. The row that got it counts as read, so the next round starts with the rows
+  this one did not reach, and no row keeps the others waiting, whether for its deposit or for Rift's
+  rate limit.
+- While the limiter holds requests back after a 429 (`isRiftRateLimited`), a round reads nothing.
+- The loader runs the Rift round beside its tick, behind a guard of its own, rather than awaiting it
+  inside the tick: a read that was already waiting for its turn when a 429 came in waits out the
+  `Retry-After`, which must not hold back the other providers' pollers.
 
 Status mapping (decided 2026-11-25):
 

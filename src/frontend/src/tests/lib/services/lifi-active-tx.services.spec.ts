@@ -2,6 +2,7 @@ import type { ActiveUserTransaction, LifiData } from '$declarations/backend/back
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import type * as ethBalanceServices from '$eth/services/eth-balance.services';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
@@ -52,7 +53,8 @@ vi.mock('$lib/rest/lifi.rest', () => ({
 	fetchLifiStatus: vi.fn()
 }));
 
-vi.mock('$eth/services/eth-balance.services', () => ({
+vi.mock('$eth/services/eth-balance.services', async (importOriginal) => ({
+	...(await importOriginal<typeof ethBalanceServices>()),
 	reloadEthereumBalance: vi.fn()
 }));
 

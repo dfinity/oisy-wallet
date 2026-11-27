@@ -5,6 +5,7 @@ import {
 } from '$lib/constants/swap.constants';
 import {
 	getRiftOrder,
+	isRiftRateLimited,
 	postRiftOrder,
 	postRiftQuote,
 	resetRiftRateLimiter
@@ -295,6 +296,26 @@ describe('rift.rest', () => {
 			expect(fetch).toHaveBeenCalledTimes(2);
 
 			await order;
+		});
+
+		it('says it is rate limited from a 429 until its Retry-After has elapsed', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce(
+				jsonResponse({ body: { error: 'slow down' }, status: 429, headers: { 'Retry-After': '3' } })
+			);
+
+			expect(isRiftRateLimited()).toBeFalsy();
+
+			await expect(settle(postRiftQuote(quoteRequest))).rejects.toMatchObject({ status: 429 });
+
+			expect(isRiftRateLimited()).toBeTruthy();
+
+			await vi.advanceTimersByTimeAsync(2_999);
+
+			expect(isRiftRateLimited()).toBeTruthy();
+
+			await vi.advanceTimersByTimeAsync(1);
+
+			expect(isRiftRateLimited()).toBeFalsy();
 		});
 
 		it('holds requests back for the default delay when a 429 carries no Retry-After', async () => {
