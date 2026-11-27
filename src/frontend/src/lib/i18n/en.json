@@ -109,9 +109,11 @@
 			"standalone_mode": "There are known connection issues when both an app and $oisy_short are installed on a home&nbsp;screen. If you encounter issues connecting $oisy_short or signing transactions, please start the app from a regular browser. We are working on a fix and it will be resolved soon. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
 			"video_not_supported": "Your browser does not support video playback.",
 			"oisy_allowance_used_up_title": "Free usage credits are used up",
-			"oisy_allowance_used_up": "Your daily amount of free credits to sign transactions is used up, so signing some transactions may fail.",
-			"oisy_allowance_used_up_own_cycles": "Your daily amount of free credits to sign transactions is used up, so signing now uses your own credits.",
-			"oisy_allowance_tools_link": "Manage your own credits in <a href=\"$url\">Tools</a>.",
+			"oisy_allowance_used_up": "Your daily amount of free usage credits is used up, so signing some transactions may fail.",
+			"oisy_allowance_used_up_own_cycles": "Your daily amount of free usage credits is used up, so signing now uses your spending limit.",
+			"oisy_allowance_used_up_short": "Your free daily usage credits are used up, so signing may fail.",
+			"oisy_allowance_used_up_own_cycles_short": "Your free daily usage credits are used up, so signing uses <a href=\"$url\">your spending limit</a>.",
+			"oisy_allowance_tools_link": "Manage your spending limit in&nbsp;<a href=\"$url\">Tools</a>.",
 			"oisy_allowance_exceeded": "This transaction costs more than your free $oisy_name allowance covers."
 		},
 		"error": {

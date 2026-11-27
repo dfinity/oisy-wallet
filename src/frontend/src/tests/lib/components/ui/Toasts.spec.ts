@@ -99,6 +99,23 @@ describe('Toasts', () => {
 		expect(container.querySelector('.msg b')?.textContent).toBe('bold');
 	});
 
+	it('scrolls a long text by default', () => {
+		toastsStore.show({ level: 'info', text: 'long' });
+
+		const { getByTestId } = render(ToastsTest);
+
+		expect(getByTestId('toast-message')).toHaveClass('scroll');
+	});
+
+	it('shows the whole text when its overflow is visible', () => {
+		toastsStore.show({ level: 'info', text: 'long', overflow: 'visible' });
+
+		const { getByTestId } = render(ToastsTest);
+
+		expect(getByTestId('toast-message')).toHaveClass('visible');
+		expect(getByTestId('toast-message')).not.toHaveClass('scroll');
+	});
+
 	it('filters by position', () => {
 		toastsStore.show({ level: 'info', text: 'bottom one' });
 		toastsStore.show({ level: 'info', text: 'top one', position: 'top' });

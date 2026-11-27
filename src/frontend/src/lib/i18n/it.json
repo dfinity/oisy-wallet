@@ -109,9 +109,11 @@
 			"standalone_mode": "Sono noti problemi di connessione quando sia un'app che $oisy_short sono installati nella schermata iniziale. Se riscontri problemi di connessione a $oisy_short o di firma delle transazioni, avvia l'app da un browser normale. Stiamo lavorando a una soluzione che sarà disponibile a breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Scopri di più</a>",
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Crediti di utilizzo gratuiti esauriti",
-			"oisy_allowance_used_up": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma di alcune transazioni potrebbe non riuscire.",
-			"oisy_allowance_used_up_own_cycles": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma ora usa i tuoi crediti.",
-			"oisy_allowance_tools_link": "Gestisci i tuoi crediti in <a href=\"$url\">Strumenti</a>.",
+			"oisy_allowance_used_up": "La tua quantità giornaliera di crediti di utilizzo gratuiti è esaurita, quindi la firma di alcune transazioni potrebbe non riuscire.",
+			"oisy_allowance_used_up_own_cycles": "La tua quantità giornaliera di crediti di utilizzo gratuiti è esaurita, quindi la firma ora usa il tuo limite di spesa.",
+			"oisy_allowance_used_up_short": "I tuoi crediti di utilizzo gratuiti giornalieri sono esauriti, quindi la firma potrebbe non riuscire.",
+			"oisy_allowance_used_up_own_cycles_short": "I tuoi crediti di utilizzo gratuiti giornalieri sono esauriti, quindi la firma usa <a href=\"$url\">il tuo limite di spesa</a>.",
+			"oisy_allowance_tools_link": "Gestisci il tuo limite di spesa in&nbsp;<a href=\"$url\">Strumenti</a>.",
 			"oisy_allowance_exceeded": "Questa transazione costa più di quanto copra la tua quota gratuita di $oisy_name."
 		},
 		"error": {

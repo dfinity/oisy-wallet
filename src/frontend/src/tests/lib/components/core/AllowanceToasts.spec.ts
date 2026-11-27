@@ -4,6 +4,7 @@ import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
 import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
 import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
+import { screensStore } from '$lib/stores/screens.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -19,6 +20,16 @@ describe('AllowanceToasts', () => {
 		icon: IconFuelPump,
 		title: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up_title),
 		text: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up),
+		overflow: 'visible',
+		link: { href: OISY_USAGE_CREDITS_DOCS_URL, label: en.core.text.learn_more }
+	};
+
+	const phoneIssueToast = {
+		level: 'warn',
+		theme: 'inverted',
+		icon: IconFuelPump,
+		text: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up_short),
+		overflow: 'visible',
 		link: { href: OISY_USAGE_CREDITS_DOCS_URL, label: en.core.text.learn_more }
 	};
 
@@ -42,6 +53,9 @@ describe('AllowanceToasts', () => {
 
 		// The flag follows the network the tests are built for, so the tests set it.
 		vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(false);
+
+		// Wider than a phone.
+		screensStore.set('lg');
 	});
 
 	it('should show no toast until a failed charged call asks for one', async () => {
@@ -197,8 +211,40 @@ describe('AllowanceToasts', () => {
 		expect(hideSpy).not.toHaveBeenCalled();
 	});
 
+	it('should show the title and the full text from 768 px on', async () => {
+		// From 768 to 895 px.
+		screensStore.set('1.5md');
+
+		render(AllowanceToasts);
+
+		allowanceIssueStore.setRefused();
+		allowanceToastStore.set({ toast: 'issue' });
+		await tick();
+
+		expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(issueToast);
+	});
+
+	describe('on phones', () => {
+		beforeEach(() => {
+			// From 640 to 767 px, the widest phone screen.
+			screensStore.set('md');
+		});
+
+		it('should show the allowance-issue toast without its title, with a short text', async () => {
+			render(AllowanceToasts);
+
+			allowanceIssueStore.setRefused();
+			allowanceToastStore.set({ toast: 'issue' });
+			await tick();
+
+			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(phoneIssueToast);
+		});
+	});
+
 	describe('while paying with own cycles is on', () => {
-		const toolsLink = 'Manage your own credits in <a href="/tools/#usage-credits">Tools</a>.';
+		// The non-breaking space keeps the link on the line of the word before it.
+		const toolsLink =
+			'Manage your spending limit in&nbsp;<a href="/tools/#usage-credits">Tools</a>.';
 
 		beforeEach(() => {
 			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(true);
@@ -239,6 +285,40 @@ describe('AllowanceToasts', () => {
 			await tick();
 
 			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(exceededToast);
+		});
+
+		describe('on phones', () => {
+			beforeEach(() => {
+				screensStore.set('md');
+			});
+
+			it('should end the short text with the link to the Usage credits card', async () => {
+				render(AllowanceToasts);
+
+				allowanceIssueStore.setRefused();
+				allowanceToastStore.set({ toast: 'issue' });
+				await tick();
+
+				expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+					...phoneIssueToast,
+					text: `${phoneIssueToast.text} ${toolsLink}`,
+					renderAsHtml: true
+				});
+			});
+
+			it('should link to the card from the short text when own credits pay', async () => {
+				render(AllowanceToasts);
+
+				allowanceIssueStore.setRefused();
+				allowanceToastStore.set({ toast: 'issue', ownCycles: true });
+				await tick();
+
+				expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+					...phoneIssueToast,
+					text: 'Your free daily usage credits are used up, so signing uses <a href="/tools/#usage-credits">your spending limit</a>.',
+					renderAsHtml: true
+				});
+			});
 		});
 	});
 });
