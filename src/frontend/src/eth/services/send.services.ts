@@ -33,6 +33,7 @@ import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { keccak256 } from 'ethers/crypto';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
@@ -174,15 +175,22 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	});
 };
 
+// Runs once a transaction is signed and before it is broadcast, with what identifies it on chain.
+// Should it reject, nothing is broadcast.
+type BeforeBroadcast = (params: { hash: string; nonce: number }) => Promise<void>;
+
 export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	token,
 	identity,
 	customNonce,
+	beforeBroadcast,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
 	customNonce?: number;
+	// For the send only, never for an approval it needs first.
+	beforeBroadcast?: BeforeBroadcast;
 } & SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string; nonce: number }> => {
 	progress?.(ProgressStepsSend.INITIALIZATION);
@@ -204,6 +212,7 @@ export const send = async ({
 		nonce: nonceTransaction,
 		token,
 		identity,
+		beforeBroadcast,
 		...rest
 	});
 
@@ -230,10 +239,14 @@ const sendTransaction = async ({
 	identity,
 	minterInfo,
 	nonce,
+	beforeBroadcast,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
-	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
+	RequiredTransactionFeeData & {
+		nonce: number;
+		beforeBroadcast?: BeforeBroadcast;
+	}): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);
@@ -331,6 +344,9 @@ const sendTransaction = async ({
 		transaction,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
+
+	// The hash of a typed transaction is the hash of its signed bytes.
+	await beforeBroadcast?.({ hash: keccak256(rawTransaction), nonce });
 
 	progress?.(ProgressStepsSend.TRANSFER);
 

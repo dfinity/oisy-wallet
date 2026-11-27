@@ -362,7 +362,9 @@ event carries the `quote_rejected` category, never Rift's text, which can name t
    ERC-20 `transfer`.
    - `send` gains an optional `beforeBroadcast({ hash, nonce })`, as `swap()` has: after signing,
      hash the signed bytes and run the hook before broadcasting; if it rejects, nothing is
-     broadcast. This lands as its own refactor PR with no behaviour change.
+     broadcast. It runs for the send only, never for an approval the send needs first, and stays
+     out of the request the signer signs. This lands as its own refactor PR with no behaviour
+     change.
    - Create the row there, with refs for the deposit hash, nonce and chain id. A second row for the
      same order is refused, and nothing is broadcast
      ([one row per order](#active-user-transactions)). Then re-read the order and broadcast only if
