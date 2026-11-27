@@ -1427,6 +1427,7 @@
 			"smart_swap_best_of_offers": "",
 			"smart_swap_offers_compared": "",
 			"unprotected_offer_status": "",
+			"provider_with_status": "",
 			"smart_swap_offers": "",
 			"smart_swap_selected_offer": "",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",

@@ -513,6 +513,9 @@ export const calculateValueDifference = ({
 export const isProtectedOffer = ({ provider }: SwapMappedResult): boolean =>
 	SWAP_PROVIDER_GUARANTEES_MINIMUM[provider];
 
+export const isUnprotectedOffer = (offer: SwapMappedResult | undefined): boolean =>
+	nonNullish(offer) && !isProtectedOffer(offer);
+
 // Protected offers first, then unprotected ones, each by receive amount descending. An estimate and
 // a guaranteed minimum are not comparable on one number, so a higher estimate never outranks a
 // protected offer, and the first offer, the automatic pick, is protected whenever one exists.

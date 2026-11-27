@@ -36,7 +36,6 @@ import {
 	SUPPORTED_CROSS_SWAP_NETWORKS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
-	SWAP_PROVIDER_GUARANTEES_MINIMUM,
 	SWAP_SLIPPAGE_INVALID_VALUE,
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
@@ -87,6 +86,7 @@ import {
 	getWithdrawableToken,
 	isBestRateOffer,
 	isSwapError,
+	isUnprotectedOffer,
 	keepSwapSlippage,
 	mapIcpSwapResult,
 	mapKongSwapResult,
@@ -110,6 +110,7 @@ import {
 	mockNearIntentsQuoteResponse,
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import { mockSwapProviders, mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
@@ -118,26 +119,9 @@ import {
 } from '$tests/mocks/velora.mock';
 import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
 
-// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
-vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
-	const actual = await importOriginal<{
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
-	}>();
-
-	return {
-		...actual,
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
-	};
-});
-
 describe('swap utils', () => {
-	const markUnprotected = (...providers: SwapProvider[]) =>
-		providers.forEach((provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = false));
-
 	afterEach(() => {
-		Object.values(SwapProvider).forEach(
-			(provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = true)
-		);
+		restoreProtection();
 	});
 
 	const ICP_LP_FEE = 4271n;
@@ -1093,6 +1077,24 @@ describe('swap utils', () => {
 			{ case: 'nothing at all', offer: undefined, swaps: undefined }
 		])('is not the best rate for $case', ({ offer, swaps }) => {
 			expect(isBestRateOffer({ offer, swaps })).toBeFalsy();
+		});
+	});
+
+	describe('isUnprotectedOffer', () => {
+		const [icpSwap] = mockSwapProviders;
+
+		it('is an offer whose provider guarantees no minimum', () => {
+			markUnprotected(SwapProvider.ICP_SWAP);
+
+			expect(isUnprotectedOffer(icpSwap)).toBeTruthy();
+		});
+
+		it('is not a protected offer', () => {
+			expect(isUnprotectedOffer(icpSwap)).toBeFalsy();
+		});
+
+		it('is not a missing offer', () => {
+			expect(isUnprotectedOffer(undefined)).toBeFalsy();
 		});
 	});
 

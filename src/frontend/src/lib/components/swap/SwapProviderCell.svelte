@@ -29,7 +29,8 @@
 		calculateSwapGainUsd,
 		findSwapProvider,
 		isBestRateOffer,
-		isProtectedOffer
+		isProtectedOffer,
+		isUnprotectedOffer
 	} from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 
@@ -128,8 +129,10 @@
 	);
 	// "Best of" claims the selected offer beat each one counted, and it is only measured against
 	// protected offers, so a higher estimate left out of the comparison is left out of the count.
+	// Alone among estimates, a protected offer beat none, so the label counts what was compared.
 	let protectedOfferCount = $derived($swapAmountsStore?.swaps.filter(isProtectedOffer).length ?? 0);
-	let isUnprotected = $derived(nonNullish(selectedProvider) && !isProtectedOffer(selectedProvider));
+	let isBestOfOffers = $derived(isBestRate && protectedOfferCount > 1);
+	let isUnprotected = $derived(isUnprotectedOffer(selectedProvider));
 	let swapDApp = $derived(
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
@@ -167,10 +170,10 @@
 	});
 	let offersLabel = $derived(
 		replacePlaceholders(
-			isBestRate
+			isBestOfOffers
 				? $i18n.swap.text.smart_swap_best_of_offers
 				: $i18n.swap.text.smart_swap_offers_compared,
-			{ $count: `${isBestRate ? protectedOfferCount : offerCount}` }
+			{ $count: `${isBestOfOffers ? protectedOfferCount : offerCount}` }
 		)
 	);
 
@@ -206,16 +209,26 @@
 	// One region for screen readers, mounted before any round and outside the cell, a button whose
 	// children are presentational. Only its text changes, so each change is heard: the status while
 	// comparing, then the provider the comparison picked.
-	let announcement = $derived(
-		comparing
-			? $i18n.swap.text.finding_best_rate
-			: nonNullish(swapDApp)
-				? [
-						resolveText({ i18n: $i18n, path: swapDApp.name }),
-						...(isUnprotected ? [$i18n.swap.text.unprotected_offer_status] : [])
-					].join(', ')
-				: ''
-	);
+	let announcement = $derived.by(() => {
+		if (comparing) {
+			return $i18n.swap.text.finding_best_rate;
+		}
+
+		const providerName = nonNullish(swapDApp)
+			? resolveText({ i18n: $i18n, path: swapDApp.name })
+			: undefined;
+
+		// The status is the only way a screen reader hears the offer is an estimate, so it is said
+		// even when the provider has no metadata to name it by.
+		if (isUnprotected && nonNullish(selectedProvider)) {
+			return replacePlaceholders($i18n.swap.text.provider_with_status, {
+				$provider: providerName ?? selectedProvider.provider,
+				$status: $i18n.swap.text.unprotected_offer_status
+			});
+		}
+
+		return providerName ?? '';
+	});
 
 	// The title and the status line run one band: `smart-thinking` sizes it in rem, not per line, so
 	// it has the same speed and position on both, and here the status line, which mounts a fade

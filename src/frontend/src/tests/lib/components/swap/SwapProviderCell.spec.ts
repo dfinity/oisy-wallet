@@ -1,5 +1,4 @@
 import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
-import { SWAP_PROVIDER_GUARANTEES_MINIMUM } from '$lib/constants/swap.constants';
 import {
 	SWAP_PROVIDER_ANIMATION,
 	SWAP_PROVIDER_CELL,
@@ -12,9 +11,11 @@ import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.stor
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as swapUtils from '$lib/utils/swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import {
 	mockNearIntentsProvider,
 	mockOneSecProvider,
@@ -36,21 +37,6 @@ vi.mock('svelte/motion', () => ({
 		}
 	}
 }));
-
-// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
-vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
-	const actual = await importOriginal<{
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
-	}>();
-
-	return {
-		...actual,
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
-	};
-});
-
-const markUnprotected = (...providers: SwapProvider[]) =>
-	providers.forEach((provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = false));
 
 // Ignore pre-existing ModalValue/Logo entry fades; only inspect the new provider motion.
 const providerAnimationCalls = (animate: MockInstance<Element['animate']>) =>
@@ -130,9 +116,7 @@ describe('SwapProviderCell', () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
-		Object.values(SwapProvider).forEach(
-			(provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = true)
-		);
+		restoreProtection();
 	});
 
 	it("draws the form's one separator under the cell, and none without a cell", async () => {
@@ -499,7 +483,10 @@ describe('SwapProviderCell', () => {
 		await tick();
 
 		expect(getByTestId(SWAP_PROVIDER_STATUS).textContent).toBe(
-			`ICPSwap, ${en.swap.text.unprotected_offer_status}`
+			replacePlaceholders(en.swap.text.provider_with_status, {
+				$provider: 'ICPSwap',
+				$status: en.swap.text.unprotected_offer_status
+			})
 		);
 	});
 
@@ -510,6 +497,53 @@ describe('SwapProviderCell', () => {
 		await tick();
 
 		expect(getByTestId(SWAP_PROVIDER_STATUS).textContent).toBe('ICPSwap');
+	});
+
+	it('counts every offer as compared when only one offer is protected', () => {
+		const higherEstimate: SwapMappedResult = {
+			...mockVeloraMarketProvider,
+			receiveAmount: 200_000_000n
+		};
+		markUnprotected(SwapProvider.VELORA);
+		store.setSwaps({
+			swaps: [bestOffer, higherEstimate],
+			selectedProvider: bestOffer,
+			amountForSwap: '1'
+		});
+		const { getByText, queryByText } = render(SwapProviderCell, {
+			props,
+			context: contextWithRate(2)
+		});
+
+		expect(getByText(twoOffersCompared)).toBeInTheDocument();
+		expect(
+			queryByText(replacePlaceholders(en.swap.text.smart_swap_best_of_offers, { $count: '1' }))
+		).not.toBeInTheDocument();
+	});
+
+	describe('without metadata for the provider', () => {
+		beforeEach(() => {
+			vi.spyOn(swapUtils, 'findSwapProvider').mockReturnValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('announces an unprotected offer by its provider id', async () => {
+			markUnprotected(SwapProvider.ICP_SWAP);
+			const { getByTestId } = render(SwapProviderCell, { props, context });
+
+			store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+			await tick();
+
+			expect(getByTestId(SWAP_PROVIDER_STATUS).textContent).toBe(
+				replacePlaceholders(en.swap.text.provider_with_status, {
+					$provider: SwapProvider.ICP_SWAP,
+					$status: en.swap.text.unprotected_offer_status
+				})
+			);
+		});
 	});
 
 	it('does not replay confirmation when a completed cell disappears and mounts again', async () => {

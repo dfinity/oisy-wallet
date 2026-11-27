@@ -106,7 +106,7 @@ describe('SwapProviderListItem', () => {
 			screensStore.set(screen);
 
 			const { getByText, queryByText } = render(SwapProviderListItem, {
-				props: { ...baseProps, dapp: createDapp(), isEstimate: true }
+				props: { ...baseProps, dapp: createDapp(), isUnprotected: true }
 			});
 
 			const estimate = getByText(en.swap.text.estimate);
@@ -123,7 +123,7 @@ describe('SwapProviderListItem', () => {
 		screensStore.set('xl');
 
 		const { container, queryByText } = render(SwapProviderListItem, {
-			props: { ...baseProps, dapp: createDapp(), isBestRate: true, isEstimate: true }
+			props: { ...baseProps, dapp: createDapp(), isBestRate: true, isUnprotected: true }
 		});
 
 		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();

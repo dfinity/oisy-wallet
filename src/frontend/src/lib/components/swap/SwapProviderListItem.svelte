@@ -21,7 +21,7 @@
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription | SwapProvidersConfig;
 		isBestRate: boolean;
-		isEstimate?: boolean;
+		isUnprotected?: boolean;
 		onClick: () => void;
 	}
 
@@ -32,7 +32,7 @@
 		usdBalance,
 		dapp,
 		isBestRate,
-		isEstimate = false,
+		isUnprotected = false,
 		onClick
 	}: Props = $props();
 
@@ -80,15 +80,18 @@
 		{/snippet}
 
 		{#snippet descriptionEnd()}
-			<div class="flex items-center justify-end gap-2">
-				<!-- An estimate holds the Best Rate slot in the fiat value's grey, as a word, not a badge:
-				it is the row's only mark, so it stays spelled out on phones, where the badge is a star. -->
-				{#if isEstimate}
-					<span class="mt-1">{$i18n.swap.text.estimate}</span>
+			<!-- The provider name truncates instead: the mark and the fiat value are what tell offers
+			apart, so neither wraps nor shrinks. -->
+			<div class="flex items-center justify-end gap-2 whitespace-nowrap">
+				<!-- An unprotected offer holds the Best Rate slot in the fiat value's grey, as the word
+				"Estimate", not a badge: it is the row's only mark, so it stays spelled out on phones,
+				where the badge is a star. -->
+				{#if isUnprotected}
+					<span class="mt-1 shrink-0">{$i18n.swap.text.estimate}</span>
 				{:else if isBestRate}
 					<BestRateBadge />
 				{/if}
-				<span class="mt-1">
+				<span class="mt-1 shrink-0">
 					{usdBalance ?? $i18n.tokens.text.exchange_is_not_available_short}
 				</span>
 			</div>

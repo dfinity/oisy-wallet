@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { SWAP_UNPROTECTED_OFFER_WARNING } from '$lib/constants/test-ids.constants';
@@ -10,25 +10,33 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { findSwapProvider, isProtectedOffer } from '$lib/utils/swap.utils';
+	import { findSwapProvider, isUnprotectedOffer } from '$lib/utils/swap.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 
-	let swapDApp = $derived(
-		nonNullish(selectedProvider) && !isProtectedOffer(selectedProvider)
-			? findSwapProvider(selectedProvider.provider)
-			: undefined
-	);
+	// The warning is the only thing on Review that says there is no minimum, so a provider without
+	// metadata is named by its id rather than left unwarned.
+	let providerName = $derived.by(() => {
+		if (isNullish(selectedProvider) || !isUnprotectedOffer(selectedProvider)) {
+			return;
+		}
+
+		const swapDApp = findSwapProvider(selectedProvider.provider);
+
+		return nonNullish(swapDApp)
+			? resolveText({ i18n: $i18n, path: swapDApp.name })
+			: selectedProvider.provider;
+	});
 </script>
 
-{#if nonNullish(swapDApp)}
+{#if nonNullish(providerName)}
 	<div class="mt-4" transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="!mb-0" testId={SWAP_UNPROTECTED_OFFER_WARNING}>
 			{replacePlaceholders($i18n.swap.text.unprotected_offer_warning, {
-				$provider: resolveText({ i18n: $i18n, path: swapDApp.name })
+				$provider: providerName
 			})}
 		</MessageBox>
 	</div>

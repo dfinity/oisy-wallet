@@ -43,7 +43,6 @@ import {
 	LIFI_QUOTE_TIMEOUT_MS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
-	SWAP_PROVIDER_GUARANTEES_MINIMUM,
 	SWAP_QUOTE_TIMEOUT_MS
 } from '$lib/constants/swap.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
@@ -132,6 +131,7 @@ import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import {
 	mockVeloraCrossChainSwapResponse,
 	mockVeloraDeltaPrice,
@@ -370,18 +370,6 @@ vi.mock('$eth/services/erc20.services', () => ({
 vi.mock('$sol/services/spl.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
-
-// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
-vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
-	const actual = await importOriginal<{
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
-	}>();
-
-	return {
-		...actual,
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
-	};
-});
 
 vi.mock('$env/rest/kongswap.env', () => ({
 	KONGSWAP_PROVIDER_ENABLED: true
@@ -1565,17 +1553,12 @@ describe('swap.services', () => {
 			}
 		];
 
-		const markUnprotected = (...providers: SwapProvider[]) =>
-			providers.forEach((provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = false));
-
 		beforeEach(() => {
 			vi.clearAllMocks();
 		});
 
 		afterEach(() => {
-			Object.values(SwapProvider).forEach(
-				(provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = true)
-			);
+			restoreProtection();
 		});
 
 		describe.each(sources)('from $network', ({ first, second, quote }) => {

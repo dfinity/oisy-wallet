@@ -1,6 +1,5 @@
 import SwapReview from '$lib/components/swap/SwapReview.svelte';
 import {
-	SWAP_PROVIDER_GUARANTEES_MINIMUM,
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
@@ -13,11 +12,17 @@ import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
 import { SwapErrorCodes, SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as swapUtils from '$lib/utils/swap.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockLifiBtcRelayQuote } from '$tests/mocks/lifi-btc.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import {
+	markProtected,
+	markUnprotected,
+	restoreProtection
+} from '$tests/mocks/swap-offer-protection.mock';
 import { mockNearIntentsProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { ChainId } from '@lifi/sdk';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -28,18 +33,6 @@ vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
 	NEAR_INTENTS_XRP_SWAP_ENABLED: false
 }));
-
-// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
-vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
-	const actual = await importOriginal<{
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
-	}>();
-
-	return {
-		...actual,
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
-	};
-});
 
 describe('SwapReview', () => {
 	const mockSourceToken = { ...mockValidIcToken, enabled: true };
@@ -786,11 +779,12 @@ describe('SwapReview', () => {
 		});
 
 		beforeEach(() => {
-			SWAP_PROVIDER_GUARANTEES_MINIMUM[SwapProvider.ICP_SWAP] = false;
+			markUnprotected(SwapProvider.ICP_SWAP);
 		});
 
 		afterEach(() => {
-			SWAP_PROVIDER_GUARANTEES_MINIMUM[SwapProvider.ICP_SWAP] = true;
+			restoreProtection();
+			vi.restoreAllMocks();
 		});
 
 		it('should warn that the provider guarantees no minimum instead of showing max slippage', () => {
@@ -834,7 +828,7 @@ describe('SwapReview', () => {
 		});
 
 		it('should not warn when a protected offer is selected', () => {
-			SWAP_PROVIDER_GUARANTEES_MINIMUM[SwapProvider.ICP_SWAP] = true;
+			markProtected(SwapProvider.ICP_SWAP);
 			const { context } = createSwapContext();
 
 			const { getByText, queryByTestId } = render(SwapReview, {
@@ -844,6 +838,22 @@ describe('SwapReview', () => {
 
 			expect(queryByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).not.toBeInTheDocument();
 			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
+		});
+
+		it('should name the provider by its id when it has no metadata', () => {
+			vi.spyOn(swapUtils, 'findSwapProvider').mockReturnValue(undefined);
+			const { context } = createSwapContext();
+
+			const { getByTestId } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(getByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).toHaveTextContent(
+				replacePlaceholders(en.swap.text.unprotected_offer_warning, {
+					$provider: SwapProvider.ICP_SWAP
+				})
+			);
 		});
 	});
 });

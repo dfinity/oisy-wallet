@@ -1,6 +1,7 @@
 import type { SwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
+import { isProtectedOffer } from '$lib/utils/swap.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { get, readable, writable, type Readable } from 'svelte/store';
@@ -59,11 +60,12 @@ export const initSwapAmountsStore = ({
 				// holds: refreshes, a return from Review and Max applying its amount again keep it, a
 				// round at another amount goes back to the top offer, and a new pair resets the store.
 				const sameAmount = Number(amountForSwap) === Number(get(store)?.amountForSwap);
-				const maxAppliedAgain = manualPickAtMax && get(amountSetToMax);
-				const manualMatch =
-					sameAmount || maxAppliedAgain
-						? swaps.find((s) => s.provider === manualProviderKey)
-						: undefined;
+				const match = swaps.find((s) => s.provider === manualProviderKey);
+				// An estimate is opted into at the amount it was shown for, so Max applying another
+				// amount releases it like a typed one.
+				const maxAppliedAgain =
+					manualPickAtMax && get(amountSetToMax) && nonNullish(match) && isProtectedOffer(match);
+				const manualMatch = sameAmount || maxAppliedAgain ? match : undefined;
 
 				if (nonNullish(manualMatch)) {
 					set({

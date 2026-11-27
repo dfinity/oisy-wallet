@@ -1,5 +1,4 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
-import { SWAP_PROVIDER_GUARANTEES_MINIMUM } from '$lib/constants/swap.constants';
 import {
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
 	SWAP_SELECTED_PROVIDER_DETAILS
@@ -12,6 +11,7 @@ import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { SwapProvider } from '$lib/types/swap';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { markUnprotected, restoreProtection } from '$tests/mocks/swap-offer-protection.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, queryAllByTestId, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -34,23 +34,8 @@ vi.mock('$env/dapp-descriptions.env', () => ({
 	]
 }));
 
-// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
-vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
-	const actual = await importOriginal<{
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
-	}>();
-
-	return {
-		...actual,
-		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
-	};
-});
-
 describe('SwapProviderListModal', () => {
 	let mockContext: Map<symbol, unknown>;
-
-	const markUnprotected = (...providers: SwapProvider[]) =>
-		providers.forEach((provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = false));
 
 	const offerRows = (container: HTMLElement) =>
 		Array.from(container.querySelectorAll<HTMLElement>('[data-testid="provider-item"]'));
@@ -75,9 +60,7 @@ describe('SwapProviderListModal', () => {
 	});
 
 	afterEach(() => {
-		Object.values(SwapProvider).forEach(
-			(provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = true)
-		);
+		restoreProtection();
 	});
 
 	it('renders all provider modal titles', () => {

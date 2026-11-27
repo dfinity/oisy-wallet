@@ -39,7 +39,7 @@
 		calculateValueDifference,
 		getSwapSlippageInvalidValue,
 		getSwapSlippageStatus,
-		isProtectedOffer
+		isUnprotectedOffer
 	} from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -112,13 +112,10 @@
 	);
 
 	// An unprotected offer has no minimum for the slippage setting to set.
-	let isUnprotectedOffer = $derived(
-		nonNullish($swapAmountsStore?.selectedProvider) &&
-			!isProtectedOffer($swapAmountsStore.selectedProvider)
-	);
+	let isUnprotected = $derived(isUnprotectedOffer($swapAmountsStore?.selectedProvider));
 
 	let isSlippageWarning = $derived(
-		!isUnprotectedOffer &&
+		!isUnprotected &&
 			getSwapSlippageStatus({
 				slippageValue,
 				maxSlippageInvalidValue: getSwapSlippageInvalidValue($sourceToken?.network.id)
@@ -172,7 +169,7 @@
 		</ModalValue>
 	{/if}
 
-	{#if !isUnprotectedOffer}
+	{#if !isUnprotected}
 		<ModalValue>
 			{#snippet label()}
 				{$i18n.swap.text.max_slippage}

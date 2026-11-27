@@ -1143,6 +1143,7 @@ interface I18nSwap {
 		smart_swap_best_of_offers: string;
 		smart_swap_offers_compared: string;
 		unprotected_offer_status: string;
+		provider_with_status: string;
 		smart_swap_offers: string;
 		smart_swap_selected_offer: string;
 		swap_provider_website: string;

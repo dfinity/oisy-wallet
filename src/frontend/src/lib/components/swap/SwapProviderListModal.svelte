@@ -24,7 +24,7 @@
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { findSwapProvider, isBestRateOffer, isProtectedOffer } from '$lib/utils/swap.utils';
+	import { findSwapProvider, isBestRateOffer, isUnprotectedOffer } from '$lib/utils/swap.utils';
 
 	interface Props {
 		slippageValue?: OptionAmount;
@@ -124,7 +124,7 @@
 							dapp={findSwapProvider(swap.provider)}
 							destinationToken={$destinationToken as IcTokenToggleable}
 							isBestRate={isBestRateOffer({ offer: swap, swaps: $swapAmountsStore.swaps })}
-							isEstimate={!isProtectedOffer(swap)}
+							isUnprotected={isUnprotectedOffer(swap)}
 							onClick={() =>
 								swap.provider === selectedProvider?.provider
 									? onCloseProviderList()
