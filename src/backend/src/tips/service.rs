@@ -17,7 +17,9 @@ use shared::types::tip::{
 };
 
 use super::{
-    icrc2::{self, Account, AllowanceArgs, TransferFromArgs, TransferFromCallError},
+    icrc2::{
+        self, Account, AllowanceArgs, LedgerCallSlot, TransferFromArgs, TransferFromCallError,
+    },
     model::{
         claim_code_matches, new_tip_exceeds_cap, spender_subaccount, stored_block_index,
         validate_amount, validate_amount_width, validate_claim_code_hash, validate_expiry,
@@ -207,6 +209,10 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
         return Err(TipError::DuplicateTipId);
     }
 
+    // Named rather than `_`, which would give the place back at once: it has to
+    // stay taken until both reads below have answered.
+    let _slot = LedgerCallSlot::acquire(sender).map_err(TipError::RateLimited)?;
+
     let ledger = request.ledger_canister_id;
     let fee = icrc2::fee(ledger)
         .await
@@ -380,6 +386,10 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     let claimer = msg_caller();
     let now = time();
     let key = TipId(tip_id.clone());
+
+    // Taken before the claim is reserved, so a claim turned away here leaves the
+    // tip exactly as it was. Kept until the payout has answered.
+    let _slot = LedgerCallSlot::acquire(claimer).map_err(TipError::RateLimited)?;
 
     // Reserve the claim, then release the state borrow before awaiting.
     let (record, payout_created_at_ns) = mutate_state(|s| {

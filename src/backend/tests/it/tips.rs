@@ -10,15 +10,17 @@
 
 use std::time::Duration;
 
-use candid::{encode_one, Nat, Principal};
+use candid::{decode_one, encode_one, Nat, Principal};
+use pocket_ic::common::rest::RawMessageId;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 use shared::types::{
     result_types::{CancelTipResult, GetTipSecretResult, SetTipSecretResult},
+    signer::RateLimitError,
     tip::{
         CreateTipRequest, MyTip, PublicTip, SetTipSecretRequest, TipClaim, TipClaimRequest,
-        TipDetails, TipError, TipStatus, TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
+        TipDetails, TipError, TipStatus, MAX_OPEN_TIP_LEDGER_CALLS, TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
         TIP_PAYOUT_DEDUP_WINDOW_NS,
     },
 };
@@ -180,6 +182,29 @@ impl TipEnv {
 
     fn balance(&self, owner: Principal) -> Nat {
         icrc1_ledger::balance_of(&self.pic_setup.pic, self.ledger, owner)
+    }
+
+    /// Submits a `create_tip` from `sender` without waiting for it. No allowance
+    /// backs it, so once it gets a place it reads the fee and the allowance and
+    /// comes back `Uncovered`.
+    fn submit_uncovered_create(&self, sender: Principal, tip_id: &str) -> RawMessageId {
+        self.pic_setup
+            .pic
+            .submit_call(
+                self.pic_setup.canister_id(),
+                sender,
+                "create_tip",
+                encode_one(CreateTipRequest {
+                    tip_id: tip_id.to_string(),
+                    ledger_canister_id: self.ledger,
+                    amount: Nat::from(TIP_AMOUNT),
+                    expires_at_ns: now_ns(&self.pic_setup) + ONE_HOUR_NS,
+                    message: None,
+                    claim_code_hash: claim_code_hash(tip_id),
+                })
+                .unwrap(),
+            )
+            .expect("create_tip should be accepted")
     }
 
     fn tip_allowance(&self, tip_id: &str) -> Nat {
@@ -1241,4 +1266,143 @@ fn a_payout_past_its_deadline_holds_the_claim_and_pays_exactly_once() {
         TipStatus::Claimed,
         "and History records the payout"
     );
+}
+
+#[test]
+fn a_ledger_read_past_its_deadline_fails_that_create_alone() {
+    let env = setup_tips();
+    let tip_id = "tip-read-deadline";
+    let create = env.submit_uncovered_create(env.sender, tip_id);
+
+    // One round runs `create_tip` up to its first await, which leaves the fee read in flight; 31 s
+    // is one second past the deadline every call to a sender's ledger has.
+    env.pic_setup.pic.tick();
+    env.pic_setup.pic.advance_time(Duration::from_secs(31));
+
+    let reply = env.pic_setup.pic.await_call(create).unwrap();
+    let result = decode_one::<Result<(), TipError>>(&reply).unwrap();
+    assert!(
+        matches!(&result, Err(TipError::TransferFailed { msg }) if msg.starts_with("icrc1_fee call failed")),
+        "the read gives up at the deadline rather than waiting the default 300 s: {result:?}"
+    );
+
+    // Nothing was stored, so the same tip goes through once the ledger answers in time.
+    env.reserve(tip_id, "code-read-deadline", TIP_AMOUNT);
+}
+
+#[test]
+fn ledger_calls_open_at_once_are_capped_for_creates_and_claims_together() {
+    // A create or a claim takes one of `MAX_OPEN_TIP_LEDGER_CALLS` places before
+    // its first ledger call and keeps it until the ledger has answered. One claim
+    // and one create per place are submitted together; each runs up to its first
+    // ledger call before any ledger answers, so exactly one of them finds every
+    // place taken, whichever one that is.
+    let env = setup_tips();
+    let tip_id = "tip-cap";
+    let claim_code = "code-cap";
+    let claimer = Principal::self_authenticating("tip-claimer-cap");
+    env.reserve(tip_id, claim_code, TIP_AMOUNT);
+
+    // Production keeps tens of T cycles. The test default leaves too little liquid for this many
+    // open calls, so the system would turn the last ones away for lack of cycles before the cap.
+    env.pic_setup
+        .pic
+        .add_cycles(env.pic_setup.canister_id(), 20_000_000_000_000);
+
+    // Spread over fresh senders to stay inside the per-caller limit of 20 a minute.
+    let senders: Vec<Principal> = (0..3)
+        .map(|i| {
+            let sender = Principal::self_authenticating(format!("tip-cap-sender-{i}"));
+            env.pic_setup.ensure_user_profile(sender);
+            sender
+        })
+        .collect();
+    let places = usize::try_from(MAX_OPEN_TIP_LEDGER_CALLS).unwrap();
+
+    let creates: Vec<(Principal, RawMessageId)> = senders
+        .iter()
+        .cycle()
+        .take(places)
+        .enumerate()
+        .map(|(i, &sender)| {
+            (
+                sender,
+                env.submit_uncovered_create(sender, &format!("tip-cap-{i}")),
+            )
+        })
+        .collect();
+    let claim = env
+        .pic_setup
+        .pic
+        .submit_call(
+            env.pic_setup.canister_id(),
+            claimer,
+            "claim_tip",
+            encode_one(TipClaimRequest {
+                tip_id: tip_id.to_string(),
+                claim_code: claim_code.to_string(),
+            })
+            .unwrap(),
+        )
+        .expect("claim_tip should be accepted");
+
+    let mut turned_away = Vec::new();
+    for (sender, message) in creates {
+        let reply = env.pic_setup.pic.await_call(message).unwrap();
+        match decode_one::<Result<(), TipError>>(&reply).unwrap() {
+            Err(TipError::Uncovered) => {}
+            Err(TipError::RateLimited(limit)) => turned_away.push((sender, limit)),
+            other => panic!("a create with a place reads an allowance of zero: {other:?}"),
+        }
+    }
+    let reply = env.pic_setup.pic.await_call(claim).unwrap();
+    match decode_one::<Result<TipClaim, TipError>>(&reply).unwrap() {
+        Ok(_) => {}
+        Err(TipError::RateLimited(limit)) => turned_away.push((claimer, limit)),
+        other => panic!("a claim with a place pays: {other:?}"),
+    }
+
+    let [(caller, limit)] = turned_away.as_slice() else {
+        panic!(
+            "exactly one request finds every place taken, not {}",
+            turned_away.len()
+        );
+    };
+    assert_eq!(
+        *limit,
+        RateLimitError {
+            max_calls: MAX_OPEN_TIP_LEDGER_CALLS,
+            window_ns: 30 * 1_000_000_000,
+            caller: *caller,
+        },
+        "and is told the cap and how long one call can keep a place"
+    );
+
+    // A claim turned away left the tip as it was, so it is claimable again.
+    // Either way the claimer is paid exactly once.
+    if *caller == claimer {
+        assert_eq!(env.balance(claimer), Nat::from(0u64));
+        env.claim(claimer, tip_id, claim_code)
+            .expect("the tip is still claimable");
+    }
+    assert_eq!(env.balance(claimer), Nat::from(TIP_AMOUNT));
+
+    // Every place came back: a minute later, past the per-caller limit, a full
+    // set of creates submitted together all get one.
+    env.pic_setup.pic.advance_time(Duration::from_secs(61));
+    let again: Vec<RawMessageId> = senders
+        .iter()
+        .cycle()
+        .take(places)
+        .enumerate()
+        .map(|(i, &sender)| env.submit_uncovered_create(sender, &format!("tip-cap-again-{i}")))
+        .collect();
+    for message in again {
+        let reply = env.pic_setup.pic.await_call(message).unwrap();
+        assert_eq!(
+            decode_one::<Result<(), TipError>>(&reply).unwrap(),
+            Err(TipError::Uncovered),
+            "no place was lost"
+        );
+    }
 }

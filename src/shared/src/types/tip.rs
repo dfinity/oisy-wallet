@@ -20,6 +20,17 @@ use super::signer::RateLimitError;
 /// way [`super::personal_note_share::MAX_PERSONAL_NOTE_SHARES_PER_USER`] does.
 pub const MAX_TIPS_PER_USER: usize = 100;
 
+/// Most calls the canister keeps open at once to the ledgers tips name, creates
+/// and claims together.
+///
+/// The ledger is whichever canister the sender named, and every open call holds
+/// the cycles the system sets aside for its reply until the ledger answers or
+/// the call's deadline passes. How many calls are open follows the request rate,
+/// so this cap is what bounds what the feature holds at any moment. A create or
+/// claim over it is answered with [`TipError::RateLimited`] before anything
+/// leaves the canister. `u32` because [`RateLimitError::max_calls`] carries it.
+pub const MAX_OPEN_TIP_LEDGER_CALLS: u32 = 50;
+
 /// Upper bound on the stored `tip_id`, in bytes. The client generates a
 /// 128-bit random id, base64url-encoded (22 ASCII characters); this is
 /// generous headroom rather than a protocol-locked length. `u32` because it

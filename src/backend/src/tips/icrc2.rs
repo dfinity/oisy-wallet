@@ -23,9 +23,9 @@
 //!   payout, as `service::claim_tip` says at length. What turns a "maybe" back into an answer is
 //!   the payout's `created_at_time`: a retry by the same claimer inside the ledger's transaction
 //!   window is the same transaction, which the ledger either executes once or answers with the
-//!   block where it already did (see [`transfer_from`]). The deadline is [`PAYOUT_TIMEOUT_SECONDS`]
-//!   rather than the `bounded_wait` default of 300 s, which is far longer than a ledger's answer
-//!   stays worth having.
+//!   block where it already did (see [`transfer_from`]). Every call here waits
+//!   [`LEDGER_CALL_TIMEOUT_SECONDS`] rather than the `bounded_wait` default of 300 s, which is far
+//!   longer than a ledger's answer stays worth having.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -35,6 +35,8 @@
 //! wrong: the underscore is in the Rust method name only, and the wire strings
 //! there are the standard `icrc2_*`. Recorded because it is the obvious thing to
 //! assume, and it is not a reason to write a second client.
+
+use std::cell::Cell;
 
 use candid::{Nat, Principal};
 use ic_cdk::call::{Call, CallFailed, RejectCode};
@@ -47,6 +49,7 @@ pub use icrc_ledger_types::{
         transfer_from::{TransferFromArgs, TransferFromError},
     },
 };
+use shared::types::{signer::RateLimitError, tip::MAX_OPEN_TIP_LEDGER_CALLS};
 
 /// Why a payout did not happen.
 ///
@@ -125,6 +128,55 @@ fn classify(response: Result<Nat, TransferFromError>) -> Result<Nat, TransferFro
     }
 }
 
+thread_local! {
+    /// Places in use among the [`MAX_OPEN_TIP_LEDGER_CALLS`]. On the heap: an
+    /// upgrade starts again at zero, and a call left open across one passes its
+    /// deadline within [`LEDGER_CALL_TIMEOUT_SECONDS`] anyway.
+    static OPEN_LEDGER_CALLS: Cell<u32> = const { Cell::new(0) };
+}
+
+/// One of the [`MAX_OPEN_TIP_LEDGER_CALLS`] places for calls to a sender's
+/// ledger, held for as long as the value lives.
+///
+/// The deadline bounds how long one call holds its reply reservation; this
+/// bounds how many calls hold one at the same time, which no deadline can,
+/// because the requests that open them may keep coming. A create or a claim
+/// takes a place before its first ledger call and keeps it until its last one
+/// has answered, and it makes one call at a time. Dropping the value gives the
+/// place back, and ic-cdk drops it too when a trap cancels the task holding it,
+/// so a place is never lost.
+#[must_use = "the place is given back as soon as this value is dropped"]
+pub struct LedgerCallSlot(());
+
+impl LedgerCallSlot {
+    /// Takes a place for `caller`'s request.
+    ///
+    /// # Errors
+    /// A [`RateLimitError`] when every place is taken, naming the cap and one
+    /// call's deadline as the window: places come free as the calls holding
+    /// them answer or reach it.
+    pub fn acquire(caller: Principal) -> Result<Self, RateLimitError> {
+        OPEN_LEDGER_CALLS.with(|open| {
+            let taken = open.get();
+            if taken >= MAX_OPEN_TIP_LEDGER_CALLS {
+                return Err(RateLimitError {
+                    max_calls: MAX_OPEN_TIP_LEDGER_CALLS,
+                    window_ns: u64::from(LEDGER_CALL_TIMEOUT_SECONDS) * 1_000_000_000,
+                    caller,
+                });
+            }
+            open.set(taken + 1);
+            Ok(Self(()))
+        })
+    }
+}
+
+impl Drop for LedgerCallSlot {
+    fn drop(&mut self) {
+        OPEN_LEDGER_CALLS.with(|open| open.set(open.get().saturating_sub(1)));
+    }
+}
+
 /// The ledger's current transfer fee, needed to size the minimum tip and to
 /// check that an allowance covers a payout plus its fee.
 ///
@@ -132,6 +184,7 @@ fn classify(response: Result<Nat, TransferFromError>) -> Result<Nat, TransferFro
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn fee(ledger: Principal) -> Result<Nat, String> {
     Call::bounded_wait(ledger, "icrc1_fee")
+        .change_timeout(LEDGER_CALL_TIMEOUT_SECONDS)
         .with_args(&())
         .await
         .map_err(|err| format!("icrc1_fee call failed: {err:?}"))?
@@ -145,6 +198,7 @@ pub async fn fee(ledger: Principal) -> Result<Nat, String> {
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowance, String> {
     Call::bounded_wait(ledger, "icrc2_allowance")
+        .change_timeout(LEDGER_CALL_TIMEOUT_SECONDS)
         .with_args(&(args,))
         .await
         .map_err(|err| format!("icrc2_allowance call failed: {err:?}"))?
@@ -152,15 +206,17 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
         .map_err(|err| format!("icrc2_allowance decode failed: {err:?}"))
 }
 
-/// How long a payout waits for the ledger before its outcome counts as unknown.
+/// How long a call to the sender's ledger waits for an answer: the two reads at
+/// creation and the payout alike. For the payout, this is when its outcome
+/// counts as unknown.
 ///
 /// A cross-subnet ledger call takes seconds, so thirty is roughly ten times what
 /// a healthy answer needs and the point past which the answer has stopped being
-/// worth waiting for. It also bounds what one open payout can hold: the cycles
+/// worth waiting for. It also bounds what one open call can hold: the cycles
 /// the system sets aside for a reply come back at the deadline whether or not
 /// the ledger answers, and the `bounded_wait` default of 300 s would hold ten
 /// times as many at once for an answer that went stale long before.
-const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
+const LEDGER_CALL_TIMEOUT_SECONDS: u32 = 30;
 
 /// Moves tokens from the sender's account to the claimer's, drawing on the
 /// per-tip allowance. The ledger charges its fee to the allowance, not to the
@@ -179,7 +235,7 @@ const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
 /// [`TransferFromCallError::InsufficientAllowance`] when the reservation no
 /// longer covers the payout; [`TransferFromCallError::InsufficientFunds`] when
 /// the sender's balance dropped below it; [`TransferFromCallError::Unresolved`]
-/// when [`PAYOUT_TIMEOUT_SECONDS`] passes with no answer, leaving the outcome
+/// when [`LEDGER_CALL_TIMEOUT_SECONDS`] passes with no answer, leaving the outcome
 /// unknown — see the module comment for why the claim state machine can take
 /// that answer; [`TransferFromCallError::TooOld`] when the stamp has aged out
 /// of the ledger's window; [`TransferFromCallError::Failed`] for any other
@@ -189,7 +245,7 @@ pub async fn transfer_from(
     args: TransferFromArgs,
 ) -> Result<Nat, TransferFromCallError> {
     let response = Call::bounded_wait(ledger, "icrc2_transfer_from")
-        .change_timeout(PAYOUT_TIMEOUT_SECONDS)
+        .change_timeout(LEDGER_CALL_TIMEOUT_SECONDS)
         .with_args(&(args,))
         .await
         .map_err(|err| {
@@ -346,5 +402,32 @@ mod tests {
                 required: 2,
             }
         )));
+    }
+
+    /// Every place up to the cap is given out, the next request is turned away
+    /// with the numbers the client shows, and a place handed back is there for
+    /// the request after.
+    #[test]
+    fn open_ledger_calls_stop_at_the_cap_until_a_place_is_given_back() {
+        let caller = Principal::from_slice(&[7]);
+        let mut held: Vec<LedgerCallSlot> = (0..MAX_OPEN_TIP_LEDGER_CALLS)
+            .map(|_| LedgerCallSlot::acquire(caller).expect("a place below the cap"))
+            .collect();
+
+        assert_eq!(
+            LedgerCallSlot::acquire(caller).err(),
+            Some(RateLimitError {
+                max_calls: MAX_OPEN_TIP_LEDGER_CALLS,
+                window_ns: 30_000_000_000,
+                caller,
+            })
+        );
+
+        held.pop();
+
+        assert!(
+            LedgerCallSlot::acquire(caller).is_ok(),
+            "a place handed back is free for the next request"
+        );
     }
 }
