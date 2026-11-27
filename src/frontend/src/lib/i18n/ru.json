@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
 			"standalone_mode": "При одновременной установке приложения и $oisy_short на главный экран возникают известные проблемы с подключением. Если у вас возникли проблемы с подключением $oisy_short или подписанием транзакций, запустите приложение из обычного браузера. Мы работаем над исправлением, которое скоро будет готово. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Подробнее</a>",
-			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
+			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео.",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "Нам не удалось подтвердить, дошла ли транзакция до сети. Она ещё может пройти, поэтому подождите минуту-другую и проверьте свою активность, прежде чем отправлять её повторно.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Ваша транзакция не была обработана сетью Solana и истекла, скорее всего, потому что указанная приоритетная комиссия была недостаточной. Мы обновили её до последней рекомендованной суммы, поэтому повторите попытку.",
 			"solana_confirmation_failed": "Мы не получили подтверждения для только что созданной вами транзакции. Подождите несколько секунд, а затем проверьте список транзакций вашего токена, чтобы убедиться, что транзакция была создана корректно.",

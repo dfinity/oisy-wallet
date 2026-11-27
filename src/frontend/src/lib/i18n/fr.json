@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
 			"standalone_mode": "Des problèmes de connexion connus surviennent lorsqu'une application et $oisy_short sont tous deux installés sur l'écran d'accueil. Si vous rencontrez des problèmes de connexion à $oisy_short ou de signature de transactions, veuillez lancer l'application depuis un navigateur classique. Nous travaillons sur un correctif qui sera bientôt disponible. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">En savoir plus</a>",
-			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
+			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo.",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "Nous n'avons pas pu confirmer si la transaction a atteint le réseau. Elle peut encore aboutir, attendez donc une minute ou deux et vérifiez votre activité avant de la renvoyer.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Votre transaction n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous les avons mis à jour au montant recommandé le plus récent, veuillez donc réessayer.",
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez attendre quelques secondes, puis vérifier la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",

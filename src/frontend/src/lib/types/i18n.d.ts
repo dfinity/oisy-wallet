@@ -92,8 +92,15 @@ interface I18nCore {
 		learn_more: string;
 		up_one_level: string;
 	};
-	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
-	error: { copy_failed: string };
+	warning: {
+		do_not_close: string;
+		standalone_mode: string;
+		video_not_supported: string;
+		oisy_allowance_used_up_title: string;
+		oisy_allowance_used_up: string;
+		oisy_allowance_exceeded: string;
+	};
+	error: { copy_failed: string; usage_credits_insufficient: string };
 }
 
 interface I18nProgress {
@@ -883,7 +890,6 @@ interface I18nSend {
 		ethereum_transaction_unconfirmed: string;
 		btc_transaction_unconfirmed: string;
 		btc_send_rate_limited: string;
-		btc_signing_allowance_spent: string;
 		btc_transaction_never_landed: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;

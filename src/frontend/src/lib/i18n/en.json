@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
 			"standalone_mode": "There are known connection issues when both an app and $oisy_short are installed on a home&nbsp;screen. If you encounter issues connecting $oisy_short or signing transactions, please start the app from a regular browser. We are working on a fix and it will be resolved soon. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
-			"video_not_supported": "Your browser does not support video playback."
+			"video_not_supported": "Your browser does not support video playback.",
+			"oisy_allowance_used_up_title": "Free usage credits are used up",
+			"oisy_allowance_used_up": "Your daily amount of free credits to sign transactions is used up, so signing some transactions may fail.",
+			"oisy_allowance_exceeded": "This transaction costs more than your free $oisy_name allowance covers."
 		},
 		"error": {
-			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again."
+			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again.",
+			"usage_credits_insufficient": "Your transaction couldn't be signed because you don't have enough usage credits left."
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "We could not confirm whether the transaction reached the network. It may still go through, so wait a minute or two and check your activity before you send it again.",
 			"btc_transaction_unconfirmed": "We could not confirm whether the transaction reached the Bitcoin network. It may still go through, so check your activity before you send it again.",
 			"btc_send_rate_limited": "You have tried to send Bitcoin several times in a short while, so this transaction was not sent. Wait about $duration, then try again.",
-			"btc_signing_allowance_spent": "The signing allowance OISY grants when you sign in is used up, so this transaction was not sent. Sign out and back in to renew it, then try again. It renews only a few times an hour, so if this message comes back, wait up to an hour before you sign in again.",
 			"btc_transaction_never_landed": "The Bitcoin network does not know this transaction, so it most likely never went out. It could still arrive later, so check your balance before you try again.",
 			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",

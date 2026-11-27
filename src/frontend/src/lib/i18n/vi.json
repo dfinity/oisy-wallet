@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
 			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
-			"video_not_supported": ""
+			"video_not_supported": "",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "Chúng tôi không thể xác nhận giao dịch đã đến mạng hay chưa. Giao dịch vẫn có thể thành công, nên hãy đợi một hai phút và kiểm tra hoạt động của bạn trước khi gửi lại.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
 			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",

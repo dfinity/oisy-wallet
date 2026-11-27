@@ -74,6 +74,12 @@ export interface AllowSigningOutcome {
 	rateLimitInfo?: RateLimitInfo;
 }
 
+// The answer to an allowance request (AR), with the OISY allowance the backend states.
+export type AllowanceRequestAnswer =
+	| { answer: 'granted'; allowance: bigint }
+	| { answer: 'skipped'; allowance: bigint }
+	| { answer: 'refused' };
+
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
 	iiDelegationChain: Nullable<IIDelegationChain>;

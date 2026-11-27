@@ -13,6 +13,7 @@ import * as authServices from '$lib/services/auth.services';
 import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
+import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
 import { authStore } from '$lib/stores/auth.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { AllowSigningOutcome } from '$lib/types/api';
@@ -25,6 +26,7 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
@@ -78,6 +80,15 @@ describe('loader.services', () => {
 			await initSignerAllowance();
 
 			expect(apiMock).toHaveBeenCalledOnce();
+		});
+
+		it('should clear the allowance issue when the request is granted', async () => {
+			allowanceIssueStore.setRefused();
+			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
+
+			await initSignerAllowance();
+
+			expect(get(allowanceIssueStore)).toBeUndefined();
 		});
 
 		it('should not track event when not rate limited', async () => {

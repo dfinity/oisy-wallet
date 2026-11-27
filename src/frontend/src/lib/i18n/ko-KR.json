@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
 			"standalone_mode": "앱과 $oisy_short 모두 홈 화면에 설치된 경우 알려진 연결 문제가 발생할 수 있습니다. $oisy_short 연결 또는 트랜잭션 서명에 문제가 발생하면 일반 브라우저에서 앱을 실행해 주세요. 현재 수정 작업 중이며 곧 해결될 예정입니다. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">자세히 알아보기</a>",
-			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
+			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다.",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "트랜잭션이 네트워크에 도달했는지 확인할 수 없었습니다. 아직 처리될 수 있으므로 1~2분 정도 기다린 후, 다시 보내기 전에 활동 내역을 확인하세요.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "귀하의 트랜잭션은 Solana 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선순위 수수료가 충분하지 않았기 때문일 가능성이 높습니다. 최신 권장 금액으로 업데이트했으니 다시 시도해 주세요.",
 			"solana_confirmation_failed": "방금 생성하신 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 기다린 후 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",

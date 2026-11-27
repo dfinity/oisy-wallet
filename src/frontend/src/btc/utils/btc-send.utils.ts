@@ -3,10 +3,8 @@ import {
 	BtcPrepareSendError,
 	type UtxosFee
 } from '$btc/types/btc-send';
-import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
-import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -84,27 +82,13 @@ const btcBroadcastRateLimitWindowSeconds = (err: unknown): bigint | undefined =>
 		? err.variant.RateLimited.window_ns / NANO_SECONDS_IN_SECOND
 		: undefined;
 
-// `btc_sign_prehash` is paid from the approval the backend grants each user at sign-in
-// (`allow_signing`). Once it is spent, the cycles ledger refuses the charge, and signing fails until
-// the next sign-in tops it up. The ledger's `InsufficientFunds` is the backend's own balance
-// instead, which a sign-in does not fix.
-//
-// Only on the backend path: one input costs 38B there, so a refusal means the approval is nearly
-// spent, and a sign-in renews it. `btc_caller_send` charges a whole send upfront, with no input cap,
-// so it can cost more than any renewed approval, and a sign-in would not help (sbpublic).
-const isBtcSigningAllowanceSpent = (err: unknown): boolean =>
-	BTC_SEND_VIA_BACKEND_ENABLED &&
-	err instanceof SignerCanisterPaymentError &&
-	'LedgerWithdrawFromError' in err.paymentError &&
-	'InsufficientAllowance' in err.paymentError.LedgerWithdrawFromError.error;
-
 /**
- * Whether a failed `sendBtc` hit one of the backend's limits: a rate-limited broadcast, or a spent
- * signing approval. Nothing was sent, and its message from `mapBtcBroadcastErrorToMessage` says
- * what to do, so a toast leaves out the error's own detail, which is English and technical.
+ * Whether a failed `sendBtc` hit the backend's rate limit on broadcasts. Nothing was sent, and its
+ * message from `mapBtcBroadcastErrorToMessage` says how long to wait, so a toast leaves out the
+ * error's own detail, which is English and technical.
  */
 export const isBtcSendLimitError = (err: unknown): boolean =>
-	nonNullish(btcBroadcastRateLimitWindowSeconds(err)) || isBtcSigningAllowanceSpent(err);
+	nonNullish(btcBroadcastRateLimitWindowSeconds(err));
 
 /**
  * The message for a failed `sendBtc` that every flow shows alike, or `undefined` for the caller to
@@ -130,10 +114,6 @@ export const mapBtcBroadcastErrorToMessage = ({
 				i18n: i18n.temporal.seconds_to_duration
 			})
 		});
-	}
-
-	if (isBtcSigningAllowanceSpent(err)) {
-		return i18n.send.error.btc_signing_allowance_spent;
 	}
 
 	if (

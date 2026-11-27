@@ -5,6 +5,7 @@
 	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
 	import CkMinterInfoLoader from '$icp/components/loaders/CkMinterInfoLoader.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
+	import AllowanceToasts from '$lib/components/core/AllowanceToasts.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Guards from '$lib/components/guard/Guards.svelte';
@@ -73,6 +74,8 @@
 	</Loader>
 
 	<Guards />
+
+	<AllowanceToasts />
 </LoaderUserProfile>
 
 <WalletConnectListener />

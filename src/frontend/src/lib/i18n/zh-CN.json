@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
 			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
-			"video_not_supported": "你的浏览器不支持视频播放。"
+			"video_not_supported": "你的浏览器不支持视频播放。",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "我们无法确认交易是否已到达网络。它仍可能完成，因此请等待一两分钟，并在重新发送前先查看您的活动记录。",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "您的交易未被Solana网络处理并已过期，很可能是因为提供的优先费用不足。我们已将其更新为最新推荐金额，请重试。",
 			"solana_confirmation_failed": "我们未收到您刚刚创建的交易的确认。请等待几秒钟，然后检查您的代币交易列表，确认您的交易是否已正确创建。",

@@ -17,6 +17,8 @@ export interface ToastMsgUI {
 	icon?: Component;
 	theme?: ToastTheme;
 	renderAsHtml?: boolean;
+	// A "Learn more" style link after the text, like the app's other links to its docs.
+	link?: { href: string; label: string };
 }
 
 // The shape callers pass to `toastsShow` / `toastsError` — the store assigns the `id`.

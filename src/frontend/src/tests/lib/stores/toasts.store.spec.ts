@@ -1,5 +1,17 @@
-import { toastsStore } from '$lib/stores/toasts.store';
+import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import { toastsError, toastsErrorNoTrace, toastsStore } from '$lib/stores/toasts.store';
+import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
+import en from '$tests/mocks/i18n.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
+
+const insufficientAllowanceError = (): SignerCanisterPaymentError =>
+	new SignerCanisterPaymentError({
+		LedgerWithdrawFromError: {
+			ledger: mockPrincipal,
+			error: { InsufficientAllowance: { allowance: 7_800_000_000n } }
+		}
+	});
 
 describe('toasts.store', () => {
 	beforeEach(() => {
@@ -83,5 +95,61 @@ describe('toasts.store', () => {
 		toastsStore.reset([]);
 
 		expect(get(toastsStore)).toHaveLength(0);
+	});
+});
+
+describe('toastsError', () => {
+	beforeEach(() => {
+		toastsStore.reset();
+
+		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+	});
+
+	it('should add the error detail to the message', () => {
+		toastsError({ msg: { text: 'Send failed.' }, err: new Error('detail') });
+
+		expect(get(toastsStore)[0].text).toBe('Send failed. / detail');
+	});
+
+	// The allowance toast next to it says why; the flow's generic text and the raw ledger text would
+	// only add noise.
+	it('should show one clear text for an insufficient allowance', () => {
+		toastsError({ msg: { text: 'Send failed.' }, err: insufficientAllowanceError() });
+
+		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
+	});
+
+	it('should show one clear text for an insufficient allowance kept as the cause of another error', () => {
+		toastsError({
+			msg: { text: 'Send failed.' },
+			err: new Error('not sent', { cause: insufficientAllowanceError() })
+		});
+
+		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
+	});
+});
+
+describe('toastsErrorNoTrace', () => {
+	beforeEach(() => {
+		toastsStore.reset();
+
+		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+	});
+
+	it('should show the message without the error detail', () => {
+		toastsErrorNoTrace({ msg: { text: 'Supply failed.' }, err: new Error('detail') });
+
+		expect(get(toastsStore)[0].text).toBe('Supply failed.');
+	});
+
+	it('should show one clear text for an insufficient allowance kept as the cause of another error', () => {
+		toastsErrorNoTrace({
+			msg: { text: 'Supply failed.' },
+			err: new LiquidiumSolTransferRefusedError({ cause: insufficientAllowanceError() })
+		});
+
+		expect(get(toastsStore)[0]).toEqual(
+			expect.objectContaining({ text: en.core.error.usage_credits_insufficient, level: 'error' })
+		);
 	});
 });

@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
 			"standalone_mode": "Znane są problemy z połączeniem, gdy zarówno aplikacja, jak i $oisy_short są zainstalowane na ekranie głównym. Jeśli napotkasz problemy z połączeniem z $oisy_short lub podpisywaniem transakcji, uruchom aplikację z poziomu zwykłej przeglądarki. Pracujemy nad poprawką, która zostanie wkrótce wdrożona. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Dowiedz się więcej</a>",
-			"video_not_supported": ""
+			"video_not_supported": "",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "Nie mogliśmy potwierdzić, czy transakcja dotarła do sieci. Może jeszcze przejść, więc odczekaj minutę lub dwie i przed ponownym wysłaniem sprawdź swoją aktywność.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",

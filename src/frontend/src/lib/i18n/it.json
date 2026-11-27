@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
 			"standalone_mode": "Sono noti problemi di connessione quando sia un'app che $oisy_short sono installati nella schermata iniziale. Se riscontri problemi di connessione a $oisy_short o di firma delle transazioni, avvia l'app da un browser normale. Stiamo lavorando a una soluzione che sarà disponibile a breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Scopri di più</a>",
-			"video_not_supported": ""
+			"video_not_supported": "",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "Non abbiamo potuto confermare se la transazione ha raggiunto la rete. Potrebbe ancora andare a buon fine, quindi attendi un minuto o due e controlla la tua attività prima di inviarla di nuovo.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "La tua transazione non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la commissione di priorità fornita non era sufficiente. L'abbiamo aggiornata all'importo consigliato più recente, quindi riprova.",
 			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Attendi qualche secondo e poi controlla la lista delle transazioni del tuo token per verificare se la tua transazione è stata creata correttamente.",

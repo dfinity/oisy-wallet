@@ -107,10 +107,14 @@
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
 			"standalone_mode": "Při instalaci aplikace i $oisy_short na domovskou obrazovku jsou známy problémy s připojením. Pokud narazíte na problémy s připojením $oisy_short nebo podepisováním transakcí, spusťte prosím aplikaci z běžného prohlížeče. Pracujeme na opravě, která bude brzy k dispozici. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Více informací</a>",
-			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
+			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa.",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {
@@ -1153,7 +1157,6 @@
 			"ethereum_transaction_unconfirmed": "Nepodařilo se nám potvrdit, zda transakce dorazila do sítě. Stále může projít, proto počkejte minutu nebo dvě a před dalším odesláním zkontrolujte svou aktivitu.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Vaše transakce nebyla zpracována sítí Solana a vypršela, nejpravděpodobněji proto, že zadaný prioritní poplatek nebyl dostatečný. Aktualizovali jsme ho na nejnovější doporučenou částku, zkuste to prosím znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení pro transakci, kterou jste právě vytvořili. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí vašeho tokenu, zda byla vaše transakce vytvořena správně.",
