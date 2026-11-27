@@ -136,6 +136,8 @@ export type SwapQuoteError =
 			type: 'two-swaps';
 			intermediateToken: Token;
 			provider: SwapProvider;
+			// The offer was refused for its deposit address, not its route.
+			depositUnverified?: boolean;
 	  };
 
 export type SwapMappedResult =

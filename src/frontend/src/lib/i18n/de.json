@@ -1467,6 +1467,7 @@
 			"as_token": "",
 			"two_swaps_info": "$oisy_short bietet einen Tausch nur an, wenn es ihn vor deiner Bestätigung vollständig prüfen kann, und einen solchen direkten Tausch von $sourceSymbol zu $destinationSymbol gibt es nicht. Du kannst aber zuerst $sourceSymbol in $intermediateSymbol tauschen und danach $intermediateSymbol in $destinationSymbol.",
 			"two_swaps_first_button": "Zuerst in $intermediateSymbol tauschen",
+			"two_swaps_deposit_unverified_info": "$oisy_short konnte die Adresse nicht prüfen, an die dieser Tausch dein $sourceSymbol senden würde, daher wird er gerade nicht angeboten. Du kannst stattdessen zweimal tauschen: zuerst $sourceSymbol in $intermediateSymbol, dann $intermediateSymbol in $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1521,7 +1522,9 @@
 			"cksol_earlier_deposit_quarantined": "Der ckSOL-Minter hat die Verarbeitung einer deiner früheren Einzahlungen gestoppt und nimmt keine neue an, bis sie geklärt ist. Es wurden keine SOL gesendet.",
 			"cksol_minter_unavailable": "Der ckSOL-Minter kann gerade keine Einzahlung annehmen. Es wurden keine SOL gesendet. Bitte versuche es später erneut.",
 			"cksol_deposit_quarantined": "Der ckSOL-Minter hat die Verarbeitung dieser Einzahlung gestoppt. Er behält die SOL, bis ein Minter-Upgrade die Einzahlung klärt.",
-			"cksol_deposit_below_minimum": "Der ckSOL-Minter konnte diese Einzahlung nicht abholen, und die SOL auf deiner Einzahlungsadresse liegen unter dem Mindesteinzahlungsbetrag. Sie werden mit deiner nächsten Umwandlung von SOL in ckSOL umgewandelt."
+			"cksol_deposit_below_minimum": "Der ckSOL-Minter konnte diese Einzahlung nicht abholen, und die SOL auf deiner Einzahlungsadresse liegen unter dem Mindesteinzahlungsbetrag. Sie werden mit deiner nächsten Umwandlung von SOL in ckSOL umgewandelt.",
+			"lifi_btc_deposit_unverified": "$oisy_short konnte die Adresse nicht prüfen, an die dieser Tausch dein $sourceSymbol senden würde, daher wurde er gestoppt. Dein $sourceSymbol ist in deinem Wallet geblieben.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short konnte die Adresse nicht prüfen, an die dieser Tausch dein $sourceSymbol senden würde, daher wurde er gestoppt. Dein $sourceSymbol ist in deinem Wallet geblieben. Du kannst stattdessen zweimal tauschen: zuerst $sourceSymbol in $intermediateSymbol, dann $intermediateSymbol in $destinationSymbol."
 		}
 	},
 	"buy": {

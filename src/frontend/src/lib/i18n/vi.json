@@ -1467,6 +1467,7 @@
 			"as_token": "",
 			"two_swaps_info": "$oisy_short chỉ cung cấp các giao dịch hoán đổi mà nó có thể xác minh đầy đủ trước khi bạn chấp thuận, và không có giao dịch hoán đổi trực tiếp như vậy từ $sourceSymbol sang $destinationSymbol. Nhưng bạn có thể hoán đổi $sourceSymbol sang $intermediateSymbol trước, rồi từ $intermediateSymbol sang $destinationSymbol.",
 			"two_swaps_first_button": "Hoán đổi sang $intermediateSymbol trước",
+			"two_swaps_deposit_unverified_info": "$oisy_short không thể xác minh địa chỉ mà giao dịch hoán đổi này sẽ gửi $sourceSymbol của bạn đến, nên hiện không cung cấp giao dịch này. Thay vào đó, bạn có thể thực hiện bằng hai lần hoán đổi: trước tiên từ $sourceSymbol sang $intermediateSymbol, sau đó từ $intermediateSymbol sang $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1521,7 +1522,9 @@
 			"cksol_earlier_deposit_quarantined": "Minter ckSOL đã ngừng xử lý một khoản nạp trước đó của bạn và sẽ không nhận khoản nạp mới cho đến khi vấn đề được giải quyết. Không có SOL nào được gửi.",
 			"cksol_minter_unavailable": "Minter ckSOL hiện không thể nhận khoản nạp. Không có SOL nào được gửi. Vui lòng thử lại sau.",
 			"cksol_deposit_quarantined": "Minter ckSOL đã ngừng xử lý khoản nạp này. Minter giữ số SOL cho đến khi một bản nâng cấp minter giải quyết khoản nạp.",
-			"cksol_deposit_below_minimum": "Minter ckSOL không thể thu gom khoản nạp này và số SOL còn lại trên địa chỉ nạp của bạn thấp hơn mức nạp tối thiểu. Số SOL này sẽ được chuyển đổi cùng với lần chuyển đổi từ SOL sang ckSOL tiếp theo của bạn."
+			"cksol_deposit_below_minimum": "Minter ckSOL không thể thu gom khoản nạp này và số SOL còn lại trên địa chỉ nạp của bạn thấp hơn mức nạp tối thiểu. Số SOL này sẽ được chuyển đổi cùng với lần chuyển đổi từ SOL sang ckSOL tiếp theo của bạn.",
+			"lifi_btc_deposit_unverified": "$oisy_short không thể xác minh địa chỉ mà giao dịch hoán đổi này sẽ gửi $sourceSymbol của bạn đến, nên đã dừng giao dịch. $sourceSymbol của bạn vẫn còn trong ví.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short không thể xác minh địa chỉ mà giao dịch hoán đổi này sẽ gửi $sourceSymbol của bạn đến, nên đã dừng giao dịch. $sourceSymbol của bạn vẫn còn trong ví. Thay vào đó, bạn có thể thực hiện bằng hai lần hoán đổi: trước tiên từ $sourceSymbol sang $intermediateSymbol, sau đó từ $intermediateSymbol sang $destinationSymbol."
 		}
 	},
 	"buy": {

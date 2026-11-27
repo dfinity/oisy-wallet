@@ -3,6 +3,7 @@ import {
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_SWAP,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -40,6 +41,48 @@ export const trackUnmappedNetworkSettingsKey = ({ key }: { key: string }) => {
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.NETWORK,
 			event_value: key,
 			result_error_severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MINOR
+		}
+	});
+};
+
+const reportedLifiBtcDeposits = new Set<string>();
+
+/**
+ * A LI.FI quote from BTC whose deposit pays another address than the one OISY pins for its bridge
+ * (`tool`). Either the bridge moved its deposit address, and LI.FI from BTC through it is unusable
+ * until the pin follows, or the answer was tampered with.
+ *
+ * `depositAddress` is the address the quote's deposit pays, as OISY decodes it from the transaction,
+ * never LI.FI's text. It is the bridge's or a stranger's, never the user's own (the BTC decode refuses
+ * a deposit to the user's address), and nothing is signed for it, so it ties the event to no wallet.
+ * Many users reporting the same one says the bridge moved; a lone one, an answer tampered with.
+ *
+ * Reported once per bridge and address per session: the swap form re-quotes every few seconds.
+ */
+export const trackLifiBtcDepositUnverified = ({
+	tool,
+	depositAddress
+}: {
+	tool: string;
+	depositAddress: string;
+}) => {
+	const key = `${tool}:${depositAddress}`;
+
+	if (reportedLifiBtcDeposits.has(key)) {
+		return;
+	}
+
+	reportedLifiBtcDeposits.add(key);
+
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.ERROR,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.SWAP,
+			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SWAP.LIFI_BTC_DEPOSIT_UNVERIFIED,
+			event_provider: tool,
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.DEPOSIT_ADDRESS,
+			event_value: depositAddress,
+			result_error_severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.CRITICAL
 		}
 	});
 };

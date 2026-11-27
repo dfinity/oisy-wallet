@@ -1,9 +1,13 @@
-import { RELAY_BTC_DEPOSITORY_ADDRESS } from '$btc/constants/lifi.constants';
-import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
+import { btcAddressToOutputScript, btcOutputScriptToAddressOrHex } from '$btc/utils/btc-psbt.utils';
 import { fetchRelayIntentStatus } from '$lib/rest/relay.rest';
+import { trackLifiBtcDepositUnverified } from '$lib/services/error-analytics.services';
 import type { LifiBtcPayoutBinding } from '$lib/services/lifi-btc-binding.services';
-import type { LifiQuoteRejectedError } from '$lib/types/errors';
-import { lifiBtcMemoText, lifiRejectedError } from '$lib/utils/lifi-swap.utils';
+import { LifiBtcDepositUnverifiedError, type LifiQuoteRejectedError } from '$lib/types/errors';
+import {
+	isLifiBtcDepositUnverified,
+	lifiBtcMemoText,
+	lifiRejectedError
+} from '$lib/utils/lifi-swap.utils';
 import { LifiRelayToolDataSchema } from '$lib/validation/lifi-relay.validation';
 import { safeParse } from '$lib/validation/utils.validation';
 import { isNullish } from '@dfinity/utils';
@@ -34,8 +38,8 @@ const depositoryScript = (address: string): Uint8Array | undefined => {
  * OISY can read before the deposit (`requests/v2` finds nothing until it sees one). So this binds what
  * it can:
  *
- * - Output 0 must pay Relay's own depository, pinned (`RELAY_BTC_DEPOSITORY_ADDRESS`), not read from
- *   LI.FI's answer.
+ * - Output 0 must pay Relay's own depository, pinned (`RELAY_BTC_DEPOSITORY_ADDRESS`, through
+ *   `LIFI_BTC_BRIDGE_DEPOSITORIES`), not read from LI.FI's answer.
  * - LI.FI's copy of Relay's quote (`estimate.toolData`) must name the order the memo carries, take
  *   exactly output 0, and pay out the reviewed asset on the reviewed chain at least the displayed
  *   minimum. That catches a quote whose parts disagree.
@@ -82,17 +86,17 @@ export const bindLifiRelayPayout: LifiBtcPayoutBinding = async ({
 
 	// Otherwise a tampered answer that names one address of its own in the transaction,
 	// `transactionRequest.to` and its copy of Relay's quote would pass every check below, and the BTC
-	// would never reach Relay.
-	if (
-		!isSameBytes({
-			actual: deposit.script,
-			expected: btcAddressToOutputScript({
-				address: RELAY_BTC_DEPOSITORY_ADDRESS,
-				network: 'mainnet'
-			})
-		})
-	) {
-		throw rejected("does not pay Relay's depository");
+	// would never reach Relay. The quote shown was checked alike, so this one is a re-quote that names
+	// another address: its own error, for the wizard to point to two swaps instead.
+	if (isLifiBtcDepositUnverified({ tool: quote.tool, deposit })) {
+		trackLifiBtcDepositUnverified({
+			tool: quote.tool,
+			depositAddress: btcOutputScriptToAddressOrHex({ script: deposit.script, network: 'mainnet' })
+		});
+
+		throw new LifiBtcDepositUnverifiedError(
+			"LI.FI quote rejected: its Relay quote does not pay Relay's depository"
+		);
 	}
 
 	const depository = depositoryScript(paymentDetails.depository);

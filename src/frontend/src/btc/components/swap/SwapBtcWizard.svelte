@@ -31,7 +31,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
-	import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
+	import { fetchLifiBtcSwap, lifiBtcIntermediateToken } from '$lib/services/lifi-btc-swap.services';
 	import { isSlippageExceeded } from '$lib/services/lifi-swap-execution.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import { enableSwapDestinationToken, fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
@@ -42,6 +42,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { LifiBtcDepositUnverifiedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider } from '$lib/types/swap';
 	import type { WizardStep } from '$lib/types/wizard';
@@ -347,6 +348,35 @@
 			// sent, so the form comes back.
 			if (err instanceof BtcValidationError) {
 				handleBtcValidationError({ err });
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
+
+			// LI.FI's re-quote pays its deposit to another address than the one OISY pins for its bridge.
+			// Nothing was signed, and the review says so and, where there is a token to go through,
+			// suggests two swaps instead.
+			if (err instanceof LifiBtcDepositUnverifiedError) {
+				const intermediateToken = nonNullish($destinationToken)
+					? lifiBtcIntermediateToken($destinationToken)
+					: undefined;
+
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders(
+							nonNullish(intermediateToken)
+								? $i18n.swap.error.lifi_btc_deposit_unverified_two_swaps
+								: $i18n.swap.error.lifi_btc_deposit_unverified
+						),
+						{
+							$sourceSymbol: $sourceToken?.symbol ?? '',
+							$destinationSymbol: $destinationToken?.symbol ?? '',
+							$intermediateSymbol: intermediateToken?.symbol ?? ''
+						}
+					),
+					variant: 'error'
+				});
 
 				onBack();
 				onStartTriggerAmount();

@@ -430,6 +430,7 @@
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
 				<SwapTwoSwapsHint
+					depositUnverified={twoSwapsQuoteError.depositUnverified}
 					intermediateToken={twoSwapsQuoteError.intermediateToken}
 					provider={twoSwapsQuoteError.provider}
 				/>

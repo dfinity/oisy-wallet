@@ -1467,6 +1467,7 @@
 			"as_token": "",
 			"two_swaps_info": "",
 			"two_swaps_first_button": "",
+			"two_swaps_deposit_unverified_info": "",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1521,7 +1522,9 @@
 			"cksol_earlier_deposit_quarantined": "",
 			"cksol_minter_unavailable": "",
 			"cksol_deposit_quarantined": "",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "",
+			"lifi_btc_deposit_unverified": "",
+			"lifi_btc_deposit_unverified_two_swaps": ""
 		}
 	},
 	"buy": {

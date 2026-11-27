@@ -1,7 +1,8 @@
 import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
 import { fetchRelayIntentStatus } from '$lib/rest/relay.rest';
+import { trackLifiBtcDepositUnverified } from '$lib/services/error-analytics.services';
 import { bindLifiRelayPayout } from '$lib/services/lifi-btc-relay-binding.services';
-import { LifiQuoteRejectedError } from '$lib/types/errors';
+import { LifiBtcDepositUnverifiedError, LifiQuoteRejectedError } from '$lib/types/errors';
 import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
 import { decodeLifiBtcTransaction, lifiBtcMemoText } from '$lib/utils/lifi-swap.utils';
 import {
@@ -11,6 +12,7 @@ import {
 import {
 	mockLifiBtcFeeAddress,
 	mockLifiBtcRelayQuote,
+	mockLifiBtcRelayQuotePaying,
 	mockRelayOrderId,
 	mockRelayRequestId
 } from '$tests/mocks/lifi-btc.mock';
@@ -19,6 +21,10 @@ import { Psbt, networks, payments } from 'bitcoinjs-lib';
 
 vi.mock('$lib/rest/relay.rest', () => ({
 	fetchRelayIntentStatus: vi.fn()
+}));
+
+vi.mock('$lib/services/error-analytics.services', () => ({
+	trackLifiBtcDepositUnverified: vi.fn()
 }));
 
 describe('lifi-btc-relay-binding.services', () => {
@@ -231,6 +237,37 @@ describe('lifi-btc-relay-binding.services', () => {
 		);
 
 		expect(fetchRelayIntentStatus).not.toHaveBeenCalled();
+	});
+
+	// The quote shown passed the same check, so this is a re-quote naming another address: the wizard
+	// tells it apart from other refusals, and Plausible learns the address.
+	it('should refuse a re-quote whose deposit Relay does not take with its own error, and report the address', async () => {
+		const elsewhere =
+			payments.p2wpkh({ hash: Buffer.alloc(20, 9), network: networks.bitcoin }).address ?? '';
+
+		const tampered = mockLifiBtcRelayQuotePaying(elsewhere);
+
+		const { deposit: tamperedDeposit, memo: tamperedMemo } = decodeLifiBtcTransaction({
+			quote: tampered,
+			amount: BigInt(action.fromAmount),
+			userAddress
+		});
+
+		await expect(
+			bind({ quote: tampered, deposit: tamperedDeposit, memo: tamperedMemo })
+		).rejects.toBeInstanceOf(LifiBtcDepositUnverifiedError);
+
+		expect(trackLifiBtcDepositUnverified).toHaveBeenCalledExactlyOnceWith({
+			tool: 'relaydepository',
+			depositAddress: elsewhere
+		});
+		expect(fetchRelayIntentStatus).not.toHaveBeenCalled();
+	});
+
+	it('should report no address for a deposit Relay takes', async () => {
+		await bind();
+
+		expect(trackLifiBtcDepositUnverified).not.toHaveBeenCalled();
 	});
 
 	it('should compare an EVM destination token in any case', async () => {

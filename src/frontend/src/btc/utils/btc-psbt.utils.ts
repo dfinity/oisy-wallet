@@ -122,6 +122,24 @@ export const btcAddressToOutputScript = ({
 };
 
 /**
+ * The address on `network` that `script` pays, or the script as hex where bitcoinjs-lib names none:
+ * a P2TR script, which it cannot turn into an address without an ECC library, or an `OP_RETURN`.
+ */
+export const btcOutputScriptToAddressOrHex = ({
+	script,
+	network
+}: {
+	script: Uint8Array;
+	network: BitcoinNetwork;
+}): string => {
+	try {
+		return btcAddressLib.fromOutputScript(Buffer.from(script), BITCOIN_JS_NETWORKS[network]);
+	} catch (_: unknown) {
+		return Buffer.from(script).toString('hex');
+	}
+};
+
+/**
  * The vsize of an output with this script: 8 bytes of value, 1 of script length and the script, all
  * non-witness. Every standard script, an `OP_RETURN` included, is shorter than 253 bytes, so its
  * length takes 1 byte.
