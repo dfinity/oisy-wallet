@@ -48,6 +48,37 @@ describe('lookalike.utils', () => {
 			expect(findLookalike({ token: { symbol: 'XYZ', name: 'ckBTC' }, among })).toBe(among[1]);
 		});
 
+		describe('a token OISY shows under its own symbol or name', () => {
+			const shown = [
+				{
+					symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+					name: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+					oisySymbol: { oisySymbol: 'BITCAT' }
+				},
+				{
+					symbol: 'TCYCLES',
+					name: 'Trillion Cycles',
+					oisyName: { oisyName: 'ICP Cycles (Trillion)' }
+				}
+			];
+
+			it.each([
+				{ label: 'the symbol OISY shows', token: { symbol: 'BITCAT', name: 'Mine' }, index: 0 },
+				{
+					label: 'the name OISY shows',
+					token: { symbol: 'XYZ', name: 'ICP Cycles (Trillion)' },
+					index: 1
+				},
+				{
+					label: 'the ledger symbol',
+					token: { symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN', name: 'Mine' },
+					index: 0
+				}
+			])('should find it by $label', ({ token, index }) => {
+				expect(findLookalike({ token, among: shown })).toBe(shown[index]);
+			});
+		});
+
 		it.each([
 			{ label: 'icp', token: { symbol: 'icp', name: 'Mine' }, index: 0 },
 			{ label: 'internet computer', token: { symbol: 'XYZ', name: 'internet computer' }, index: 0 },

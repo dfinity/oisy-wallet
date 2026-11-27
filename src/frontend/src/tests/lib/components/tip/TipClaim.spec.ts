@@ -32,6 +32,24 @@ vi.mock('$app/navigation', () => ({
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
 
+// The tests run as a local build, which lists none of the additional ICRC tokens, so BITCAT, which
+// OISY shows under a symbol of its own, is added here.
+vi.mock(import('$env/tokens/tokens.listed.env'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		LISTED_TOKEN_LABELS: [
+			...actual.LISTED_TOKEN_LABELS,
+			{
+				symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				name: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				oisySymbol: { oisySymbol: 'BITCAT' }
+			}
+		]
+	};
+});
+
 describe('TipClaim', () => {
 	const tipId = 'the-tip-id';
 	const claimCode = 'the-claim-code';
@@ -367,6 +385,23 @@ describe('TipClaim', () => {
 					)
 				);
 			});
+
+			// The BITCAT ledger names itself BITCAT•ID•YRMO•ODIN; OISY shows it as BITCAT.
+			it.each([
+				{ copy: 'the symbol OISY shows', symbol: 'BITCAT' },
+				{ copy: 'the ledger symbol', symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN' }
+			])(
+				'names a listed token by the symbol OISY shows, for a copy of $copy',
+				async ({ symbol }) => {
+					const { container } = renderWithToken({ ledger: unlistedLedger, symbol, name: 'Mine' });
+
+					await waitFor(() =>
+						expect(warning(container)).toHaveTextContent(
+							replacePlaceholders(get(i18n).tip.text.token_copies_listed, { $token: 'BITCAT' })
+						)
+					);
+				}
+			);
 
 			it('says OISY does not list a token that copies none', async () => {
 				const { container, getByText } = renderWithToken({

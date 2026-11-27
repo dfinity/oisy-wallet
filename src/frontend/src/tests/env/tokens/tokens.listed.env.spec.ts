@@ -39,4 +39,51 @@ describe('tokens.listed.env', () => {
 			expect(LISTED_TOKEN_LABELS.some((label) => label.symbol === symbol)).toBeTruthy()
 		);
 	});
+
+	describe('with the additional ICRC tokens', () => {
+		// The tests run as a local build, which loads none of them, so two that OISY shows under a
+		// label of its own stand in. The setup has already loaded the token modules, so they are
+		// loaded again against the mock.
+		beforeEach(() => {
+			vi.doMock('$icp/utils/map-icrc-data', () => ({
+				mapIcrcData: () => ({
+					BITCAT: {
+						ledgerCanisterId: 'xlwi6-kyaaa-aaaar-qarya-cai',
+						symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+						name: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+						decimals: 8,
+						fee: 10n
+					},
+					TCYCLES: {
+						ledgerCanisterId: 'um5iw-rqaaa-aaaaq-qaaba-cai',
+						symbol: 'TCYCLES',
+						name: 'Trillion Cycles',
+						decimals: 12,
+						fee: 100_000_000n
+					}
+				})
+			}));
+			vi.resetModules();
+		});
+
+		afterEach(() => {
+			vi.doUnmock('$icp/utils/map-icrc-data');
+		});
+
+		it('should know the symbol or name OISY shows in place of a ledger label', async () => {
+			const { LISTED_TOKEN_LABELS: labels } = await import('$env/tokens/tokens.listed.env');
+
+			expect(labels).toContainEqual({
+				symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				name: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				oisySymbol: { oisySymbol: 'BITCAT' }
+			});
+
+			expect(labels).toContainEqual({
+				symbol: 'TCYCLES',
+				name: 'Trillion Cycles',
+				oisyName: { oisyName: 'ICP Cycles (Trillion)' }
+			});
+		});
+	});
 });

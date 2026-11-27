@@ -34,6 +34,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findLookalike } from '$lib/utils/lookalike.utils';
 	import { isTipUnavailable } from '$lib/utils/tip.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		tipId: string;
@@ -325,7 +326,9 @@
 	{#if !listed}
 		<MessageBox level="warning" styleClass="mb-6" testId={TIP_TOKEN_WARNING}>
 			{nonNullish(copied)
-				? replacePlaceholders($i18n.tip.text.token_copies_listed, { $token: copied.symbol })
+				? replacePlaceholders($i18n.tip.text.token_copies_listed, {
+						$token: getTokenDisplaySymbol(copied)
+					})
 				: $i18n.tip.text.token_not_listed}
 		</MessageBox>
 	{/if}

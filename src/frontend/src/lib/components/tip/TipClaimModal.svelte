@@ -64,6 +64,7 @@
 		isTipUnavailable,
 		rememberTipWelcomeSeen
 	} from '$lib/utils/tip.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		pending: PendingTipClaim;
@@ -598,7 +599,9 @@
 			{#if newToken}
 				<MessageBox level="warning" styleClass="mb-4" testId={TIP_ADDED_TOKEN_WARNING}>
 					{nonNullish(copied)
-						? replacePlaceholders($i18n.tip.text.added_token_copies, { $token: copied.symbol })
+						? replacePlaceholders($i18n.tip.text.added_token_copies, {
+								$token: getTokenDisplaySymbol(copied)
+							})
 						: $i18n.tip.text.added_token_not_listed}
 				</MessageBox>
 			{/if}

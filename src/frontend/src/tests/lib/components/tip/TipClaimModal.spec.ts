@@ -61,6 +61,16 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 				ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
 				enabled: false,
 				symbol: 'ckTEST'
+			},
+			// The BITCAT ledger names itself BITCAT•ID•YRMO•ODIN; OISY shows it as BITCAT.
+			{
+				...mockIcrcCustomToken,
+				id: parseTokenId('BITCAT'),
+				ledgerCanisterId: 'xlwi6-kyaaa-aaaar-qarya-cai',
+				enabled: false,
+				symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				name: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN',
+				oisySymbol: { oisySymbol: 'BITCAT' }
 			}
 		])
 	};
@@ -288,6 +298,19 @@ describe('TipClaimModal', () => {
 			);
 
 			expect(dontAddButton(container)).toBeInTheDocument();
+		});
+
+		it.each([
+			{ copy: 'the symbol OISY shows', symbol: 'BITCAT' },
+			{ copy: 'the ledger symbol', symbol: 'BITCAT\u{2022}ID\u{2022}YRMO\u{2022}ODIN' }
+		])('names a token by the symbol OISY shows, for a copy of $copy', async ({ symbol }) => {
+			const { container } = await renderWithToken({ ledger: unlistedLedger, symbol, name: 'Mine' });
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(
+					replacePlaceholders(get(i18n).tip.text.added_token_copies, { $token: 'BITCAT' })
+				)
+			);
 		});
 
 		it('says OISY does not list a new token that copies none', async () => {

@@ -33,10 +33,17 @@ interface Labels {
 	name: string;
 }
 
+// The symbol and name OISY shows for a token in place of its ledger's own, where it has one.
+interface ShownLabels {
+	oisySymbol?: { oisySymbol: string };
+	oisyName?: { oisyName: string };
+}
+
 /**
- * The first of `among` whose symbol or name looks like the symbol or name of `token`, if any.
+ * The first of `among` whose symbol or name, its ledger's own or the one OISY shows, looks like the
+ * symbol or name of `token`, if any.
  */
-export const findLookalike = <T extends Labels>({
+export const findLookalike = <T extends Labels & ShownLabels>({
 	token: { symbol, name },
 	among
 }: {
@@ -51,8 +58,8 @@ export const findLookalike = <T extends Labels>({
 		return undefined;
 	}
 
-	return among.find(({ symbol, name }) =>
-		[symbol, name].some(
+	return among.find(({ symbol, name, oisySymbol, oisyName }) =>
+		[symbol, name, oisySymbol?.oisySymbol, oisyName?.oisyName].some(
 			(label) => notEmptyString(label) && toLookalikeKeys(label).some((key) => keys.has(key))
 		)
 	);
