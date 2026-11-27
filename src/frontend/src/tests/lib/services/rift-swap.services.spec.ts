@@ -812,6 +812,45 @@ describe('rift-swap.services', () => {
 				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
+			// Refused in the hook, after the row was created: the row goes, the refusal propagates, and the
+			// deposit is never treated as sent.
+			describe('right before the broadcast', () => {
+				const expectStoppedWithRowDeleted = async (reason: RiftSwapRefusal) => {
+					const progress = vi.fn();
+
+					await expect(fetchRiftEvmSwap(params({ progress }))).rejects.toMatchObject({ reason });
+
+					expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: rowId()
+					});
+					expect(progress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+				};
+
+				it('stops when the order has seen a deposit since', async () => {
+					vi.mocked(getRiftOrder).mockResolvedValue({ ...evmOrder, status: 'funded' });
+
+					await expectStoppedWithRowDeleted('orderInFlight');
+				});
+
+				it('stops when the order cannot be read again', async () => {
+					vi.mocked(getRiftOrder).mockRejectedValue(
+						new RiftApiError({ status: 503, message: 'no' })
+					);
+
+					await expectStoppedWithRowDeleted('orderRefused');
+				});
+
+				it('stops when the order passed its deadline during signing', async () => {
+					vi.mocked(getRiftOrder).mockResolvedValue({
+						...evmOrder,
+						deposit_deadline: new Date(Date.now() - 1).toISOString()
+					});
+
+					await expectStoppedWithRowDeleted('quoteExpired');
+				});
+			});
+
 			it('stops with nothing to delete when the order already has a row', async () => {
 				vi.mocked(createActiveUserTransaction).mockRejectedValue({ AlreadyInFlight: null });
 
