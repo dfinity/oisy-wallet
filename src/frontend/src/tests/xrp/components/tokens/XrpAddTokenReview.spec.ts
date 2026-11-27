@@ -4,7 +4,9 @@ import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockRlusdIssuer,
 	mockXrpAddress,
@@ -18,7 +20,7 @@ import type {
 } from '$xrp/services/xrp-add-token.services';
 import * as xrpAddTokenServices from '$xrp/services/xrp-add-token.services';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$xrp/services/xrp-add-token.services', () => ({
 	loadXrpAddTokenReview: vi.fn()
@@ -36,12 +38,14 @@ describe('XrpAddTokenReview', () => {
 		network: XRP_MAINNET_NETWORK,
 		currency: 'RLUSD',
 		issuer: mockRlusdIssuer,
-		onBack: vi.fn()
+		onBack: vi.fn(),
+		onSave: vi.fn()
 	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		mockAuthStore();
 		xrpAddressMainnetStore.set({ certified: true, data: mockXrpAddress });
 		xrpTrustLinesStore.set({ tokenId: XRP_TOKEN.id, lines: [mockXrpTrustLine] });
 
@@ -58,6 +62,7 @@ describe('XrpAddTokenReview', () => {
 
 		await waitFor(() => {
 			expect(xrpAddTokenServices.loadXrpAddTokenReview).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
 				currency: 'RLUSD',
 				issuer: mockRlusdIssuer,
 				address: mockXrpAddress,
@@ -141,15 +146,31 @@ describe('XrpAddTokenReview', () => {
 		expect(queryByText(/that OISY lists/)).toBeNull();
 	});
 
-	it('does not add the token yet', async () => {
+	it('adds the token once it is reviewed', async () => {
 		const { getByText } = render(XrpAddTokenReview, { props });
 
 		await waitFor(() => expect(getByText(RLUSD_TOKEN.symbol)).toBeInTheDocument());
+
+		const add = getByText(en.tokens.import.text.add_the_token).closest('button');
+
+		expect(add).toBeEnabled();
+
+		await fireEvent.click(add as HTMLButtonElement);
+
+		expect(props.onSave).toHaveBeenCalledOnce();
+	});
+
+	it('offers no adding while the review loads', () => {
+		vi.mocked(xrpAddTokenServices.loadXrpAddTokenReview).mockReturnValue(new Promise(() => {}));
+
+		const { getByText } = render(XrpAddTokenReview, { props });
 
 		expect(getByText(en.tokens.import.text.add_the_token).closest('button')).toBeDisabled();
 	});
 
 	it.each<{ refusal: XrpAddTokenRefusal; text: string; reserve?: bigint }>([
+		{ refusal: 'transaction_in_flight', text: en.tokens.import.error.xrp_transaction_in_flight },
+		{ refusal: 'not_guarded', text: en.tokens.import.error.xrp_not_guarded },
 		{ refusal: 'invalid_currency_code', text: en.tokens.import.error.xrp_invalid_currency_code },
 		{ refusal: 'invalid_issuer', text: en.tokens.import.error.xrp_invalid_issuer },
 		{ refusal: 'issuer_is_own_address', text: en.tokens.import.error.xrp_issuer_is_own_address },

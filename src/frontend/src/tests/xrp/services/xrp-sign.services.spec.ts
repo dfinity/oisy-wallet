@@ -1,12 +1,17 @@
 import { XRP_KEY_ID } from '$env/networks/networks.xrp.env';
 import * as signerApi from '$lib/api/signer.api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import {
+	mockRlusdCurrencyCode,
+	mockRlusdIssuer,
+	mockXrpAddress,
+	mockXrpAddress2
+} from '$tests/mocks/xrp.mock';
 import { XRP_DERIVATION_PATH_PREFIX } from '$xrp/constants/xrp.constants';
 import { getXrpAddressMainnet } from '$xrp/services/xrp-address.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { buildXrpPayment } from '$xrp/utils/xrp-transaction.utils';
+import { buildXrpPayment, buildXrpTrustSet } from '$xrp/utils/xrp-transaction.utils';
 import { decode, encodeForSigning } from 'ripple-binary-codec';
 
 describe('xrp-sign.services', () => {
@@ -149,6 +154,40 @@ describe('xrp-sign.services', () => {
 			expect(decoded.Amount).toBe('25000000');
 			expect(decoded.DestinationTag).toBe(12345);
 			expect(decoded.SigningPubKey).toBe(canonicalPublicKey);
+		});
+
+		it('signs a TrustSet the same way', async () => {
+			const spy = vi.spyOn(signerApi, 'signWithSchnorr').mockResolvedValue(signature);
+
+			const trustSet = buildXrpTrustSet({
+				account: mockXrpAddress,
+				token: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer },
+				fee: 12n,
+				sequence: 1,
+				signingPublicKey: canonicalPublicKey,
+				lastLedgerSequence: 1020
+			});
+
+			const blob = await signXrpTransaction({
+				identity: mockIdentity,
+				network: XrpNetworks.mainnet,
+				transaction: trustSet
+			});
+
+			expect(spy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					message: Uint8Array.from(Buffer.from(encodeForSigning(trustSet), 'hex'))
+				})
+			);
+
+			const decoded = decode(blob);
+
+			expect(decoded.TransactionType).toBe('TrustSet');
+			expect(decoded.TxnSignature).toBe(Buffer.from(signature).toString('hex').toUpperCase());
+			expect(decoded.LimitAmount).toMatchObject({
+				currency: mockRlusdCurrencyCode,
+				issuer: mockRlusdIssuer
+			});
 		});
 	});
 });

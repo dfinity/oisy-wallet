@@ -10,7 +10,9 @@ import {
 	mockXrpDestinationAddress,
 	mockXrpSourceAddress,
 	mockXrpSwapActiveUserTransaction,
-	mockXrpSwapData
+	mockXrpSwapData,
+	mockXrpTrustSetActiveUserTransaction,
+	mockXrpTrustSetData
 } from '$tests/mocks/active-user-transactions.mock';
 import {
 	isXrpPaymentInFlight,
@@ -38,6 +40,16 @@ describe('xrp-in-flight.utils', () => {
 				).toBeTruthy();
 				expect(
 					makesXrpPayment(withStatus({ tx: mockXrpSwapActiveUserTransaction, status }))
+				).toBeTruthy();
+			}
+		);
+
+		// A `TrustSet` claims its fee as a payment does, whatever the ledger makes of it.
+		it.each([{ Pending: null }, { Failed: null }] as ActiveUserTransactionStatus[])(
+			'is true for adding a trust-line token while %o',
+			(status) => {
+				expect(
+					makesXrpPayment(withStatus({ tx: mockXrpTrustSetActiveUserTransaction, status }))
 				).toBeTruthy();
 			}
 		);
@@ -74,6 +86,20 @@ describe('xrp-in-flight.utils', () => {
 			expect(isXrpPaymentInFlight(mockXrpSwapActiveUserTransaction)).toBeTruthy();
 		});
 
+		it.each([
+			{ status: { Pending: null }, inFlight: true },
+			{ status: { Executing: null }, inFlight: true },
+			{ status: { Succeeded: null }, inFlight: false },
+			{ status: { Failed: null }, inFlight: false }
+		] as { status: ActiveUserTransactionStatus; inFlight: boolean }[])(
+			'is $inFlight for adding a trust-line token while $status',
+			({ status, inFlight }) => {
+				expect(
+					isXrpPaymentInFlight(withStatus({ tx: mockXrpTrustSetActiveUserTransaction, status }))
+				).toBe(inFlight);
+			}
+		);
+
 		// From `Executing` the swap belongs to the NEAR Intents poller, not to the XRP ledger resolution.
 		it.each([
 			{ Executing: null },
@@ -99,6 +125,13 @@ describe('xrp-in-flight.utils', () => {
 	describe('xrpPaymentSettledStatus', () => {
 		it('ends a send as Succeeded', () => {
 			expect(xrpPaymentSettledStatus(mockXrpActiveUserTransaction)).toEqual({ Succeeded: null });
+		});
+
+		// The `TrustSet` is the whole of adding a token: once it validates, the line is there.
+		it('ends adding a trust-line token as Succeeded', () => {
+			expect(xrpPaymentSettledStatus(mockXrpTrustSetActiveUserTransaction)).toEqual({
+				Succeeded: null
+			});
 		});
 
 		// A validated deposit is not a swapped amount: 1Click still has to deliver it.
@@ -168,6 +201,39 @@ describe('xrp-in-flight.utils', () => {
 							...mockXrpSwapData,
 							source_address: [mockXrpDestinationAddress] as [string]
 						}
+					}
+				};
+
+				expect(inFlight([otherAddress])).toBeUndefined();
+			});
+		});
+
+		// A `TrustSet` takes the address's next sequence exactly as a payment does, so while it is
+		// unresolved no other transaction from the address is safe to sign — and it waits for them.
+		describe('adding a trust-line token', () => {
+			it.each([{ Pending: null }, { Executing: null }] as ActiveUserTransactionStatus[])(
+				'holds its address while %o',
+				(status) => {
+					const trustSet = withStatus({ tx: mockXrpTrustSetActiveUserTransaction, status });
+
+					expect(inFlight([trustSet])).toBe(trustSet);
+				}
+			);
+
+			it.each([{ Succeeded: null }, { Failed: null }] as ActiveUserTransactionStatus[])(
+				'releases its address once %o',
+				(status) => {
+					expect(
+						inFlight([withStatus({ tx: mockXrpTrustSetActiveUserTransaction, status })])
+					).toBeUndefined();
+				}
+			);
+
+			it('does not hold another address', () => {
+				const otherAddress: ActiveUserTransaction = {
+					...mockXrpTrustSetActiveUserTransaction,
+					data: {
+						XrpTrustSet: { ...mockXrpTrustSetData, source_address: mockXrpDestinationAddress }
 					}
 				};
 

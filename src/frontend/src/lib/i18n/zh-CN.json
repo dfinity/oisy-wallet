@@ -1662,7 +1662,9 @@
 				"xrp_issued_by": "",
 				"xrp_issuer_powers": "",
 				"xrp_reserve": "",
-				"xrp_reserve_after": ""
+				"xrp_reserve_after": "",
+				"xrp_add_submitted": "",
+				"xrp_token_added": ""
 			},
 			"error": {
 				"loading_metadata": "指定的地址在所选网络中不是有效的代币。",
@@ -1685,7 +1687,13 @@
 				"xrp_account_not_found": "",
 				"xrp_insufficient_fee": "",
 				"xrp_insufficient_reserve": "",
-				"xrp_state_unavailable": ""
+				"xrp_state_unavailable": "",
+				"xrp_transaction_in_flight": "",
+				"xrp_not_guarded": "",
+				"xrp_trust_set_unfunded": "",
+				"xrp_add_failed": "",
+				"xrp_trust_set_failed": "",
+				"xrp_trust_set_expired": ""
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name 正在准备并保护新的代币。在完成之前请不要关闭此标签页。",

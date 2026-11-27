@@ -1,6 +1,8 @@
 import type { TokenId } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -21,6 +23,7 @@ import { mockPrincipal, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
+import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
@@ -162,6 +165,23 @@ describe('token-id.utils', () => {
 		// no backend identity cannot be recorded at all.
 		it('maps native XRP on mainnet', () => {
 			expect(toBackendTokenId(XRP_TOKEN)).toEqual({ XrpNativeMainnet: null });
+		});
+
+		// A trust-line token shares native XRP's network, so matched on the network alone its
+		// `TrustSet` would be recorded as a native XRP payment.
+		it('maps a listed trust-line token to its currency and issuer, not to native XRP', () => {
+			expect(toBackendTokenId(RLUSD_TOKEN)).toEqual({
+				XrpTrustLineMainnet: [RLUSD_TOKEN.currency, RLUSD_TOKEN.issuer]
+			});
+		});
+
+		it('maps a token added by its currency and issuer the same way', () => {
+			const token = toXrpTrustLineToken({
+				identity: { currency: 'USD', issuer: mockRlusdIssuer },
+				network: XRP_MAINNET_NETWORK
+			});
+
+			expect(toBackendTokenId(token)).toEqual({ XrpTrustLineMainnet: ['USD', mockRlusdIssuer] });
 		});
 
 		// Bitcoin regtest is a local-development network with no `TokenId` variant

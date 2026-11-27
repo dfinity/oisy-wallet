@@ -59,6 +59,13 @@ export class XrpSendAlreadyInFlightError extends Error {}
 export class XrpSendNotGuardedError extends Error {}
 
 /**
+ * Adding a trust-line token refused before signing: the balance cannot pay the fee, or — once the
+ * account owns two objects, where the ledger stops waiving it — cannot keep the reserve the new line
+ * adds. Either way the ledger would apply the `TrustSet` as a failure and claim the fee.
+ */
+export class XrpTrustSetUnfundedError extends Error {}
+
+/**
  * The AUT an XRP payment is recorded under — the record that holds the one-payment-in-flight
  * invariant and that the ledger resolution closes. A send is recorded under its own `Xrp` AUT, and
  * a swap's deposit under the swap's `NearIntents` AUT, since that payment is part of the swap and

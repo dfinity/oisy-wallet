@@ -8,6 +8,7 @@
 	import IconPickaxe from '$lib/components/icons/IconPickaxe.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -47,7 +48,9 @@
 	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 	import {
 		isXrpActiveUserTransaction,
-		xrpActiveUserTransactionDisplay
+		isXrpTrustSetActiveUserTransaction,
+		xrpActiveUserTransactionDisplay,
+		xrpTrustSetActiveUserTransactionDisplay
 	} from '$xrp/utils/xrp-active-tx.utils';
 
 	interface Props {
@@ -77,6 +80,8 @@
 	// to hold the one-unresolved-payment-per-address invariant. It has one token
 	// and one network, so the swap layout's "A → B" reads wrong for it.
 	const isXrp = $derived(isXrpActiveUserTransaction(tx));
+	// Adding a trust-line token: one token, one network, and no amount — the row says which token.
+	const isXrpTrustSet = $derived(isXrpTrustSetActiveUserTransaction(tx));
 
 	// A mint writes the swap providers' display refs and keeps their layout: two tokens on
 	// one network. Only its label, provider and icon differ.
@@ -87,6 +92,7 @@
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
 	const xrpDisplay = $derived(xrpActiveUserTransactionDisplay(tx));
+	const xrpTrustSetDisplay = $derived(xrpTrustSetActiveUserTransactionDisplay(tx));
 
 	// A LI.FI route that paid out in another token (`DONE` / `PARTIAL`) shows the token actually
 	// received, with its amount, in place of the one asked for.
@@ -178,28 +184,30 @@
 				]
 					.filter(nonNullish)
 					.join(' ')
-			: isXrp
-				? [$i18n.send.text.send, xrpDisplay?.amount, xrpDisplay?.symbol]
-						.filter(nonNullish)
-						.join(' ')
-				: isCyclesTopUp
-					? [
-							$i18n.transaction.label.canister_top_up,
-							refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
-							refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]
-						]
+			: isXrpTrustSet
+				? [$i18n.core.text.add, xrpTrustSetDisplay?.symbol].filter(nonNullish).join(' ')
+				: isXrp
+					? [$i18n.send.text.send, xrpDisplay?.amount, xrpDisplay?.symbol]
 							.filter(nonNullish)
 							.join(' ')
-					: [
-							isCyclesMint ? $i18n.mint.text.mint : isSwap ? $i18n.swap.text.swap : undefined,
-							refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
-							refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-							'→',
-							...(lifiReceived ??
-								chainFusionReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
-						]
-							.filter(nonNullish)
-							.join(' ')
+					: isCyclesTopUp
+						? [
+								$i18n.transaction.label.canister_top_up,
+								refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+								refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]
+							]
+								.filter(nonNullish)
+								.join(' ')
+						: [
+								isCyclesMint ? $i18n.mint.text.mint : isSwap ? $i18n.swap.text.swap : undefined,
+								refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+								refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
+								'→',
+								...(lifiReceived ??
+									chainFusionReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
+							]
+								.filter(nonNullish)
+								.join(' ')
 	);
 
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
@@ -213,9 +221,11 @@
 	const networkText = $derived(
 		isXrp
 			? (xrpDisplay?.network ?? '')
-			: isCyclesTopUp || sourceNetwork === destinationNetwork
-				? sourceNetwork
-				: `${sourceNetwork} → ${destinationNetwork}`
+			: isXrpTrustSet
+				? (xrpTrustSetDisplay?.network ?? '')
+				: isCyclesTopUp || sourceNetwork === destinationNetwork
+					? sourceNetwork
+					: `${sourceNetwork} → ${destinationNetwork}`
 	);
 
 	// Time since the last status change, not since creation: a settled swap
@@ -267,6 +277,8 @@
 						<IconAlertTriangle size="20" />
 					{:else if isXrp}
 						<IconSend size="20" />
+					{:else if isXrpTrustSet}
+						<IconPlus size="20" />
 					{:else if isCyclesMint}
 						<IconPickaxe size="20" />
 					{:else if isCyclesTopUp}
