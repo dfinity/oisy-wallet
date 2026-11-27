@@ -110,8 +110,8 @@
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa.",
 			"oisy_allowance_used_up_title": "Bezplatné kredity za používání jsou vyčerpány",
 			"oisy_allowance_used_up": "Váš denní objem bezplatných kreditů na podepisování transakcí je vyčerpán, takže podepsání některých transakcí může selhat.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Váš denní objem bezplatných kreditů na podepisování transakcí je vyčerpán, takže podepisování nyní využívá vaše vlastní kredity.",
+			"oisy_allowance_tools_link": "Své vlastní kredity spravujte v sekci <a href=\"$url\">Nástroje</a>.",
 			"oisy_allowance_exceeded": "Tato transakce stojí víc, než pokryje váš bezplatný limit $oisy_name."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Kredity za používání",
+			"description": "Když vyčerpáte denní bezplatné kredity za používání, podepisování se platí z vašich ICP Cycles, až do limitu výdajů, který zde nastavíte.",
+			"own_credits": "Limit výdajů",
+			"balance": "Zůstatek ICP Cycles",
+			"add_more": "Nastavit limit výdajů",
+			"get_cycles": "Získat ICP Cycles",
+			"add_title": "Nastavte limit výdajů",
+			"add_description": "Podepisování může z vašich ICP Cycles strhnout nejvýše tuto částku. Zůstávají na vašem zůstatku.",
+			"own_credits_after": "Zbývá",
+			"added": "Váš limit výdajů je nastaven na $amount $token.",
+			"free_signatures": "Zbývající bezplatné podpisy",
+			"signatures_one": "~1 podpis",
+			"signatures_other": "~$count podpisů",
+			"new_limit": "Nový limit výdajů",
+			"set": "Nastavit",
+			"previous_limit": "Předchozí limit výdajů",
+			"limit_left": "Zbývá $remaining z $limit $token",
+			"balance_short": "Váš zůstatek pokryje jen $amount $token z vašeho zbývajícího limitu.",
+			"balance_empty": "Váš zůstatek je nulový."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Kredity za používání se nepodařilo načíst.",
+			"add": "Limit výdajů se nepodařilo nastavit. Zkuste to prosím znovu."
 		}
 	},
 	"shortcuts": {

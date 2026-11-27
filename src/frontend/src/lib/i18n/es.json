@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Créditos de uso gratuitos agotados",
 			"oisy_allowance_used_up": "Tu cantidad diaria de créditos gratuitos para firmar transacciones se ha agotado, así que la firma de algunas transacciones puede fallar.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Tu cantidad diaria de créditos gratuitos para firmar transacciones se ha agotado, así que la firma ahora usa tus propios créditos.",
+			"oisy_allowance_tools_link": "Gestiona tus propios créditos en <a href=\"$url\">Herramientas</a>.",
 			"oisy_allowance_exceeded": "Esta transacción cuesta más de lo que cubre tu asignación gratuita de $oisy_name."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Créditos de uso",
+			"description": "Cuando tus créditos de uso gratuitos diarios se agotan, la firma se paga con tus ICP Cycles, hasta el límite de gasto que fijes aquí.",
+			"own_credits": "Límite de gasto",
+			"balance": "Saldo de ICP Cycles",
+			"add_more": "Fijar límite de gasto",
+			"get_cycles": "Obtener ICP Cycles",
+			"add_title": "Fija tu límite de gasto",
+			"add_description": "La firma puede cobrar hasta este importe de tus ICP Cycles. Se quedan en tu saldo.",
+			"own_credits_after": "Restante",
+			"added": "Tu límite de gasto es ahora de $amount $token.",
+			"free_signatures": "Firmas gratuitas restantes",
+			"signatures_one": "~1 firma",
+			"signatures_other": "~$count firmas",
+			"new_limit": "Nuevo límite de gasto",
+			"set": "Fijar",
+			"previous_limit": "Límite de gasto anterior",
+			"limit_left": "$remaining de $limit $token restantes",
+			"balance_short": "Tu saldo solo cubre $amount $token de tu límite restante.",
+			"balance_empty": "Tu saldo está vacío."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "No se pudieron cargar tus créditos de uso.",
+			"add": "No se pudo fijar tu límite de gasto. Inténtalo de nuevo."
 		}
 	},
 	"shortcuts": {

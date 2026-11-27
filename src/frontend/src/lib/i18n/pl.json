@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Darmowe kredyty użytkowania wykorzystane",
 			"oisy_allowance_used_up": "Twoja dzienna pula darmowych kredytów na podpisywanie transakcji została wykorzystana, więc podpisanie niektórych transakcji może się nie powieść.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Twoja dzienna pula darmowych kredytów na podpisywanie transakcji została wykorzystana, więc podpisywanie korzysta teraz z Twoich własnych kredytów.",
+			"oisy_allowance_tools_link": "Zarządzaj własnymi kredytami w <a href=\"$url\">Narzędziach</a>.",
 			"oisy_allowance_exceeded": "Ta transakcja kosztuje więcej, niż pokrywa Twój darmowy limit $oisy_name."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Kredyty użytkowania",
+			"description": "Gdy Twoje dzienne darmowe kredyty użytkowania się wyczerpią, podpisywanie jest opłacane z Twoich ICP Cycles, do limitu wydatków, który tu ustawisz.",
+			"own_credits": "Limit wydatków",
+			"balance": "Saldo ICP Cycles",
+			"add_more": "Ustaw limit wydatków",
+			"get_cycles": "Zdobądź ICP Cycles",
+			"add_title": "Ustaw limit wydatków",
+			"add_description": "Podpisywanie może pobrać z Twoich ICP Cycles najwyżej tę kwotę. Pozostają one na Twoim saldzie.",
+			"own_credits_after": "Pozostało",
+			"added": "Twój limit wydatków wynosi teraz $amount $token.",
+			"free_signatures": "Pozostałe darmowe podpisy",
+			"signatures_one": "~1 podpis",
+			"signatures_other": "~$count podpisów",
+			"new_limit": "Nowy limit wydatków",
+			"set": "Ustaw",
+			"previous_limit": "Poprzedni limit wydatków",
+			"limit_left": "Pozostało $remaining z $limit $token",
+			"balance_short": "Twoje saldo pokrywa tylko $amount $token z pozostałego limitu.",
+			"balance_empty": "Twoje saldo wynosi zero."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Nie udało się wczytać Twoich kredytów użytkowania.",
+			"add": "Nie udało się ustawić limitu wydatków. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {

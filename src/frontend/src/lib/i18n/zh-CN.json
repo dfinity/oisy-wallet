@@ -110,8 +110,8 @@
 			"video_not_supported": "你的浏览器不支持视频播放。",
 			"oisy_allowance_used_up_title": "免费使用额度已用完",
 			"oisy_allowance_used_up": "你每日用于签署交易的免费额度已用完，部分交易可能签署失败。",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "你每日用于签署交易的免费额度已用完，签名现在将使用你自己的额度。",
+			"oisy_allowance_tools_link": "在<a href=\"$url\">工具</a>中管理你自己的额度。",
 			"oisy_allowance_exceeded": "此交易的费用超出了你的 $oisy_name 免费额度。"
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "使用额度",
+			"description": "每日免费使用额度用完后，签名费用将从你的 ICP Cycles 中支付，以你在此设置的支出上限为限。",
+			"own_credits": "支出上限",
+			"balance": "ICP Cycles 余额",
+			"add_more": "设置支出上限",
+			"get_cycles": "获取 ICP Cycles",
+			"add_title": "设置你的支出上限",
+			"add_description": "签名最多可从你的 ICP Cycles 中扣除此金额。它们仍保留在你的余额中。",
+			"own_credits_after": "剩余",
+			"added": "你的支出上限已设置为 $amount $token。",
+			"free_signatures": "剩余免费签名",
+			"signatures_one": "~1 次签名",
+			"signatures_other": "~$count 次签名",
+			"new_limit": "新支出上限",
+			"set": "设置",
+			"previous_limit": "之前的支出上限",
+			"limit_left": "$limit $token 中剩余 $remaining",
+			"balance_short": "你的余额仅够支付剩余上限中的 $amount $token。",
+			"balance_empty": "你的余额为零。"
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "无法加载你的使用额度。",
+			"add": "无法设置你的支出上限。请重试。"
 		}
 	},
 	"shortcuts": {

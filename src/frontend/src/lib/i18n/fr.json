@@ -110,8 +110,8 @@
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo.",
 			"oisy_allowance_used_up_title": "Crédits d'utilisation gratuits épuisés",
 			"oisy_allowance_used_up": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature de certaines transactions peut donc échouer.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature utilise donc désormais vos propres crédits.",
+			"oisy_allowance_tools_link": "Gérez vos propres crédits dans <a href=\"$url\">Outils</a>.",
 			"oisy_allowance_exceeded": "Cette transaction coûte plus que ce que couvre votre quota gratuit $oisy_name."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Crédits d'utilisation",
+			"description": "Lorsque vos crédits d'utilisation gratuits quotidiens sont épuisés, la signature est payée avec vos ICP Cycles, jusqu'à la limite de dépense que vous fixez ici.",
+			"own_credits": "Limite de dépense",
+			"balance": "Solde ICP Cycles",
+			"add_more": "Définir la limite de dépense",
+			"get_cycles": "Obtenir des ICP Cycles",
+			"add_title": "Définissez votre limite de dépense",
+			"add_description": "La signature peut prélever jusqu'à ce montant sur vos ICP Cycles. Ils restent dans votre solde.",
+			"own_credits_after": "Restant",
+			"added": "Votre limite de dépense est fixée à $amount $token.",
+			"free_signatures": "Signatures gratuites restantes",
+			"signatures_one": "~1 signature",
+			"signatures_other": "~$count signatures",
+			"new_limit": "Nouvelle limite de dépense",
+			"set": "Définir",
+			"previous_limit": "Limite de dépense précédente",
+			"limit_left": "Il reste $remaining sur $limit $token",
+			"balance_short": "Votre solde ne couvre que $amount $token de votre limite restante.",
+			"balance_empty": "Votre solde est vide."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Impossible de charger vos crédits d'utilisation.",
+			"add": "Impossible de définir votre limite de dépense. Veuillez réessayer."
 		}
 	},
 	"shortcuts": {

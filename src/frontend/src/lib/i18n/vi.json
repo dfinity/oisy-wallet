@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Đã dùng hết tín dụng sử dụng miễn phí",
 			"oisy_allowance_used_up": "Lượng tín dụng miễn phí hằng ngày để ký giao dịch của bạn đã dùng hết, nên việc ký một số giao dịch có thể thất bại.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Lượng tín dụng miễn phí hằng ngày để ký giao dịch của bạn đã dùng hết, nên việc ký giờ sử dụng tín dụng của chính bạn.",
+			"oisy_allowance_tools_link": "Quản lý tín dụng của bạn trong <a href=\"$url\">Công cụ</a>.",
 			"oisy_allowance_exceeded": "Chi phí của giao dịch này vượt quá hạn mức miễn phí của $oisy_name."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Tín dụng sử dụng",
+			"description": "Khi tín dụng sử dụng miễn phí hằng ngày của bạn đã hết, việc ký sẽ được trả bằng ICP Cycles của bạn, tối đa bằng hạn mức chi tiêu bạn đặt ở đây.",
+			"own_credits": "Hạn mức chi tiêu",
+			"balance": "Số dư ICP Cycles",
+			"add_more": "Đặt hạn mức chi tiêu",
+			"get_cycles": "Nhận ICP Cycles",
+			"add_title": "Đặt hạn mức chi tiêu của bạn",
+			"add_description": "Việc ký có thể trừ tối đa số tiền này từ ICP Cycles của bạn. Chúng vẫn nằm trong số dư của bạn.",
+			"own_credits_after": "Còn lại",
+			"added": "Hạn mức chi tiêu của bạn được đặt là $amount $token.",
+			"free_signatures": "Chữ ký miễn phí còn lại",
+			"signatures_one": "~1 chữ ký",
+			"signatures_other": "~$count chữ ký",
+			"new_limit": "Hạn mức chi tiêu mới",
+			"set": "Đặt",
+			"previous_limit": "Hạn mức chi tiêu trước đó",
+			"limit_left": "Còn lại $remaining trên $limit $token",
+			"balance_short": "Số dư của bạn chỉ đủ cho $amount $token trong hạn mức còn lại.",
+			"balance_empty": "Số dư của bạn bằng 0."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Không thể tải tín dụng sử dụng của bạn.",
+			"add": "Không thể đặt hạn mức chi tiêu của bạn. Vui lòng thử lại."
 		}
 	},
 	"shortcuts": {

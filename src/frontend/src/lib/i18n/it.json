@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Crediti di utilizzo gratuiti esauriti",
 			"oisy_allowance_used_up": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma di alcune transazioni potrebbe non riuscire.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma ora usa i tuoi crediti.",
+			"oisy_allowance_tools_link": "Gestisci i tuoi crediti in <a href=\"$url\">Strumenti</a>.",
 			"oisy_allowance_exceeded": "Questa transazione costa più di quanto copra la tua quota gratuita di $oisy_name."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Crediti di utilizzo",
+			"description": "Quando i tuoi crediti di utilizzo gratuiti giornalieri sono esauriti, la firma viene pagata con i tuoi ICP Cycles, fino al limite di spesa che imposti qui.",
+			"own_credits": "Limite di spesa",
+			"balance": "Saldo ICP Cycles",
+			"add_more": "Imposta limite di spesa",
+			"get_cycles": "Ottieni ICP Cycles",
+			"add_title": "Imposta il tuo limite di spesa",
+			"add_description": "La firma può addebitare fino a questo importo sui tuoi ICP Cycles. Restano nel tuo saldo.",
+			"own_credits_after": "Rimanente",
+			"added": "Il tuo limite di spesa è impostato a $amount $token.",
+			"free_signatures": "Firme gratuite rimanenti",
+			"signatures_one": "~1 firma",
+			"signatures_other": "~$count firme",
+			"new_limit": "Nuovo limite di spesa",
+			"set": "Imposta",
+			"previous_limit": "Limite di spesa precedente",
+			"limit_left": "$remaining su $limit $token rimanenti",
+			"balance_short": "Il tuo saldo copre solo $amount $token del tuo limite rimanente.",
+			"balance_empty": "Il tuo saldo è a zero."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Impossibile caricare i tuoi crediti di utilizzo.",
+			"add": "Impossibile impostare il limite di spesa. Riprova."
 		}
 	},
 	"shortcuts": {

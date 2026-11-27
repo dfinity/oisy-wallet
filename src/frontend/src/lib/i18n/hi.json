@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "मुफ़्त उपयोग क्रेडिट खत्म हो गए",
 			"oisy_allowance_used_up": "लेनदेन पर हस्ताक्षर करने के लिए आपके दैनिक मुफ़्त क्रेडिट खत्म हो गए हैं, इसलिए कुछ लेनदेन पर हस्ताक्षर विफल हो सकते हैं।",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "लेनदेन पर हस्ताक्षर करने के लिए आपके दैनिक मुफ़्त क्रेडिट खत्म हो गए हैं, इसलिए अब हस्ताक्षर आपके अपने क्रेडिट का उपयोग करते हैं।",
+			"oisy_allowance_tools_link": "अपने क्रेडिट <a href=\"$url\">टूल्स</a> में प्रबंधित करें।",
 			"oisy_allowance_exceeded": "इस लेनदेन की लागत आपके मुफ़्त $oisy_name भत्ते से अधिक है।"
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "उपयोग क्रेडिट",
+			"description": "जब आपके दैनिक मुफ़्त उपयोग क्रेडिट खत्म हो जाते हैं, तो हस्ताक्षर का भुगतान आपके ICP Cycles से होता है, उस खर्च सीमा तक जो आप यहाँ तय करते हैं।",
+			"own_credits": "खर्च सीमा",
+			"balance": "ICP Cycles बैलेंस",
+			"add_more": "खर्च सीमा तय करें",
+			"get_cycles": "ICP Cycles पाएँ",
+			"add_title": "अपनी खर्च सीमा तय करें",
+			"add_description": "हस्ताक्षर आपके ICP Cycles से अधिकतम इतनी राशि ले सकते हैं। वे आपके बैलेंस में रहते हैं।",
+			"own_credits_after": "शेष",
+			"added": "आपकी खर्च सीमा $amount $token पर तय की गई है।",
+			"free_signatures": "बचे हुए मुफ़्त हस्ताक्षर",
+			"signatures_one": "~1 हस्ताक्षर",
+			"signatures_other": "~$count हस्ताक्षर",
+			"new_limit": "नई खर्च सीमा",
+			"set": "तय करें",
+			"previous_limit": "पिछली खर्च सीमा",
+			"limit_left": "$limit $token में से $remaining शेष",
+			"balance_short": "आपका बैलेंस आपकी शेष सीमा में से केवल $amount $token के लिए काफ़ी है।",
+			"balance_empty": "आपका बैलेंस खाली है।"
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "आपके उपयोग क्रेडिट लोड नहीं हो सके।",
+			"add": "आपकी खर्च सीमा तय नहीं की जा सकी। कृपया फिर से कोशिश करें।"
 		}
 	},
 	"shortcuts": {

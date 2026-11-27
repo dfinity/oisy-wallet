@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Créditos de uso gratuitos esgotados",
 			"oisy_allowance_used_up": "Sua quantidade diária de créditos gratuitos para assinar transações se esgotou, então a assinatura de algumas transações pode falhar.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Sua quantidade diária de créditos gratuitos para assinar transações se esgotou, então a assinatura agora usa seus próprios créditos.",
+			"oisy_allowance_tools_link": "Gerencie seus próprios créditos em <a href=\"$url\">Ferramentas</a>.",
 			"oisy_allowance_exceeded": "Esta transação custa mais do que sua cota gratuita do $oisy_name cobre."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Créditos de uso",
+			"description": "Quando seus créditos de uso gratuitos diários se esgotam, a assinatura é paga com seus ICP Cycles, até o limite de gastos que você definir aqui.",
+			"own_credits": "Limite de gastos",
+			"balance": "Saldo de ICP Cycles",
+			"add_more": "Definir limite de gastos",
+			"get_cycles": "Obter ICP Cycles",
+			"add_title": "Defina seu limite de gastos",
+			"add_description": "A assinatura pode cobrar até este valor dos seus ICP Cycles. Eles continuam no seu saldo.",
+			"own_credits_after": "Restante",
+			"added": "Seu limite de gastos foi definido para $amount $token.",
+			"free_signatures": "Assinaturas gratuitas restantes",
+			"signatures_one": "~1 assinatura",
+			"signatures_other": "~$count assinaturas",
+			"new_limit": "Novo limite de gastos",
+			"set": "Definir",
+			"previous_limit": "Limite de gastos anterior",
+			"limit_left": "$remaining de $limit $token restantes",
+			"balance_short": "Seu saldo cobre apenas $amount $token do seu limite restante.",
+			"balance_empty": "Seu saldo está zerado."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Não foi possível carregar seus créditos de uso.",
+			"add": "Não foi possível definir seu limite de gastos. Tente novamente."
 		}
 	},
 	"shortcuts": {

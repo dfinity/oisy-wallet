@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Gratis-Nutzungsguthaben aufgebraucht",
 			"oisy_allowance_used_up": "Dein tägliches Gratis-Guthaben zum Signieren von Transaktionen ist aufgebraucht, daher kann das Signieren einiger Transaktionen fehlschlagen.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Dein tägliches Gratis-Guthaben zum Signieren von Transaktionen ist aufgebraucht, daher nutzt das Signieren jetzt dein eigenes Guthaben.",
+			"oisy_allowance_tools_link": "Verwalte dein eigenes Guthaben unter <a href=\"$url\">Werkzeuge</a>.",
 			"oisy_allowance_exceeded": "Diese Transaktion kostet mehr, als dein Gratis-Kontingent von $oisy_name abdeckt."
 		},
 		"error": {
@@ -927,29 +927,29 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
-			"free_signatures": "",
-			"signatures_one": "",
-			"signatures_other": "",
-			"new_limit": "",
-			"set": "",
-			"previous_limit": "",
-			"limit_left": "",
-			"balance_short": "",
-			"balance_empty": ""
+			"title": "Nutzungsguthaben",
+			"description": "Wenn dein tägliches Gratis-Nutzungsguthaben aufgebraucht ist, wird das Signieren aus deinen ICP Cycles bezahlt, bis zu dem Ausgabelimit, das du hier festlegst.",
+			"own_credits": "Ausgabelimit",
+			"balance": "ICP Cycles-Guthaben",
+			"add_more": "Ausgabelimit festlegen",
+			"get_cycles": "ICP Cycles holen",
+			"add_title": "Ausgabelimit festlegen",
+			"add_description": "Das Signieren kann bis zu diesem Betrag von deinen ICP Cycles abbuchen. Sie bleiben in deinem Guthaben.",
+			"own_credits_after": "Verbleibend",
+			"added": "Dein Ausgabelimit ist auf $amount $token festgelegt.",
+			"free_signatures": "Verbleibende Gratis-Signaturen",
+			"signatures_one": "~1 Signatur",
+			"signatures_other": "~$count Signaturen",
+			"new_limit": "Neues Ausgabelimit",
+			"set": "Festlegen",
+			"previous_limit": "Bisheriges Ausgabelimit",
+			"limit_left": "$remaining von $limit $token übrig",
+			"balance_short": "Dein Guthaben deckt nur $amount $token deines verbleibenden Limits ab.",
+			"balance_empty": "Dein Guthaben ist leer."
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Dein Nutzungsguthaben konnte nicht geladen werden.",
+			"add": "Ausgabelimit konnte nicht festgelegt werden. Bitte versuche es erneut."
 		}
 	},
 	"shortcuts": {
