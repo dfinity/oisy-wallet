@@ -19,6 +19,7 @@ import {
 	back,
 	gotoReplaceRoot,
 	isActivityPath,
+	isAssetsRouteId,
 	isDappExplorerPath,
 	isEarnPath,
 	isEarningPath,
@@ -715,6 +716,31 @@ describe('nav.utils', () => {
 				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
 				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
+
+		describe('isAssetsRouteId', () => {
+			it.each([
+				{ label: 'Tokens', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` },
+				{ label: 'Tokens (no trailing slash)', routeId: `${ROUTE_ID_GROUP_APP}` },
+				{ label: 'WalletConnect', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}` },
+				{ label: 'Trading', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Trading}` },
+				{ label: 'Earning', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Earning}` },
+				{ label: 'Borrowings', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Borrowings}` }
+			])('should return true for the $label tab route', ({ routeId }) => {
+				expect(isAssetsRouteId(routeId)).toBeTruthy();
+			});
+
+			it.each([
+				{ label: 'NFTs (own section)', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Nfts}` },
+				{ label: 'Activity', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Activity}` },
+				{ label: 'Explore', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Explore}` },
+				{ label: 'Settings', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Settings}` },
+				{ label: 'Earn', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Earn}` },
+				{ label: 'Rewards', routeId: `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}` },
+				{ label: 'null', routeId: null }
+			])('should return false for $label', ({ routeId }) => {
+				expect(isAssetsRouteId(routeId)).toBeFalsy();
 			});
 		});
 	});

@@ -17,6 +17,8 @@ import {
 	NAVIGATION_MORE_MENU_SOURCE_CODE,
 	NAVIGATION_MORE_MENU_X
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
@@ -145,6 +147,39 @@ describe('NavigationMoreMenu', () => {
 			expect(help.getAttribute('href')).toBe(OISY_SUPPORT_URL);
 			expect(help.getAttribute('target')).toBe('_blank');
 			expect(help.getAttribute('rel')).toContain('noopener');
+		});
+
+		it('counts a click as one on the Help item of the main navigation', async () => {
+			const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+
+			const { getByTestId } = await open();
+
+			await fireEvent.click(getByTestId(NAVIGATION_MORE_MENU_HELP));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.UI_CLICK,
+				metadata: {
+					source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+					source_sublocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MAIN_MENU,
+					event_value: 'help'
+				}
+			});
+
+			trackEventSpy.mockRestore();
+		});
+
+		it('does not count the documentation support link as the Help item', async () => {
+			featureFlags.helpEnabled = false;
+
+			const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+
+			const { getByTestId } = await open();
+
+			await fireEvent.click(getByTestId(NAVIGATION_MORE_MENU_HELP));
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			trackEventSpy.mockRestore();
 		});
 	});
 

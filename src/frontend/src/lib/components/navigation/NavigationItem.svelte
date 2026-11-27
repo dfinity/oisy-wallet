@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
+	import { trackEvent as trackEventServices } from '$lib/services/analytics.services';
+	import type { TrackEventParams } from '$lib/types/analytics';
 	import type { TagVariant } from '$lib/types/style';
 
 	interface Props {
@@ -14,6 +16,7 @@
 		testId?: string;
 		tag?: string;
 		tagVariant?: TagVariant;
+		trackEvent?: TrackEventParams;
 	}
 
 	let {
@@ -25,8 +28,22 @@
 		ariaLabel,
 		testId,
 		tag,
-		tagVariant
+		tagVariant,
+		trackEvent
 	}: Props = $props();
+
+	const track = () => {
+		if (isNullish(trackEvent)) {
+			return;
+		}
+
+		trackEventServices(trackEvent);
+	};
+
+	const onButtonClick = () => {
+		track();
+		onclick?.();
+	};
 </script>
 
 {#snippet content()}
@@ -55,6 +72,7 @@
 		aria-label={ariaLabel}
 		data-tid={testId}
 		{href}
+		onclick={track}
 	>
 		{@render content()}
 	</a>
@@ -64,7 +82,7 @@
 		class:selected
 		aria-label={ariaLabel}
 		data-tid={testId}
-		{onclick}
+		onclick={onButtonClick}
 		type="button"
 	>
 		{@render content()}
