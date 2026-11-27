@@ -6,6 +6,7 @@
 	import SwapLifiBtcRelayWarning from '$lib/components/swap/SwapLifiBtcRelayWarning.svelte';
 	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import SwapUnprotectedOfferWarning from '$lib/components/swap/SwapUnprotectedOfferWarning.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -37,7 +38,8 @@
 	import {
 		calculateValueDifference,
 		getSwapSlippageInvalidValue,
-		getSwapSlippageStatus
+		getSwapSlippageStatus,
+		isProtectedOffer
 	} from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -109,11 +111,18 @@
 		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	);
 
+	// An unprotected offer has no minimum for the slippage setting to set.
+	let isUnprotectedOffer = $derived(
+		nonNullish($swapAmountsStore?.selectedProvider) &&
+			!isProtectedOffer($swapAmountsStore.selectedProvider)
+	);
+
 	let isSlippageWarning = $derived(
-		getSwapSlippageStatus({
-			slippageValue,
-			maxSlippageInvalidValue: getSwapSlippageInvalidValue($sourceToken?.network.id)
-		}) === 'warning'
+		!isUnprotectedOffer &&
+			getSwapSlippageStatus({
+				slippageValue,
+				maxSlippageInvalidValue: getSwapSlippageInvalidValue($sourceToken?.network.id)
+			}) === 'warning'
 	);
 
 	let isMissingTokenPrice = $derived(
@@ -163,23 +172,25 @@
 		</ModalValue>
 	{/if}
 
-	<ModalValue>
-		{#snippet label()}
-			{$i18n.swap.text.max_slippage}
-		{/snippet}
+	{#if !isUnprotectedOffer}
+		<ModalValue>
+			{#snippet label()}
+				{$i18n.swap.text.max_slippage}
+			{/snippet}
 
-		{#snippet mainValue()}
-			{#if isSlippageWarning}
-				<!-- Amber text fails 4.5:1, so only the sign is amber. -->
-				<span class="inline-flex items-center gap-2">
-					<span class="text-warning-primary" aria-hidden="true">⚠</span>
-					<span>{slippageValue}%</span>
-				</span>
-			{:else}
-				{slippageValue}%
-			{/if}
-		{/snippet}
-	</ModalValue>
+			{#snippet mainValue()}
+				{#if isSlippageWarning}
+					<!-- Amber text fails 4.5:1, so only the sign is amber. -->
+					<span class="inline-flex items-center gap-2">
+						<span class="text-warning-primary" aria-hidden="true">⚠</span>
+						<span>{slippageValue}%</span>
+					</span>
+				{:else}
+					{slippageValue}%
+				{/if}
+			{/snippet}
+		</ModalValue>
+	{/if}
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
@@ -193,6 +204,8 @@
 	{/if}
 
 	<SwapLifiBtcRelayWarning />
+
+	<SwapUnprotectedOfferWarning />
 
 	{#if isSlippageWarning}
 		<div class="mt-4">

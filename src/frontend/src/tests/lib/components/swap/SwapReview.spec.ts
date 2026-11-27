@@ -1,14 +1,18 @@
 import SwapReview from '$lib/components/swap/SwapReview.svelte';
 import {
+	SWAP_PROVIDER_GUARANTEES_MINIMUM,
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
-import { SWAP_LIFI_BTC_RELAY_WARNING } from '$lib/constants/test-ids.constants';
+import {
+	SWAP_LIFI_BTC_RELAY_WARNING,
+	SWAP_UNPROTECTED_OFFER_WARNING
+} from '$lib/constants/test-ids.constants';
 import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
 import { SwapErrorCodes, SwapProvider, type SwapMappedResult } from '$lib/types/swap';
-import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -24,6 +28,18 @@ vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
 	NEAR_INTENTS_XRP_SWAP_ENABLED: false
 }));
+
+// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
+vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
+	const actual = await importOriginal<{
+		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
+	}>();
+
+	return {
+		...actual,
+		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
+	};
+});
 
 describe('SwapReview', () => {
 	const mockSourceToken = { ...mockValidIcToken, enabled: true };
@@ -761,6 +777,73 @@ describe('SwapReview', () => {
 			});
 
 			expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('unprotected offer', () => {
+		const warning = replacePlaceholders(en.swap.text.unprotected_offer_warning, {
+			$provider: 'ICPSwap'
+		});
+
+		beforeEach(() => {
+			SWAP_PROVIDER_GUARANTEES_MINIMUM[SwapProvider.ICP_SWAP] = false;
+		});
+
+		afterEach(() => {
+			SWAP_PROVIDER_GUARANTEES_MINIMUM[SwapProvider.ICP_SWAP] = true;
+		});
+
+		it('should warn that the provider guarantees no minimum instead of showing max slippage', () => {
+			const { context } = createSwapContext();
+
+			const { getByTestId, getByText, queryByText } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(getByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).toHaveTextContent(warning);
+			expect(queryByText(en.swap.text.max_slippage)).not.toBeInTheDocument();
+			expect(queryByText('0.5%')).not.toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+		});
+
+		it('should not warn about high slippage, which does not apply', () => {
+			const { context } = createSwapContext();
+
+			const { queryByText } = render(SwapReview, {
+				props: { ...baseProps, slippageValue: '8' },
+				context
+			});
+
+			expect(queryByText(en.swap.text.max_slippage_warning)).not.toBeInTheDocument();
+			expect(queryByText('⚠')).not.toBeInTheDocument();
+		});
+
+		it('should still ask to confirm a large value difference, with no checkbox of its own', () => {
+			const { context } = createSwapContext();
+
+			const { getAllByRole, getByTestId, getByText } = render(SwapReview, {
+				props: { ...baseProps, receiveAmount: 0.1 },
+				context
+			});
+
+			expect(getByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).toBeInTheDocument();
+			expect(getAllByRole('checkbox')).toHaveLength(1);
+			expect(getByText(en.swap.text.value_difference_error_confirmation)).toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeDisabled();
+		});
+
+		it('should not warn when a protected offer is selected', () => {
+			SWAP_PROVIDER_GUARANTEES_MINIMUM[SwapProvider.ICP_SWAP] = true;
+			const { context } = createSwapContext();
+
+			const { getByText, queryByTestId } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(queryByTestId(SWAP_UNPROTECTED_OFFER_WARNING)).not.toBeInTheDocument();
+			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 		});
 	});
 });
