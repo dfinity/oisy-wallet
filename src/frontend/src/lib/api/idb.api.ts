@@ -1,7 +1,7 @@
 import { isNullish } from '@dfinity/utils';
 
 // We prefer to run deletions async as promises to avoid that a single failure blocks the whole process.
-const deleteDatabase = (name: string): Promise<void> =>
+export const deleteIdbDatabase = (name: string): Promise<void> =>
 	new Promise((resolve, reject) => {
 		const request = indexedDB.deleteDatabase(name);
 
@@ -23,7 +23,7 @@ export const deleteIdbAllOisyRelated = async () => {
 				return;
 			}
 
-			await deleteDatabase(name);
+			await deleteIdbDatabase(name);
 		});
 
 		await Promise.allSettled(promises);

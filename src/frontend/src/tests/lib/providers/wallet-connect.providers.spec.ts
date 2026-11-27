@@ -7,12 +7,17 @@ import {
 import { BIP122_MAINNET_CHAINS_KEYS } from '$env/bip122-chains.env';
 import * as signerEnv from '$env/signer.env';
 import * as signerConstants from '$lib/constants/signer.constants';
-import { UNEXPECTED_ERROR, WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
+import {
+	UNEXPECTED_ERROR,
+	WALLET_CONNECT_IDB_NAME,
+	WALLET_CONNECT_METADATA,
+	WALLET_CONNECT_SESSIONS_OWNER_KEY
+} from '$lib/constants/wallet-connect.constants';
 import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockPrincipal, mockPrincipalText, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
@@ -601,6 +606,169 @@ describe('wallet-connect.providers', () => {
 					topic: 'topic1',
 					reason: getSdkError('USER_DISCONNECTED')
 				});
+			});
+		});
+
+		describe('sessions saved in the browser', () => {
+			const storeName = 'keyvaluestorage';
+
+			const saveSessions = (): Promise<void> =>
+				new Promise((resolve, reject) => {
+					const request = indexedDB.open(WALLET_CONNECT_IDB_NAME);
+
+					request.onupgradeneeded = () => request.result.createObjectStore(storeName);
+					request.onerror = () => reject(request.error);
+					request.onsuccess = () => {
+						const db = request.result;
+						const tx = db.transaction(storeName, 'readwrite');
+
+						tx.objectStore(storeName).put('[{"topic":"topic1"}]', 'wc@2:client:0.3//session');
+						tx.onerror = () => reject(tx.error);
+						tx.oncomplete = () => {
+							db.close();
+							resolve();
+						};
+					};
+				});
+
+			const hasSavedSessions = (): Promise<boolean> =>
+				new Promise((resolve, reject) => {
+					const request = indexedDB.open(WALLET_CONNECT_IDB_NAME);
+
+					request.onerror = () => reject(request.error);
+					request.onsuccess = () => {
+						const db = request.result;
+						const saved = db.objectStoreNames.contains(storeName);
+
+						db.close();
+						resolve(saved);
+					};
+				});
+
+			const deleteSavedSessions = (): Promise<void> =>
+				new Promise((resolve) => {
+					const request = indexedDB.deleteDatabase(WALLET_CONNECT_IDB_NAME);
+
+					request.onsuccess = () => resolve();
+					request.onerror = () => resolve();
+				});
+
+			// The WalletKit instance is created once per page load, so each test loads the provider anew.
+			const loadProvider = async () => {
+				vi.resetModules();
+
+				const { WalletKit } = await import('@reown/walletkit');
+				const walletKitInit = vi.spyOn(WalletKit, 'init').mockResolvedValue(walletKitSpy);
+
+				const { WalletConnectClient } = await import('$lib/providers/wallet-connect.providers');
+
+				return { WalletConnectClient, walletKitInit };
+			};
+
+			const savedOwner = (): string | null =>
+				localStorage.getItem(WALLET_CONNECT_SESSIONS_OWNER_KEY);
+
+			beforeEach(async () => {
+				localStorage.clear();
+
+				await deleteSavedSessions();
+				await saveSessions();
+			});
+
+			afterEach(async () => {
+				localStorage.clear();
+
+				await deleteSavedSessions();
+			});
+
+			it('should record the owner under a key the WalletConnect storage leaves in local storage', () => {
+				const key = WALLET_CONNECT_SESSIONS_OWNER_KEY.toLowerCase();
+
+				['wc@', 'wc_', 'walletconnect', 'wallet_connect'].forEach((pattern) =>
+					expect(key).not.toContain(pattern)
+				);
+			});
+
+			it('should keep the sessions saved by the identity that signs in', async () => {
+				localStorage.setItem(WALLET_CONNECT_SESSIONS_OWNER_KEY, JSON.stringify(mockPrincipalText));
+
+				const { WalletConnectClient, walletKitInit } = await loadProvider();
+
+				await WalletConnectClient.init({ ...mockParams, cleanSlate: false });
+
+				await expect(hasSavedSessions()).resolves.toBeTruthy();
+
+				expect(walletKitInit).toHaveBeenCalledOnce();
+				expect(savedOwner()).toBe(JSON.stringify(mockPrincipalText));
+			});
+
+			it('should drop the sessions saved by another identity before WalletKit loads them', async () => {
+				localStorage.setItem(WALLET_CONNECT_SESSIONS_OWNER_KEY, JSON.stringify(mockPrincipalText2));
+
+				const { WalletConnectClient, walletKitInit } = await loadProvider();
+
+				walletKitInit.mockImplementationOnce(async () => {
+					await expect(hasSavedSessions()).resolves.toBeFalsy();
+
+					return walletKitSpy;
+				});
+
+				await WalletConnectClient.init({ ...mockParams, cleanSlate: false });
+
+				expect(walletKitInit).toHaveBeenCalledOnce();
+				expect(savedOwner()).toBe(JSON.stringify(mockPrincipalText));
+			});
+
+			it('should drop the sessions saved before an owner was recorded', async () => {
+				const { WalletConnectClient, walletKitInit } = await loadProvider();
+
+				await WalletConnectClient.init({ ...mockParams, cleanSlate: false });
+
+				await expect(hasSavedSessions()).resolves.toBeFalsy();
+
+				expect(walletKitInit).toHaveBeenCalledOnce();
+				expect(savedOwner()).toBe(JSON.stringify(mockPrincipalText));
+			});
+
+			it('should drop the saved sessions and record no owner when no identity is signed in', async () => {
+				localStorage.setItem(WALLET_CONNECT_SESSIONS_OWNER_KEY, JSON.stringify(mockPrincipalText2));
+
+				const { WalletConnectClient } = await loadProvider();
+
+				await WalletConnectClient.init({
+					...mockParams,
+					btcPrincipal: undefined,
+					cleanSlate: false
+				});
+
+				await expect(hasSavedSessions()).resolves.toBeFalsy();
+
+				expect(savedOwner()).toBe(JSON.stringify(mockPrincipalText2));
+			});
+
+			it('should not start WalletKit when the sessions of another identity cannot be dropped', async () => {
+				localStorage.setItem(WALLET_CONNECT_SESSIONS_OWNER_KEY, JSON.stringify(mockPrincipalText2));
+
+				// A connection that stays open (e.g. from another tab) blocks deleting the database.
+				const openConnection = await new Promise<IDBDatabase>((resolve, reject) => {
+					const request = indexedDB.open(WALLET_CONNECT_IDB_NAME);
+
+					request.onerror = () => reject(request.error);
+					request.onsuccess = () => resolve(request.result);
+				});
+
+				const { WalletConnectClient, walletKitInit } = await loadProvider();
+
+				try {
+					await expect(
+						WalletConnectClient.init({ ...mockParams, cleanSlate: false })
+					).rejects.toThrow();
+
+					expect(walletKitInit).not.toHaveBeenCalled();
+					expect(savedOwner()).toBe(JSON.stringify(mockPrincipalText2));
+				} finally {
+					openConnection.close();
+				}
 			});
 		});
 
