@@ -661,7 +661,7 @@
 
 					<Button
 						colorStyle="secondary-light"
-						disabled={handingOff}
+						disabled={handingOff || !$icrcCustomTokensInitialized}
 						fullWidth
 						onclick={leaveForWallet}
 						testId={TIP_RECEIVED_BUTTON}

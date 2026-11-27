@@ -302,6 +302,33 @@ describe('TipClaimModal', () => {
 			);
 		});
 
+		it('keeps the wallet button off until the list lands, then names the new token', async () => {
+			tokensInitialized.set(false);
+
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			const walletButton = () =>
+				container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`);
+
+			expect(walletButton()).toBeDisabled();
+			expect(warning(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).not.toBeInTheDocument();
+
+			tokensInitialized.set(true);
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(get(i18n).tip.text.added_token_not_listed)
+			);
+
+			expect(dontAddButton(container)).toBeInTheDocument();
+			expect(walletButton()).toBeEnabled();
+			expect(setCustomTokenApi).not.toHaveBeenCalled();
+		});
+
 		it('leaves a new token out of the list when the claimer says so', async () => {
 			const { container } = await renderWithToken({
 				ledger: unlistedLedger,
@@ -543,7 +570,13 @@ describe('TipClaimModal', () => {
 			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
 		);
 
-		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+		const walletButton = () =>
+			container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`);
+
+		// Off until the list lands, so a tap cannot start a handover on an unloaded list.
+		expect(walletButton()).toBeDisabled();
+
+		walletButton()?.click();
 
 		await vi.advanceTimersByTimeAsync(600);
 
@@ -564,6 +597,10 @@ describe('TipClaimModal', () => {
 				certified: true
 			}
 		]);
+
+		await vi.waitFor(() => expect(walletButton()).toBeEnabled());
+
+		walletButton()?.click();
 
 		await vi.advanceTimersByTimeAsync(1_000);
 
