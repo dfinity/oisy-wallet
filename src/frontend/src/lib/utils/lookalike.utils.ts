@@ -22,10 +22,13 @@ export const toLookalikeKey = (text: string): string =>
 		.toLowerCase();
 
 // A label both as written and in lower case: case alone never makes two labels different, while a
-// lookalike such as a capital I for a lowercase l only shows in the case it is written in.
+// lookalike such as a capital I for a lowercase l only shows in the case it is written in. The key
+// mapped once more covers a character that only turns into a letter with a lookalike after the
+// mapping: a circled m (NFKC) or a mathematical capital M (lower case) becomes an m, which maps to rn.
 const toLookalikeKeys = (label: string): string[] => [
 	toLookalikeKey(label),
-	toLookalikeKey(label.toLowerCase())
+	toLookalikeKey(label.toLowerCase()),
+	toLookalikeKey(toLookalikeKey(label))
 ];
 
 interface Labels {

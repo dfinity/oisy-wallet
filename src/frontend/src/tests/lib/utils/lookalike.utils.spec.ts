@@ -91,6 +91,17 @@ describe('lookalike.utils', () => {
 			}
 		);
 
+		// Both only turn into a lowercase m, which the list maps to rn, after the mapping.
+		it.each([
+			{ how: 'a bold italic capital M', name: 'Internet Co\u{1D474}puter' },
+			{ how: 'a circled small m', name: 'Internet Co\u{24DC}puter' }
+		])(
+			'should find a token through a letter that becomes one with a lookalike: $how',
+			({ name }) => {
+				expect(findLookalike({ token: { symbol: 'XYZ', name }, among })).toBe(among[0]);
+			}
+		);
+
 		it('should still treat a lowercase l as the capital I it looks like', () => {
 			expect(findLookalike({ token: { symbol: 'lCP', name: 'Mine' }, among })).toBe(among[0]);
 		});
