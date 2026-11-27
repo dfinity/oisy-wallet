@@ -10,6 +10,7 @@ export const NAVIGATION_MENU_TIP_COUNT = 'navigation-menu-tip-count';
 export const TIP_INTRO_GET_STARTED_BUTTON = 'tip-intro-get-started-button';
 export const TIP_INTRO_HISTORY_BUTTON = 'tip-intro-history-button';
 export const TIP_SHARE_COPY_BUTTON = 'tip-share-copy-button';
+export const TIP_CLAIM_BUTTON = 'tip-claim-button';
 export const TIP_CLAIM_RETRY_BUTTON = 'tip-claim-retry-button';
 export const TIP_RECEIVED_BUTTON = 'tip-received-button';
 export const TIP_WELCOME_MODAL = 'tip-welcome-modal';
