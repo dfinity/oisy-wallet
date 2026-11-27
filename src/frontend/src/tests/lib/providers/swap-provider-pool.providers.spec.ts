@@ -16,7 +16,7 @@ describe('swapProviderPool', () => {
 				SwapProvider.ONE_SEC,
 				SwapProvider.CHAIN_FUSION
 			],
-			wider: [SwapProvider.VELORA, SwapProvider.NEAR_INTENTS, SwapProvider.LIFI]
+			wider: [SwapProvider.VELORA, SwapProvider.NEAR_INTENTS, SwapProvider.LIFI, SwapProvider.RIFT]
 		});
 	});
 
@@ -32,7 +32,8 @@ describe('swapProviderPool', () => {
 				SwapProvider.NEAR_INTENTS,
 				SwapProvider.ONE_SEC,
 				SwapProvider.CHAIN_FUSION,
-				SwapProvider.LIFI
+				SwapProvider.LIFI,
+				SwapProvider.RIFT
 			],
 			wider: [SwapProvider.ICP_SWAP, SwapProvider.OISY_TRADE]
 		});

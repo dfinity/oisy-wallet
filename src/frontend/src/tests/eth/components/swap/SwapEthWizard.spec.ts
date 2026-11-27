@@ -1281,6 +1281,28 @@ describe('SwapEthWizard', () => {
 			expect(onBack).toHaveBeenCalledOnce();
 		});
 
+		// A node's refusal of the deposit can carry the signed transaction or the user's address.
+		it('reports any other failure as an allow-listed category, never its text', async () => {
+			vi.mocked(fetchRiftEvmSwap).mockRejectedValue(
+				new Error(`replacement fee too low: 0x02f8${mockEthAddress.slice(2)}`)
+			);
+
+			await confirm();
+
+			const errorEvent = vi
+				.mocked(analytics.trackEvent)
+				.mock.calls.find(([{ name }]) => name === TRACK_COUNT_SWAP_ERROR);
+
+			expect(errorEvent?.[0].metadata).toEqual(
+				expect.objectContaining({
+					dApp: SwapProvider.RIFT,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN
+				})
+			);
+			expect(errorEvent?.[0].metadata).not.toHaveProperty('error');
+			expect(JSON.stringify(errorEvent?.[0].metadata)).not.toContain(mockEthAddress.slice(2));
+		});
+
 		// Nothing was signed; Rift's answers can carry the user's addresses, which its refusals wrap.
 		it('says why Rift stopped the swap, reported as an allow-listed category', async () => {
 			vi.mocked(fetchRiftEvmSwap).mockRejectedValue(new RiftSwapRefusedError('orderUnverified'));

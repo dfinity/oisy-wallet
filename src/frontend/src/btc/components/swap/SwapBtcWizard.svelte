@@ -27,7 +27,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
-	import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -44,7 +43,6 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { RiftSwapRefusedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider } from '$lib/types/swap';
 	import type { WizardStep } from '$lib/types/wizard';
@@ -55,7 +53,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
-	import { riftSwapRefusedMessage } from '$lib/utils/rift.utils';
+	import { riftSwapRefusedMessage, toRiftSwapErrorType } from '$lib/utils/rift.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -369,12 +367,12 @@
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					// LI.FI's error text can carry the user's addresses: only an allow-listed category is
-					// reported, as from EVM and Solana. So can Rift's, which its refusals wrap.
+					// LI.FI's and Rift's error text can carry the user's addresses: only an allow-listed
+					// category is reported, as from EVM and Solana.
 					...(nonNullish(lifiOffer)
 						? { result_error_type: toLifiSwapErrorType(err) }
-						: err instanceof RiftSwapRefusedError
-							? { result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED }
+						: selectedProvider?.provider === SwapProvider.RIFT
+							? { result_error_type: toRiftSwapErrorType(err) }
 							: { error: errorDetailToString(err) ?? '' })
 				}
 			});

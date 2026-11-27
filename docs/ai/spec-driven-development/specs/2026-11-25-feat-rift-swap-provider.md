@@ -350,8 +350,11 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
 4. Track `TRACK_COUNT_SWAP_SUBMITTED`. The modal closes and the AUT poller takes over.
 
 A swap that stops before its deposit (`RiftSwapRefusedError`: an expired quote, a refused, unverified
-or in-flight order) says why, and the form comes back with a fresh quote. Its `TRACK_COUNT_SWAP_ERROR`
-event carries the `quote_rejected` category, never Rift's text, which can name the user's addresses.
+or in-flight order) says why, and the form comes back with a fresh quote. Every failed Rift swap, in
+either direction, reports an allow-listed category in its `TRACK_COUNT_SWAP_ERROR` event
+(`toRiftSwapErrorType`: `quote_rejected` for those refusals, `insufficient_funds`, else `unknown`),
+never the error's text: Rift's can name the user's addresses, and a node's refusal of an EVM deposit
+can carry the signed transaction.
 
 ### Execution: EVM → BTC
 

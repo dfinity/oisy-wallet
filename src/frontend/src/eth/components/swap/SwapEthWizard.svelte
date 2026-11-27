@@ -48,7 +48,6 @@
 	import { fungibleTokens } from '$lib/derived/tokens.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
-	import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -75,7 +74,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
-	import { LifiFeeChangedError, RiftSwapRefusedError } from '$lib/types/errors';
+	import { LifiFeeChangedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
@@ -93,7 +92,7 @@
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
-	import { riftSwapRefusedMessage } from '$lib/utils/rift.utils';
+	import { riftSwapRefusedMessage, toRiftSwapErrorType } from '$lib/utils/rift.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -768,12 +767,12 @@
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					// LI.FI's error text can carry the user's addresses or signed transaction: only an
-					// allow-listed category is reported. So can Rift's, which its refusals wrap.
+					// LI.FI's and Rift's error text can carry the user's addresses or signed transaction:
+					// only an allow-listed category is reported.
 					...(selectedProvider?.provider === SwapProvider.LIFI
 						? { result_error_type: toLifiSwapErrorType(err) }
-						: err instanceof RiftSwapRefusedError
-							? { result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED }
+						: selectedProvider?.provider === SwapProvider.RIFT
+							? { result_error_type: toRiftSwapErrorType(err) }
 							: { error: errorDetail ?? '' })
 				}
 			});

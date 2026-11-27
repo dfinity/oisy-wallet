@@ -1,3 +1,4 @@
+import { BtcSendValidationError, BtcValidationError } from '$btc/types/btc-send';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
@@ -14,6 +15,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import { RiftSwapRefusedError } from '$lib/types/errors';
 import type { RiftOrder, RiftQuote } from '$lib/types/rift';
 import {
@@ -24,7 +26,8 @@ import {
 	isSameRiftAssetId,
 	riftRouteVenues,
 	riftSwapRefusedMessage,
-	toRiftAssetId
+	toRiftAssetId,
+	toRiftSwapErrorType
 } from '$lib/utils/rift.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -326,6 +329,35 @@ describe('rift.utils', () => {
 
 		it('says nothing of any other failure', () => {
 			expect(riftSwapRefusedMessage({ err: new Error('boom'), i18n: en })).toBeUndefined();
+		});
+	});
+
+	describe('toRiftSwapErrorType', () => {
+		it.each([
+			{
+				label: 'a refusal before the deposit',
+				err: new RiftSwapRefusedError('orderRefused', { cause: new Error('0xabc failed') }),
+				expected: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED
+			},
+			{
+				label: "a node's insufficient-funds refusal",
+				err: Object.assign(new Error('insufficient funds for gas * price + value'), {
+					code: 'INSUFFICIENT_FUNDS'
+				}),
+				expected: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.INSUFFICIENT_FUNDS
+			},
+			{
+				label: 'a BTC balance too low',
+				err: new BtcValidationError(BtcSendValidationError.InsufficientBalance),
+				expected: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.INSUFFICIENT_FUNDS
+			},
+			{
+				label: 'any other failure, whatever its text',
+				err: new Error('nonce too low: 0x02f8...signed bytes'),
+				expected: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN
+			}
+		])('reports $label as $expected', ({ err, expected }) => {
+			expect(toRiftSwapErrorType(err)).toBe(expected);
 		});
 	});
 
