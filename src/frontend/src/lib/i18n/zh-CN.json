@@ -111,6 +111,7 @@
 			"oisy_allowance_used_up_title": "免费使用额度已用完",
 			"oisy_allowance_used_up": "你每日用于签署交易的免费额度已用完，部分交易可能签署失败。",
 			"oisy_allowance_used_up_own_cycles": "",
+			"oisy_allowance_tools_link": "",
 			"oisy_allowance_exceeded": "此交易的费用超出了你的 $oisy_name 免费额度。"
 		},
 		"error": {

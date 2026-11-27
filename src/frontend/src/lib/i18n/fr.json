@@ -111,6 +111,7 @@
 			"oisy_allowance_used_up_title": "Crédits d'utilisation gratuits épuisés",
 			"oisy_allowance_used_up": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature de certaines transactions peut donc échouer.",
 			"oisy_allowance_used_up_own_cycles": "",
+			"oisy_allowance_tools_link": "",
 			"oisy_allowance_exceeded": "Cette transaction coûte plus que ce que couvre votre quota gratuit $oisy_name."
 		},
 		"error": {

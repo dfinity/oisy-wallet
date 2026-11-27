@@ -596,6 +596,8 @@ On those builds, the user's own credits pay a CC only when the OISY allowance ca
 
 When own cycles can't pay either, because no approval is left or the approval or the TCYCLES balance runs short, the CC fails as in phase 1, with the toast for its outcome; a CC that ran short on own cycles gets the usage-credits error text too. Nothing in the app sets the approval back to zero.
 
+On those builds, the allowance-issue toast, in both its texts, ends with "Manage your own credits in Tools." before its Learn more link. "Tools" opens the Tools page at the Usage credits card, the way the Activity info box links to Settings. The warning that a CC costs more than the OISY allowance covers has no such link.
+
 ---
 
 ## User Preferences
