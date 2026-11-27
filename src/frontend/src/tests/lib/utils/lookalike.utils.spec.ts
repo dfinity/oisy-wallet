@@ -28,7 +28,8 @@ describe('lookalike.utils', () => {
 	describe('findLookalike', () => {
 		const among = [
 			{ symbol: 'ICP', name: 'Internet Computer' },
-			{ symbol: 'ckBTC', name: 'ckBTC' }
+			{ symbol: 'ckBTC', name: 'ckBTC' },
+			{ symbol: 'MOON', name: 'Moon' }
 		];
 
 		it('should find a token whose symbol looks like the symbol', () => {
@@ -45,6 +46,31 @@ describe('lookalike.utils', () => {
 
 		it('should find a token whose symbol looks like the name', () => {
 			expect(findLookalike({ token: { symbol: 'XYZ', name: 'ckBTC' }, among })).toBe(among[1]);
+		});
+
+		it.each([
+			{ label: 'icp', token: { symbol: 'icp', name: 'Mine' }, index: 0 },
+			{ label: 'internet computer', token: { symbol: 'XYZ', name: 'internet computer' }, index: 0 },
+			{ label: 'moon', token: { symbol: 'moon', name: 'Mine' }, index: 2 },
+			{ label: 'MOON in a name', token: { symbol: 'XYZ', name: 'MOON' }, index: 2 }
+		])(
+			'should find a token whatever the case of a letter with a lookalike: $label',
+			({ token, index }) => {
+				expect(findLookalike({ token, among })).toBe(among[index]);
+			}
+		);
+
+		it('should still treat a lowercase l as the capital I it looks like', () => {
+			expect(findLookalike({ token: { symbol: 'lCP', name: 'Mine' }, among })).toBe(among[0]);
+		});
+
+		it('should keep apart letters that only match in another case', () => {
+			expect(
+				findLookalike({
+					token: { symbol: 'lcp', name: 'Mine' },
+					among: [{ symbol: 'icp', name: 'icp' }]
+				})
+			).toBeUndefined();
 		});
 
 		it('should find nothing for a token that looks like none of them', () => {

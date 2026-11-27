@@ -10,6 +10,9 @@ const UNSEEN = /[\p{M}\p{Default_Ignorable_Code_Point}\s]/gu;
  * per Unicode's list of lookalike characters (UTS #39), and accents, invisible characters, spaces and
  * case are dropped. Two texts with the same key look alike: `USDC`, for example, and `USDC` with a
  * Cyrillic C (U+0421) in place of the last letter, or in full-width letters.
+ *
+ * The case is lowered last, because the list maps some letters in one case only (`I` to `l`, `m` to
+ * `rn`), so two texts that differ only in case can get different keys. `findLookalike` covers that.
  */
 export const toLookalikeKey = (text: string): string =>
 	[...text.normalize('NFD').replace(UNSEEN, '')]
@@ -17,6 +20,13 @@ export const toLookalikeKey = (text: string): string =>
 		.join('')
 		.normalize('NFKC')
 		.toLowerCase();
+
+// A label both as written and in lower case: case alone never makes two labels different, while a
+// lookalike such as a capital I for a lowercase l only shows in the case it is written in.
+const toLookalikeKeys = (label: string): string[] => [
+	toLookalikeKey(label),
+	toLookalikeKey(label.toLowerCase())
+];
 
 interface Labels {
 	symbol: string;
@@ -34,7 +44,7 @@ export const findLookalike = <T extends Labels>({
 	among: readonly T[];
 }): T | undefined => {
 	const keys = new Set(
-		[symbol, name].filter(notEmptyString).map(toLookalikeKey).filter(notEmptyString)
+		[symbol, name].filter(notEmptyString).flatMap(toLookalikeKeys).filter(notEmptyString)
 	);
 
 	if (keys.size === 0) {
@@ -42,6 +52,8 @@ export const findLookalike = <T extends Labels>({
 	}
 
 	return among.find(({ symbol, name }) =>
-		[symbol, name].some((label) => notEmptyString(label) && keys.has(toLookalikeKey(label)))
+		[symbol, name].some(
+			(label) => notEmptyString(label) && toLookalikeKeys(label).some((key) => keys.has(key))
+		)
 	);
 };
