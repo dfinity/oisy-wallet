@@ -58,6 +58,40 @@ describe('AllowanceToasts', () => {
 		expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(issueToast);
 	});
 
+	it('should say in the allowance-issue toast, under the same title, that own credits pay now', async () => {
+		render(AllowanceToasts);
+
+		allowanceIssueStore.setRefused();
+		allowanceToastStore.set({ toast: 'issue', ownCycles: true });
+		await tick();
+
+		expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+			...issueToast,
+			text: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up_own_cycles)
+		});
+	});
+
+	it('should give the open allowance-issue toast the own-credits text where it is', async () => {
+		render(AllowanceToasts);
+
+		allowanceIssueStore.setRefused();
+		allowanceToastStore.set({ toast: 'issue' });
+		await tick();
+
+		const toastId = toastsShowSpy.mock.results[0].value;
+
+		allowanceToastStore.set({ toast: 'issue', ownCycles: true });
+		await tick();
+
+		expect(toastsShowSpy).toHaveBeenCalledOnce();
+		expect(get(toasts.toastsStore)).toEqual([
+			expect.objectContaining({
+				id: toastId,
+				text: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up_own_cycles)
+			})
+		]);
+	});
+
 	it('should keep the open allowance-issue toast where it is', async () => {
 		render(AllowanceToasts);
 

@@ -1,4 +1,4 @@
-import { insufficientAllowanceOf } from '$lib/canisters/signer.errors';
+import { isUsageCreditsShort } from '$lib/canisters/signer.errors';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ToastLevel, ToastMsg, ToastMsgUI } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
@@ -78,9 +78,10 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 		consoleError(err);
 	}
 
-	// An insufficient allowance gets one clear text instead of the flow's generic one and the raw
-	// ledger text; the allowance toast next to it says why.
-	if (nonNullish(err) && nonNullish(insufficientAllowanceOf(err))) {
+	// Usage credits that can't cover a call, the OISY allowance or the user's own cycles, get one
+	// clear text instead of the flow's generic one and the raw ledger text; the allowance toast next
+	// to it says why.
+	if (nonNullish(err) && isUsageCreditsShort(err)) {
 		return toastsStore.show({
 			...rest,
 			text: get(i18n).core.error.usage_credits_insufficient,
@@ -98,9 +99,10 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {
 	consoleError(`${msg.text}:`, err);
 
-	// The error stays out of the toast, but an insufficient allowance still gets its clear text.
+	// The error stays out of the toast, but usage credits that can't cover a call still get their
+	// clear text.
 	return toastsError({
-		msg: nonNullish(insufficientAllowanceOf(err))
+		msg: isUsageCreditsShort(err)
 			? { ...msg, text: get(i18n).core.error.usage_credits_insufficient }
 			: msg
 	});

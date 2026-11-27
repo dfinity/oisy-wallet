@@ -2,6 +2,7 @@ import * as api from '$lib/api/backend.api';
 import { ALLOWANCE_REQUEST_COOLDOWN_MILLIS, ZERO } from '$lib/constants/app.constants';
 import { trackOisyAllowanceRequest } from '$lib/services/allowance-analytics.services';
 import {
+	isAllowanceRequestInCooldown,
 	requestAllowance,
 	requestAllowanceAfterInsufficientAllowance,
 	requestAllowanceAtLoad
@@ -219,14 +220,12 @@ describe('allowance-request.services', () => {
 			toastSpy = vi.spyOn(allowanceToastStore, 'set');
 		});
 
-		it('should repeat after a granted request, without a toast', async () => {
+		it('should repeat after a granted request', async () => {
 			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(grantedOutcome);
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true });
-
-			expect(toastSpy).not.toHaveBeenCalled();
+			).resolves.toBe('repeat');
 		});
 
 		it('should repeat after a skipped request with a larger allowance than the failed call stated', async () => {
@@ -234,12 +233,10 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true });
-
-			expect(toastSpy).not.toHaveBeenCalled();
+			).resolves.toBe('repeat');
 		});
 
-		it('should ask for the warning that the call costs more than the allowance after a skipped request with no larger allowance', async () => {
+		it('should say the call costs more than the allowance after a skipped request with no larger allowance', async () => {
 			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(skippedOutcome);
 
 			await expect(
@@ -247,32 +244,31 @@ describe('allowance-request.services', () => {
 					identity: mockIdentity,
 					allowance: 1_500_000_000_000n
 				})
-			).resolves.toEqual({ repeat: false });
+			).resolves.toBe('exceeded');
 
-			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
 			expect(get(allowanceIssueStore)).toBeUndefined();
 		});
 
-		it('should ask for the allowance-issue toast after a refused request', async () => {
+		it('should say refused after a refused request, and set the allowance issue', async () => {
 			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: false });
+			).resolves.toBe('refused');
 
-			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
 			expect(get(allowanceIssueStore)).toEqual({ refusedAt: Date.now() });
 		});
 
-		it('should ask for the allowance-issue toast again, without a request, for a call failing in the cooldown', async () => {
+		it('should say refused again, without a request, for a call failing in the cooldown', async () => {
 			const spy = vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
 
 			await requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance });
-			await requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance });
+
+			await expect(
+				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
+			).resolves.toBe('refused');
 
 			expect(spy).toHaveBeenCalledOnce();
-			expect(toastSpy).toHaveBeenCalledTimes(2);
-			expect(toastSpy).toHaveBeenNthCalledWith(2, { toast: 'issue' });
 		});
 
 		it('should repeat, and clear the allowance issue, once a request after the cooldown is granted', async () => {
@@ -286,10 +282,38 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true });
+			).resolves.toBe('repeat');
 
-			expect(toastSpy).toHaveBeenCalledOnce();
 			expect(get(allowanceIssueStore)).toBeUndefined();
+		});
+
+		// The signer module shows the toast, once it knows whether the user's own cycles paid.
+		it('should ask for no toast', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance });
+
+			expect(toastSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('isAllowanceRequestInCooldown', () => {
+		it('should be off without an allowance issue', () => {
+			expect(isAllowanceRequestInCooldown()).toBeFalsy();
+		});
+
+		it('should be on for the minute after a refused request', () => {
+			allowanceIssueStore.setRefused();
+
+			expect(isAllowanceRequestInCooldown()).toBeTruthy();
+
+			vi.advanceTimersByTime(ALLOWANCE_REQUEST_COOLDOWN_MILLIS - 1);
+
+			expect(isAllowanceRequestInCooldown()).toBeTruthy();
+
+			vi.advanceTimersByTime(1);
+
+			expect(isAllowanceRequestInCooldown()).toBeFalsy();
 		});
 	});
 

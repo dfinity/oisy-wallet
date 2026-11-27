@@ -1,12 +1,14 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { OWN_CYCLES_ENABLED } from '$env/own-cycles.env';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import { allowance, approve, balance } from '$icp/api/icrc-ledger.api';
 import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 export interface OwnCycles {
@@ -19,6 +21,24 @@ export interface OwnCycles {
 // A call paid with the caller's own cycles (`CallerPaysIcrc2Cycles`) is charged from the caller's
 // main cycles-ledger account, through an approval to the signer's main account.
 const signerAccount = (): IcrcAccount => ({ owner: Principal.fromText(SIGNER_CANISTER_ID) });
+
+const loadApproved = async ({
+	identity,
+	certified = false
+}: {
+	identity: Identity;
+	certified?: boolean;
+}): Promise<bigint> => {
+	const { allowance: approved } = await allowance({
+		identity,
+		certified,
+		ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
+		owner: { owner: identity.getPrincipal() },
+		spender: signerAccount()
+	});
+
+	return approved;
+};
 
 /**
  * The approval left for the signer and the TCYCLES balance, read with queries unless `certified`:
@@ -35,21 +55,13 @@ export const loadOwnCycles = async ({
 }): Promise<OwnCycles> => {
 	assertNonNullish(identity);
 
-	const owner = identity.getPrincipal();
-
-	const [{ allowance: approved }, ownBalance] = await Promise.all([
-		allowance({
-			identity,
-			certified,
-			ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
-			owner: { owner },
-			spender: signerAccount()
-		}),
+	const [approved, ownBalance] = await Promise.all([
+		loadApproved({ identity, certified }),
 		balance({
 			identity,
 			certified,
 			ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
-			owner
+			owner: identity.getPrincipal()
 		})
 	]);
 
@@ -153,6 +165,29 @@ export const loadPreviousSpendingLimit = async ({
 	}
 
 	return undefined;
+};
+
+/**
+ * Whether the user's own cycles can pay a charged call: paying with them is on, and some approval
+ * is left for the signer. No call's price is known, so any approval left counts. A query is
+ * enough: the ledger enforces the approval when the signer charges it.
+ *
+ * It never throws: an approval that can't be read counts as none.
+ */
+export const canPayWithOwnCycles = async ({
+	identity
+}: {
+	identity: NullishIdentity;
+}): Promise<boolean> => {
+	if (!OWN_CYCLES_ENABLED || isNullish(identity)) {
+		return false;
+	}
+
+	try {
+		return (await loadApproved({ identity })) > ZERO;
+	} catch (_: unknown) {
+		return false;
+	}
 };
 
 /**

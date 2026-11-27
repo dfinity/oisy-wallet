@@ -110,6 +110,7 @@
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa.",
 			"oisy_allowance_used_up_title": "Bezplatné kredity za používání jsou vyčerpány",
 			"oisy_allowance_used_up": "Váš denní objem bezplatných kreditů na podepisování transakcí je vyčerpán, takže podepsání některých transakcí může selhat.",
+			"oisy_allowance_used_up_own_cycles": "",
 			"oisy_allowance_exceeded": "Tato transakce stojí víc, než pokryje váš bezplatný limit $oisy_name."
 		},
 		"error": {

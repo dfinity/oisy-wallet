@@ -587,7 +587,14 @@ A user can also let the signer charge their own TCYCLES: an approval on the cycl
 - **Set spending limit** opens two steps. The first starts at the limit set last, when the card found one above 0, and is empty otherwise: the user enters the new limit, from 0, which revokes it, up to their TCYCLES balance less the 0.0001 TCYCLES ledger fee the approval costs, above **Previous spending limit** (when found), **Remaining** (the approval left) and the fee. A new limit equal to the approval left can't be reviewed. **Review** shows the previous limit, the remaining, the new limit and the fee, and **Set** sets the approval to the new limit, with no expiry, and closes with a confirmation. The approval states the one it replaces, so the ledger refuses it if the limit changed since the card read it, for example after a charge: the review then stays open with an error toast, and the card reads both values again.
 - **Get ICP Cycles** opens [Mint TCYCLES](#mint-tcycles).
 
-CCs do not use the approval yet, and nothing in the app sets it back to zero.
+On those builds, the user's own credits pay a CC only when the OISY allowance can't, and only while some approval is left (read with a query, since no CC's price is known):
+
+- After a refused AR, the CC is repeated once with own cycles, and the allowance-issue toast keeps its title but says the free credits are used up, so signing now uses the user's own credits.
+- During the AR cooldown, CCs go straight to own cycles, with no AR and no toast.
+- A CC that costs more than the OISY allowance covers (a skipped AR, or a repeat refused again) is repeated once with own cycles, with no warning.
+- After the cooldown, the next CC tries the OISY allowance first again, so own cycles never pay while free credits would.
+
+When own cycles can't pay either, because no approval is left or the approval or the TCYCLES balance runs short, the CC fails as in phase 1, with the toast for its outcome; a CC that ran short on own cycles gets the usage-credits error text too. Nothing in the app sets the approval back to zero.
 
 ---
 

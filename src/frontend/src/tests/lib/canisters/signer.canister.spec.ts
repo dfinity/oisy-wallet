@@ -6,7 +6,11 @@ import type {
 import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
+import {
+	P2WPKH,
+	SIGNER_OWN_CYCLES_PAYMENT_TYPE,
+	SIGNER_PAYMENT_TYPE
+} from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -431,6 +435,22 @@ describe('signer.canister', () => {
 			expect(res).toEqual(response);
 			expect(service.eth_personal_sign).toHaveBeenCalledWith(personalSignParams, [
 				SIGNER_PAYMENT_TYPE
+			]);
+		});
+
+		it('charges the caller’s own cycles when paying with them', async () => {
+			const response = 'personal-sign';
+			service.eth_personal_sign.mockResolvedValue({ Ok: { signature: response } });
+
+			const signer = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await signer.payingWithOwnCycles().personalSign(personalSignParams);
+
+			expect(res).toEqual(response);
+			expect(service.eth_personal_sign).toHaveBeenCalledWith(personalSignParams, [
+				SIGNER_OWN_CYCLES_PAYMENT_TYPE
 			]);
 		});
 

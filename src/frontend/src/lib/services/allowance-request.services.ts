@@ -6,8 +6,7 @@ import {
 } from '$lib/services/allowance-analytics.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
-import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
-import type { AllowanceRequestAnswer } from '$lib/types/api';
+import type { AllowanceRequestAnswer, InsufficientAllowanceOutcome } from '$lib/types/api';
 import type { NullishIdentity } from '$lib/types/identity';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -15,7 +14,9 @@ import { get } from 'svelte/store';
 
 let pendingRequest: Promise<AllowanceRequestAnswer> | undefined;
 
-const inCooldown = (): boolean => {
+// The AR cooldown: the minute after a refused AR, during which OISY sends no AR, since the OISY
+// allowance is known to be used up.
+export const isAllowanceRequestInCooldown = (): boolean => {
 	const issue = get(allowanceIssueStore);
 
 	return nonNullish(issue) && Date.now() - issue.refusedAt < ALLOWANCE_REQUEST_COOLDOWN_MILLIS;
@@ -86,7 +87,7 @@ export const requestAllowance = (identity: NullishIdentity): Promise<AllowanceRe
 		return pendingRequest;
 	}
 
-	if (inCooldown()) {
+	if (isAllowanceRequestInCooldown()) {
 		return Promise.resolve({ answer: 'refused' });
 	}
 
@@ -123,12 +124,11 @@ export const requestAllowanceAtLoad = async (identity: NullishIdentity): Promise
 };
 
 /**
- * After a charged call (CC) failed with an insufficient allowance, sends the AR and says whether to
- * repeat the CC: after a granted AR, or a skipped one that states a larger OISY allowance than the
- * failed CC did, because another tab or device got a new one in the meantime.
- *
- * Otherwise it asks for the toast that fits the answer: the allowance-issue toast for a refused AR,
- * or the warning that the CC costs more than the OISY allowance covers for a skipped one.
+ * After a charged call (CC) failed with an insufficient allowance, sends the AR and says what
+ * follows: a repeat after a granted AR, or a skipped one that states a larger OISY allowance than
+ * the failed CC did, because another tab or device got a new one in the meantime. Otherwise the AR
+ * was refused, or the CC costs more than the OISY allowance covers (a skipped AR). The caller shows
+ * the toast that fits, since the user's own cycles may still pay the CC.
  */
 export const requestAllowanceAfterInsufficientAllowance = async ({
 	identity,
@@ -136,17 +136,15 @@ export const requestAllowanceAfterInsufficientAllowance = async ({
 }: {
 	identity: NullishIdentity;
 	allowance: bigint;
-}): Promise<{ repeat: boolean }> => {
+}): Promise<InsufficientAllowanceOutcome> => {
 	const result = await requestAllowance(identity);
 
 	if (
 		result.answer === 'granted' ||
 		(result.answer === 'skipped' && result.allowance > allowance)
 	) {
-		return { repeat: true };
+		return 'repeat';
 	}
 
-	allowanceToastStore.set({ toast: result.answer === 'skipped' ? 'exceeded' : 'issue' });
-
-	return { repeat: false };
+	return result.answer === 'skipped' ? 'exceeded' : 'refused';
 };

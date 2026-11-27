@@ -80,6 +80,11 @@ export type AllowanceRequestAnswer =
 	| { answer: 'skipped'; allowance: bigint }
 	| { answer: 'refused' };
 
+// What follows a charged call that failed with an insufficient allowance, once the allowance request
+// (AR) answered: repeating it with the new OISY allowance; or not, because the AR was refused, or
+// because the call costs more than the OISY allowance covers.
+export type InsufficientAllowanceOutcome = 'repeat' | 'refused' | 'exceeded';
+
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
 	iiDelegationChain: Nullable<IIDelegationChain>;

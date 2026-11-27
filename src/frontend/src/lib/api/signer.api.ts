@@ -8,14 +8,19 @@ import type {
 import type { EthAddress } from '$eth/types/address';
 import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import { insufficientAllowanceOf } from '$lib/canisters/signer.errors';
+import { insufficientAllowanceOf, toOwnCyclesError } from '$lib/canisters/signer.errors';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { trackChargedCallInsufficientAllowance } from '$lib/services/allowance-analytics.services';
-import { requestAllowanceAfterInsufficientAllowance } from '$lib/services/allowance-request.services';
-import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
+import {
+	isAllowanceRequestInCooldown,
+	requestAllowanceAfterInsufficientAllowance
+} from '$lib/services/allowance-request.services';
+import { canPayWithOwnCycles } from '$lib/services/own-cycles.services';
+import { type AllowanceToast, allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type {
 	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
+	InsufficientAllowanceOutcome,
 	SendBtcParams,
 	SignWithSchnorrParams
 } from '$lib/types/api';
@@ -148,8 +153,9 @@ export const genericSignWithEcdsa = async ({
 // Every signer call is a charged call (CC), so this is the one place that handles an insufficient
 // allowance for all of them, and no flow needs to know about it: it sends the allowance request (AR)
 // before the flow sees the error and, when a new allowance came through, repeats the CC once. A CC
-// refused for its allowance ran nothing, so the repeat is like the first try. Any other answer, or a
-// repeat that fails, reaches the flow as the error it would have seen anyway.
+// refused for its allowance ran nothing, so the repeat is like the first try. When the OISY allowance
+// can't pay, the user's own cycles pay instead, if they allowed some. Any other answer, or a repeat
+// that fails, reaches the flow as the error it would have seen anyway.
 const callSigner = async <T>({
 	identity,
 	canisterId,
@@ -162,6 +168,15 @@ const callSigner = async <T>({
 }>): Promise<T> => {
 	const signer = await signerCanister({ identity, canisterId });
 
+	// Read once per CC, and only when the OISY allowance can't pay it.
+	let ownCycles: Promise<boolean> | undefined;
+	const canPayWithOwn = (): Promise<boolean> => (ownCycles ??= canPayWithOwnCycles({ identity }));
+
+	// The OISY allowance is known to be used up within a minute of a refused AR.
+	if (isAllowanceRequestInCooldown() && (await canPayWithOwn())) {
+		return await callWithOwnCycles({ signer, call, failedToast: { toast: 'issue' } });
+	}
+
 	try {
 		return await call(signer);
 	} catch (err: unknown) {
@@ -173,24 +188,91 @@ const callSigner = async <T>({
 
 		trackChargedCallInsufficientAllowance({ method });
 
-		const { repeat } = await requestAllowanceAfterInsufficientAllowance({ identity, allowance });
+		const outcome = await requestAllowanceAfterInsufficientAllowance({ identity, allowance });
 
-		if (!repeat) {
-			throw err;
+		if (outcome !== 'repeat') {
+			return await callWithOwnCyclesInstead({ signer, call, err, outcome, canPayWithOwn });
 		}
 
 		try {
 			return await call(signer);
 		} catch (repeatErr: unknown) {
-			// Refused again with a new allowance: the CC costs more than the OISY allowance covers.
-			if (nonNullish(insufficientAllowanceOf(repeatErr))) {
-				trackChargedCallInsufficientAllowance({ method });
-
-				allowanceToastStore.set({ toast: 'exceeded' });
+			if (isNullish(insufficientAllowanceOf(repeatErr))) {
+				throw repeatErr;
 			}
 
-			throw repeatErr;
+			// Refused again with a new allowance: the CC costs more than the OISY allowance covers.
+			trackChargedCallInsufficientAllowance({ method });
+
+			return await callWithOwnCyclesInstead({
+				signer,
+				call,
+				err: repeatErr,
+				outcome: 'exceeded',
+				canPayWithOwn
+			});
 		}
+	}
+};
+
+// The OISY allowance can't pay the CC, so the user's own cycles pay it, if they allowed some. After
+// a refused AR, the allowance-issue toast says the free credits are used up, and that the user's
+// own credits pay now when they did. A CC that costs more than the OISY allowance covers gets no
+// toast when they paid. Otherwise the CC fails with the toast for its outcome.
+const callWithOwnCyclesInstead = async <T>({
+	signer,
+	call,
+	err,
+	outcome,
+	canPayWithOwn
+}: {
+	signer: SignerCanister;
+	call: (signer: SignerCanister) => Promise<T>;
+	err: unknown;
+	outcome: Exclude<InsufficientAllowanceOutcome, 'repeat'>;
+	canPayWithOwn: () => Promise<boolean>;
+}): Promise<T> => {
+	const failedToast: AllowanceToast =
+		outcome === 'refused' ? { toast: 'issue' } : { toast: 'exceeded' };
+
+	if (!(await canPayWithOwn())) {
+		allowanceToastStore.set(failedToast);
+
+		throw err;
+	}
+
+	return await callWithOwnCycles({
+		signer,
+		call,
+		paidToast: outcome === 'refused' ? { toast: 'issue', ownCycles: true } : undefined,
+		failedToast
+	});
+};
+
+// When the user's own cycles can't pay either, the flow gets the usage-credits error text.
+const callWithOwnCycles = async <T>({
+	signer,
+	call,
+	paidToast,
+	failedToast
+}: {
+	signer: SignerCanister;
+	call: (signer: SignerCanister) => Promise<T>;
+	paidToast?: AllowanceToast;
+	failedToast: AllowanceToast;
+}): Promise<T> => {
+	try {
+		const result = await call(signer.payingWithOwnCycles());
+
+		if (nonNullish(paidToast)) {
+			allowanceToastStore.set(paidToast);
+		}
+
+		return result;
+	} catch (err: unknown) {
+		allowanceToastStore.set(failedToast);
+
+		throw toOwnCyclesError(err);
 	}
 };
 
