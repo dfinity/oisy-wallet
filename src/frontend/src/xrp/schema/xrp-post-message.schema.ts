@@ -15,7 +15,10 @@ const XrpPostMessageWalletDataSchema = z.object({
 	newTransactions: JsonTransactionsTextSchema.optional(),
 	// Absent when the lines are unchanged or could not be read; either way the listener keeps what
 	// it holds. An empty array is a real answer: the account has no trust lines.
-	trustLines: z.custom<XrpTrustLine[]>().optional()
+	trustLines: z.custom<XrpTrustLine[]>().optional(),
+	// The new rows of trust-line tokens, read from the same page as `newTransactions` and absent
+	// whenever it is, or when trust-line tokens are off.
+	newTrustLineTransactions: JsonTransactionsTextSchema.optional()
 });
 
 export const XrpPostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({

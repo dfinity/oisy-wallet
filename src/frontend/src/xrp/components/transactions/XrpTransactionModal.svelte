@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -102,16 +103,17 @@
 		{/if}
 
 		<List styleClass="mt-5">
-			{#if nonNullish(fee) && nonNullish(token)}
+			<!-- The network fee is paid in XRP, also for a trust-line token's payment. -->
+			{#if nonNullish(fee)}
 				<ListItem>
 					<span>{$i18n.fee.text.fee}</span>
 					<output>
 						{formatToken({
 							value: fee,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
+							unitName: XRP_TOKEN.decimals,
+							displayDecimals: XRP_TOKEN.decimals
 						})}
-						{token.symbol}
+						{XRP_TOKEN.symbol}
 					</output>
 				</ListItem>
 			{/if}
