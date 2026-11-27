@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "포함된 유동성 풀 수수료",
 			"best_rate": "최선 환율",
 			"expected_minimum": "예상 최소값",
+			"no_minimum": "",
 			"you_receive": "받는 금액",
 			"you_receive_estimate": "",
 			"select_swap_provider": "스왑 제공자 선택",

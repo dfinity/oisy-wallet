@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Zahrnuté poplatky za likviditní pool",
 			"best_rate": "Nejlepší kurz",
 			"expected_minimum": "Očekávané minimum",
+			"no_minimum": "",
 			"you_receive": "Obdržíte",
 			"you_receive_estimate": "",
 			"select_swap_provider": "Vybrat poskytovatele výměny",

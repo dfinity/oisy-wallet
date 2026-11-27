@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "包含的流动性费用",
 			"best_rate": "最佳汇率",
 			"expected_minimum": "预计最少获得",
+			"no_minimum": "",
 			"you_receive": "你将收到",
 			"you_receive_estimate": "",
 			"select_swap_provider": "选择兑换服务商",

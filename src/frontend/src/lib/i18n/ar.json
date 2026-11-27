@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "رسوم مجمع السيولة المضمنة",
 			"best_rate": "أفضل سعر",
 			"expected_minimum": "الحد الأدنى المتوقع",
+			"no_minimum": "",
 			"you_receive": "أنت تستلم",
 			"you_receive_estimate": "",
 			"select_swap_provider": "حدد مزود التبديل",

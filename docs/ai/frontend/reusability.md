@@ -109,6 +109,9 @@ as Swap does for clearing the receive token.
 | `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned loop of the asked providers, then the `swapProviderPool`; reveals the real winner once; reduced motion built in.                            |
 | `SwapFeeRow`                            | `$lib/components/swap/`           | A swap form's fee row: slides in, shows a "Total fee" skeleton during a foreground comparison, cross-fades to the form's fees.                            |
 
+For a custom `Collapsible` trigger, use a native button with `aria-expanded` and call the
+snippet’s `toggle` handler. Pass the content `id` to the button’s `aria-controls`.
+
 `Logo` defaults to lazy loading and its existing readiness opacity/fade, with transitions
 suppressed on iOS. Set `animateReadiness={false}` when a parent owns the whole reveal;
 `loading="eager"` forwards an eager policy to shared `Img`. `SwapProviderAnimation` uses

@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Включенные комиссии пула ликвидности",
 			"best_rate": "Лучший курс",
 			"expected_minimum": "Ожидаемый минимум",
+			"no_minimum": "",
 			"you_receive": "Вы получаете",
 			"you_receive_estimate": "",
 			"select_swap_provider": "Выбрать поставщика обмена",

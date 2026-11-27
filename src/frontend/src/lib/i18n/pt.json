@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Taxas de pool de liquidez incluídas",
 			"best_rate": "Melhor Taxa",
 			"expected_minimum": "Mínimo esperado",
+			"no_minimum": "",
 			"you_receive": "Você recebe",
 			"you_receive_estimate": "",
 			"select_swap_provider": "Selecionar provedor de troca",

@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Comisiones del fondo de liquidez incluidas",
 			"best_rate": "Mejor Tarifa",
 			"expected_minimum": "Mínimo esperado",
+			"no_minimum": "",
 			"you_receive": "Tú recibes",
 			"you_receive_estimate": "",
 			"select_swap_provider": "Seleccionar proveedor de intercambio",

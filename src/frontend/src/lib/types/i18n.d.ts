@@ -1149,6 +1149,7 @@ interface I18nSwap {
 		included_liquidity_fees: string;
 		best_rate: string;
 		expected_minimum: string;
+		no_minimum: string;
 		you_receive: string;
 		you_receive_estimate: string;
 		select_swap_provider: string;

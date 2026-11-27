@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Phí bể thanh khoản đã bao gồm",
 			"best_rate": "Tỷ giá tốt nhất",
 			"expected_minimum": "Tối thiểu dự kiến",
+			"no_minimum": "",
 			"you_receive": "Bạn nhận được",
 			"you_receive_estimate": "",
 			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",

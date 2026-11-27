@@ -38,21 +38,21 @@ describe('SwapDetailsRift', () => {
 		});
 	};
 
-	it('shows the receive amount as an estimate, and no minimum', () => {
-		const { getByText, queryByText } = renderDetails();
+	it('shows the receive amount as an estimate at the offers list precision, and no minimum', () => {
+		const { getByText, container } = renderDetails();
 
 		expect(getByText(en.swap.text.you_receive_estimate)).toBeInTheDocument();
-		expect(
-			getByText(`${formatToken({ value: 121_475_958n, unitName: usdc.decimals })} USDC`)
-		).toBeInTheDocument();
-		expect(queryByText(en.swap.text.expected_minimum)).not.toBeInTheDocument();
+		expect(container).toHaveTextContent('121.475958 USDC');
+		expect(getByText(en.swap.text.expected_minimum)).toBeInTheDocument();
+		expect(getByText(en.swap.text.no_minimum)).toBeInTheDocument();
+		expect(getByText(en.swap.text.rift_estimate_warning)).toBeInTheDocument();
 	});
 
 	it('shows the expanded token path with venues in quote order', () => {
-		const { getByText, getByTitle, getAllByRole } = renderDetails();
-		const route = getByText(en.swap.text.swap_route).closest('details');
+		const { getByText, getByTitle, getByRole, getAllByRole } = renderDetails();
+		const route = getByRole('button', { name: en.swap.text.swap_route });
 
-		expect(route).toHaveAttribute('open');
+		expect(route).toHaveAttribute('aria-expanded', 'true');
 		expect(getByTitle('BTC on Bitcoin')).toHaveTextContent('BTC');
 		expect(getByTitle('kBTC on Ink')).toHaveTextContent('kBTC');
 		expect(getByTitle('USDC on Ethereum')).toHaveTextContent('USDC');
@@ -65,20 +65,19 @@ describe('SwapDetailsRift', () => {
 	});
 
 	it('collapses to the number of venue hops', async () => {
-		const { getByText } = renderDetails();
-		const label = getByText(en.swap.text.swap_route);
-		const route = label.closest('details');
+		const { getByText, getByRole } = renderDetails();
+		const route = getByRole('button', { name: en.swap.text.swap_route });
 
-		await fireEvent.click(label);
+		await fireEvent.click(route);
 
-		expect(route).not.toHaveAttribute('open');
+		expect(route).toHaveAttribute('aria-expanded', 'false');
 		expect(
 			getByText(replacePlaceholders(en.swap.text.rift_route_hops, { $count: '2' }))
 		).toBeVisible();
 
-		await fireEvent.click(label);
+		await fireEvent.click(route);
 
-		expect(route).toHaveAttribute('open');
+		expect(route).toHaveAttribute('aria-expanded', 'true');
 	});
 
 	it('preserves the raw identity of an unknown asset and venue', () => {
@@ -114,9 +113,28 @@ describe('SwapDetailsRift', () => {
 		expect(container).toHaveTextContent('0.036528 USDC');
 	});
 
-	it('discloses that Rift guarantees no minimum', () => {
-		const { getByText } = renderDetails();
+	it('shows an 18-decimal delivery cost with at most 8 decimals', () => {
+		const eth = { ...usdc, symbol: 'ETH', decimals: 18 };
+		const context = new Map();
+		context.set(
+			SWAP_CONTEXT_KEY,
+			initSwapContext({ sourceToken: BTC_MAINNET_TOKEN, destinationToken: eth })
+		);
 
-		expect(getByText(en.swap.text.rift_estimate_warning)).toBeInTheDocument();
+		const { container } = render(SwapDetailsRift, {
+			props: {
+				provider: {
+					provider: SwapProvider.RIFT,
+					receiveAmount: 1_000_000_000_000_000_000n,
+					swapDetails: { ...mockRiftQuote, estimated_execution_cost: '579859545132401' }
+				}
+			},
+			context
+		});
+
+		expect(container).not.toHaveTextContent('0.000579859545132401');
+		expect(container).toHaveTextContent(
+			`${formatToken({ value: 579_859_545_132_401n, unitName: 18, displayDecimals: 8 })} ETH`
+		);
 	});
 });

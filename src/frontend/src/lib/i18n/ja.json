@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "含まれる流動性プール手数料",
 			"best_rate": "最良レート",
 			"expected_minimum": "予想される最低受取額",
+			"no_minimum": "",
 			"you_receive": "受取額",
 			"you_receive_estimate": "",
 			"select_swap_provider": "スワッププロバイダーを選択",

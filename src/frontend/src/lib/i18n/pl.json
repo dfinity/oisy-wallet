@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Wliczone opłaty za pulę płynności",
 			"best_rate": "Najlepsza stawka",
 			"expected_minimum": "Oczekiwane minimum",
+			"no_minimum": "",
 			"you_receive": "Otrzymasz",
 			"you_receive_estimate": "",
 			"select_swap_provider": "Wybierz dostawcę wymiany",

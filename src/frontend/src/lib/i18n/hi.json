@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "शामिल तरलता पूल शुल्क",
 			"best_rate": "सर्वोत्तम दर",
 			"expected_minimum": "अपेक्षित न्यूनतम",
+			"no_minimum": "",
 			"you_receive": "आप प्राप्त करते हैं",
 			"you_receive_estimate": "",
 			"select_swap_provider": "स्वैप प्रदाता चुनें",

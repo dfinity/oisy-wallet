@@ -4,6 +4,7 @@
 	import kbtcLogo from '$lib/assets/kbtc.webp';
 	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
+	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { allFungibleTokens } from '$lib/derived/all-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,6 +25,7 @@
 	}
 
 	const { quote }: Props = $props();
+	const routeId = $props.id();
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	// Route intermediates need not be wallet tokens. Ink's kBTC appears in Rift's BTC → USDC quote.
@@ -134,65 +136,63 @@
 {/snippet}
 
 {#if nonNullish(firstHop)}
-	<details class="swap-route mb-1 text-tertiary" open>
-		<summary
-			class="hit-area relative flex min-h-8 cursor-pointer list-none items-center justify-between gap-2 rounded-sm row-feedback text-sm hit-area-touch"
-		>
-			<span>{$i18n.swap.text.swap_route}</span>
-			<span class="flex shrink-0 items-center gap-1.5">
-				<span class="route-count text-xs">{hopCount}</span>
-				<span class="route-chevron" aria-hidden="true"><IconExpandMore size={16} /></span>
-			</span>
-		</summary>
-
-		<ol class="sr-only" role="list">
-			{#each hops as { from, to, venue }, index (index)}
-				<li>
-					{replacePlaceholders($i18n.swap.text.rift_route_hop, {
-						$from: from.label,
-						$to: to.label,
-						$venue: venue
-					})}
-				</li>
-			{/each}
-		</ol>
-
-		<div class="grid gap-2 pb-1" aria-hidden="true" bind:clientWidth={availableWidth}>
-			{#if fitsInOneTrack}
-				<div
-					style:--hops={hops.length}
-					class="route-track one-track"
-					class:dense={hops.length > 2}
-					bind:clientWidth={oneTrackWidth}
+	<div class="mb-1 text-tertiary">
+		<Collapsible id={routeId} initiallyExpanded wrapHeight>
+			{#snippet trigger({ expanded, toggle })}
+				<button
+					class="hit-area relative flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 rounded-sm row-feedback text-sm hit-area-touch"
+					aria-controls={routeId}
+					aria-expanded={expanded}
+					onclick={toggle}
+					type="button"
 				>
-					{@render oneTrack(firstHop.from)}
-				</div>
-			{:else}
+					<span>{$i18n.swap.text.swap_route}</span>
+					<span class="flex shrink-0 items-center gap-1.5">
+						{#if !expanded}
+							<span class="text-xs">{hopCount}</span>
+						{/if}
+						<span class:rotate-180={expanded} aria-hidden="true"><IconExpandMore size={16} /></span>
+					</span>
+				</button>
+			{/snippet}
+
+			<ol class="sr-only" role="list">
 				{#each hops as { from, to, venue }, index (index)}
-					<div style:--hops={1} class="route-track stacked">
-						{@render token(from, 1)}
-						{@render connector(venue, 2)}
-						{@render token(to, 3)}
-					</div>
+					<li>
+						{replacePlaceholders($i18n.swap.text.rift_route_hop, {
+							$from: from.label,
+							$to: to.label,
+							$venue: venue
+						})}
+					</li>
 				{/each}
-			{/if}
-		</div>
-	</details>
+			</ol>
+
+			<div class="grid gap-2 pb-1" aria-hidden="true" bind:clientWidth={availableWidth}>
+				{#if fitsInOneTrack}
+					<div
+						style:--hops={hops.length}
+						class="route-track one-track"
+						class:dense={hops.length > 2}
+						bind:clientWidth={oneTrackWidth}
+					>
+						{@render oneTrack(firstHop.from)}
+					</div>
+				{:else}
+					{#each hops as { from, to, venue }, index (index)}
+						<div style:--hops={1} class="route-track stacked">
+							{@render token(from, 1)}
+							{@render connector(venue, 2)}
+							{@render token(to, 3)}
+						</div>
+					{/each}
+				{/if}
+			</div>
+		</Collapsible>
+	</div>
 {/if}
 
 <style lang="scss">
-	summary::-webkit-details-marker {
-		display: none;
-	}
-
-	details[open] .route-count {
-		display: none;
-	}
-
-	details[open] .route-chevron {
-		rotate: 180deg;
-	}
-
 	.route-track {
 		--icon-size: 0.875rem;
 		--arrow-size: 0.75rem;

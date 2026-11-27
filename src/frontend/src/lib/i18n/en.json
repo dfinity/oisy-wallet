@@ -1434,6 +1434,7 @@
 			"included_liquidity_fees": "Included liquidity pool fees",
 			"best_rate": "Best Rate",
 			"expected_minimum": "Expected minimum",
+			"no_minimum": "None",
 			"you_receive": "You receive",
 			"you_receive_estimate": "You receive (estimate)",
 			"select_swap_provider": "Select swap provider",

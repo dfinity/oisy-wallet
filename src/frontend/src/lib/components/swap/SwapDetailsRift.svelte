@@ -3,13 +3,14 @@
 	import { getContext } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import SwapRiftRoute from '$lib/components/swap/SwapRiftRoute.svelte';
+	import Amount from '$lib/components/ui/Amount.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
-	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		provider: Extract<SwapMappedResult, { provider: SwapProvider.RIFT }>;
@@ -19,34 +20,44 @@
 
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	// Rift states no minimum, so the estimate is all there is to show, and it is labelled as one.
-	const formattedEstimate = $derived(
-		nonNullish($destinationToken?.decimals)
-			? formatToken({ value: provider.receiveAmount, unitName: $destinationToken.decimals })
-			: undefined
-	);
-
 	// What delivering to the destination chain costs, already taken out of the estimate.
 	const executionCost = $derived(BigInt(provider.swapDetails.estimated_execution_cost));
 </script>
 
-{#if nonNullish(formattedEstimate) && nonNullish($destinationToken)}
+<!-- Rift states no minimum, so the amount is labelled as an estimate, at the offers list's precision,
+and the minimum row other providers show says there is none. -->
+{#if nonNullish($destinationToken)}
 	<ModalValue>
 		{#snippet label()}
 			{$i18n.swap.text.you_receive_estimate}
 		{/snippet}
 
 		{#snippet mainValue()}
-			{formattedEstimate} {$destinationToken.symbol}
+			<Amount
+				amount={provider.receiveAmount}
+				decimals={$destinationToken.decimals}
+				symbol={$destinationToken.symbol}
+			/>
 		{/snippet}
 	</ModalValue>
 {/if}
+
+<ModalValue>
+	{#snippet label()}
+		{$i18n.swap.text.expected_minimum}
+	{/snippet}
+
+	{#snippet mainValue()}
+		{$i18n.swap.text.no_minimum}
+	{/snippet}
+</ModalValue>
 
 <SwapRiftRoute quote={provider.swapDetails} />
 
 {#if nonNullish($destinationToken)}
 	<FeeDisplay
 		decimals={$destinationToken.decimals}
+		displayDecimals={Math.min($destinationToken.decimals, EIGHT_DECIMALS)}
 		exchangeRate={$exchanges?.[$destinationToken.id]?.usd}
 		feeAmount={executionCost}
 		symbol={$destinationToken.symbol}
