@@ -7,8 +7,9 @@ export const NEAR_INTENTS_BTC_SWAP_ENABLED = true;
 
 export const NEAR_INTENTS_XRP_SWAP_ENABLED = true;
 
-// Apparently we do not need any API keys for Near Intents; we can make unauthorised calls
-export const NEAR_INTENTS_API_KEY = import.meta.env.VITE_NEAR_INTENTS_API_KEY;
+// The partner JWT from the NEAR Intents Partner Dashboard. 1Click refuses confidential quotes
+// without it and charges an extra platform fee on unauthenticated ones.
+export const NEAR_INTENTS_API_KEY: string | undefined = import.meta.env.VITE_NEAR_INTENTS_API_KEY;
 
 export const NEAR_INTENTS_API_URL = safeParse({
 	schema: UrlSchema,
