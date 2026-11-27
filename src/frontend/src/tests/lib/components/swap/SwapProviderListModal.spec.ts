@@ -1,4 +1,5 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+import { SWAP_PROVIDER_GUARANTEES_MINIMUM } from '$lib/constants/swap.constants';
 import {
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
 	SWAP_SELECTED_PROVIDER_DETAILS
@@ -9,6 +10,7 @@ import { screensStore } from '$lib/stores/screens.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { SwapProvider } from '$lib/types/swap';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, queryAllByTestId, render } from '@testing-library/svelte';
@@ -32,8 +34,26 @@ vi.mock('$env/dapp-descriptions.env', () => ({
 	]
 }));
 
+// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
+vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
+	const actual = await importOriginal<{
+		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
+	}>();
+
+	return {
+		...actual,
+		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
+	};
+});
+
 describe('SwapProviderListModal', () => {
 	let mockContext: Map<symbol, unknown>;
+
+	const markUnprotected = (...providers: SwapProvider[]) =>
+		providers.forEach((provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = false));
+
+	const offerRows = (container: HTMLElement) =>
+		Array.from(container.querySelectorAll<HTMLElement>('[data-testid="provider-item"]'));
 
 	beforeEach(() => {
 		screensStore.set('xs');
@@ -52,6 +72,12 @@ describe('SwapProviderListModal', () => {
 				selectedProvider: mockSwapProviders[0]
 			})
 		});
+	});
+
+	afterEach(() => {
+		Object.values(SwapProvider).forEach(
+			(provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = true)
+		);
 	});
 
 	it('renders all provider modal titles', () => {
@@ -92,6 +118,49 @@ describe('SwapProviderListModal', () => {
 		expect(container.querySelector('[data-testid="provider-item"]')).toHaveTextContent(
 			get(i18n).swap.text.best_rate
 		);
+	});
+
+	it('marks no offer as an estimate when every offer is protected', () => {
+		const { container } = render(SwapProviderListModal, { context: mockContext });
+
+		expect(container).not.toHaveTextContent(get(i18n).swap.text.estimate);
+	});
+
+	it.each(['xs', 'lg'] as const)(
+		'marks a higher unprotected offer below the best protected one as an estimate on %s screens',
+		(screen) => {
+			screensStore.set(screen);
+			// The mock lists the protected ICP Swap first and the higher Kong Swap offer second, the
+			// order the ranking gives them once Kong Swap is unprotected.
+			markUnprotected(SwapProvider.KONG_SWAP);
+
+			const { container } = render(SwapProviderListModal, { context: mockContext });
+			const [protectedRow, unprotectedRow] = offerRows(container);
+
+			expect(protectedRow).toHaveTextContent('ICP Swap');
+			expect(protectedRow).not.toHaveTextContent(get(i18n).swap.text.estimate);
+			// On phones the badge is a star, still named for screen readers.
+			expect(protectedRow).toHaveTextContent(get(i18n).swap.text.best_rate);
+
+			expect(unprotectedRow).toHaveTextContent('Kong Swap');
+			expect(unprotectedRow).toHaveTextContent(get(i18n).swap.text.estimate);
+			expect(unprotectedRow).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		}
+	);
+
+	it('gives no offer Best Rate when every offer is an estimate', () => {
+		screensStore.set('lg');
+		markUnprotected(SwapProvider.ICP_SWAP, SwapProvider.KONG_SWAP);
+
+		const { container } = render(SwapProviderListModal, { context: mockContext });
+		const rows = offerRows(container);
+
+		expect(rows).toHaveLength(2);
+
+		rows.forEach((row) => {
+			expect(row).toHaveTextContent(get(i18n).swap.text.estimate);
+			expect(row).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		});
 	});
 
 	it('goes back instead of pinning the offer already in use', async () => {

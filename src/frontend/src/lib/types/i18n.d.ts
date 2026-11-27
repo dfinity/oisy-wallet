@@ -1142,6 +1142,7 @@ interface I18nSwap {
 		smart_swap_gain: string;
 		smart_swap_best_of_offers: string;
 		smart_swap_offers_compared: string;
+		unprotected_offer_status: string;
 		smart_swap_offers: string;
 		smart_swap_selected_offer: string;
 		swap_provider_website: string;
@@ -1149,6 +1150,7 @@ interface I18nSwap {
 		included_network_fees: string;
 		included_liquidity_fees: string;
 		best_rate: string;
+		estimate: string;
 		expected_minimum: string;
 		you_receive: string;
 		select_swap_provider: string;

@@ -1,5 +1,6 @@
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
+import { screensStore } from '$lib/stores/screens.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -97,6 +98,47 @@ describe('SwapProviderListItem', () => {
 		});
 
 		expect(getByText('$12.34')).toBeInTheDocument();
+	});
+
+	it.each(['xs', 'md', 'xl'] as const)(
+		'marks an estimate in the Best Rate slot, in the grey of the fiat value, on %s screens',
+		(screen) => {
+			screensStore.set(screen);
+
+			const { getByText, queryByText } = render(SwapProviderListItem, {
+				props: { ...baseProps, dapp: createDapp(), isEstimate: true }
+			});
+
+			const estimate = getByText(en.swap.text.estimate);
+			const fiat = getByText('$5.00');
+
+			expect(estimate.parentElement).toBe(fiat.parentElement);
+			expect(estimate.compareDocumentPosition(fiat)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+			expect(estimate.closest('.text-tertiary')).toBe(fiat.closest('.text-tertiary'));
+			expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
+		}
+	);
+
+	it('never shows Best Rate on an estimate', () => {
+		screensStore.set('xl');
+
+		const { container, queryByText } = render(SwapProviderListItem, {
+			props: { ...baseProps, dapp: createDapp(), isBestRate: true, isEstimate: true }
+		});
+
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
+		expect(container.querySelector('svg')).toBeNull();
+	});
+
+	it('shows Best Rate and no estimate on a protected offer', () => {
+		screensStore.set('xl');
+
+		const { getByText, queryByText } = render(SwapProviderListItem, {
+			props: { ...baseProps, dapp: createDapp(), isBestRate: true }
+		});
+
+		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
+		expect(queryByText(en.swap.text.estimate)).not.toBeInTheDocument();
 	});
 
 	it('renders fallback text if usdBalance is undefined', () => {

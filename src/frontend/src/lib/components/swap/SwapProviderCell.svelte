@@ -129,6 +129,7 @@
 	// "Best of" claims the selected offer beat each one counted, and it is only measured against
 	// protected offers, so a higher estimate left out of the comparison is left out of the count.
 	let protectedOfferCount = $derived($swapAmountsStore?.swaps.filter(isProtectedOffer).length ?? 0);
+	let isUnprotected = $derived(nonNullish(selectedProvider) && !isProtectedOffer(selectedProvider));
 	let swapDApp = $derived(
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
@@ -187,12 +188,15 @@
 					: undefined;
 		}
 	});
+	// An unprotected offer keeps the line, even alone: it is the only place the form says the
+	// amount is an estimate.
 	let compact = $derived(
-		settled
-			? offerCount === 1
-			: nonNullish(singleOfferPair) &&
+		!isUnprotected &&
+			(settled
+				? offerCount === 1
+				: nonNullish(singleOfferPair) &&
 					singleOfferPair[0] === $sourceToken?.id &&
-					singleOfferPair[1] === $destinationToken?.id
+					singleOfferPair[1] === $destinationToken?.id)
 	);
 
 	// The cell opens the offers and the selected provider's details once there is something to
@@ -206,7 +210,10 @@
 		comparing
 			? $i18n.swap.text.finding_best_rate
 			: nonNullish(swapDApp)
-				? resolveText({ i18n: $i18n, path: swapDApp.name })
+				? [
+						resolveText({ i18n: $i18n, path: swapDApp.name }),
+						...(isUnprotected ? [$i18n.swap.text.unprotected_offer_status] : [])
+					].join(', ')
 				: ''
 	);
 
@@ -280,7 +287,9 @@
 									class:opacity-0={comparing}
 									in:fade={labelIn}
 								>
-									{#if nonNullish(gainParts)}
+									{#if isUnprotected}
+										<span class="text-tertiary">{$i18n.swap.text.unprotected_offer_status}</span>
+									{:else if nonNullish(gainParts)}
 										<span class="text-tertiary"
 											>{gainParts.before}<span class="font-semibold text-primary"
 												>{gainParts.amount}</span

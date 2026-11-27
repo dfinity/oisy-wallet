@@ -21,6 +21,7 @@
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription | SwapProvidersConfig;
 		isBestRate: boolean;
+		isEstimate?: boolean;
 		onClick: () => void;
 	}
 
@@ -31,6 +32,7 @@
 		usdBalance,
 		dapp,
 		isBestRate,
+		isEstimate = false,
 		onClick
 	}: Props = $props();
 
@@ -79,7 +81,11 @@
 
 		{#snippet descriptionEnd()}
 			<div class="flex items-center justify-end gap-2">
-				{#if isBestRate}
+				<!-- An estimate holds the Best Rate slot in the fiat value's grey, as a word, not a badge:
+				it is the row's only mark, so it stays spelled out on phones, where the badge is a star. -->
+				{#if isEstimate}
+					<span class="mt-1">{$i18n.swap.text.estimate}</span>
+				{:else if isBestRate}
 					<BestRateBadge />
 				{/if}
 				<span class="mt-1">
