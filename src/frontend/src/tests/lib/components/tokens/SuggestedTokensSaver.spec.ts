@@ -1,11 +1,17 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { USDC_TOKEN as USDC_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import * as erc20Derived from '$eth/derived/erc20.derived';
+import * as icrcDerived from '$icp/derived/icrc.derived';
 import SuggestedTokensSaver from '$lib/components/tokens/SuggestedTokensSaver.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import * as modalDerived from '$lib/derived/modal.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import { saveSuggestedTokens } from '$lib/services/suggested-tokens.services';
 import { balancesStore } from '$lib/stores/balances.store';
+import * as splDerived from '$sol/derived/spl.derived';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -42,6 +48,15 @@ describe('SuggestedTokensSaver', () => {
 		vi.spyOn(modalDerived, 'modalHideToken', 'get').mockImplementation(() => readable(false));
 		vi.spyOn(modalDerived, 'modalIcHideToken', 'get').mockImplementation(() => readable(false));
 		vi.spyOn(modalDerived, 'modalSolHideToken', 'get').mockImplementation(() => readable(false));
+		vi.spyOn(icrcDerived, 'icrcCustomTokensInitialized', 'get').mockImplementation(() =>
+			readable(true)
+		);
+		vi.spyOn(erc20Derived, 'erc20CustomTokensInitialized', 'get').mockImplementation(() =>
+			readable(true)
+		);
+		vi.spyOn(splDerived, 'splCustomTokensInitialized', 'get').mockImplementation(() =>
+			readable(true)
+		);
 	});
 
 	it('should save a suggested token once the user holds a balance in it', async () => {
@@ -127,6 +142,65 @@ describe('SuggestedTokensSaver', () => {
 			});
 		}
 	);
+
+	describe('while the custom tokens of a standard are loading', () => {
+		const icrc = { ...mockValidIcrcToken, enabled: true };
+		const usdcSol = { ...USDC_SOL_TOKEN, enabled: true };
+
+		const icrcCustomTokensLoaded = writable(false);
+		const erc20CustomTokensLoaded = writable(false);
+		const splCustomTokensLoaded = writable(false);
+
+		beforeEach(() => {
+			[icrcCustomTokensLoaded, erc20CustomTokensLoaded, splCustomTokensLoaded].forEach((loaded) =>
+				loaded.set(false)
+			);
+
+			vi.spyOn(icrcDerived, 'icrcCustomTokensInitialized', 'get').mockImplementation(
+				() => icrcCustomTokensLoaded
+			);
+			vi.spyOn(erc20Derived, 'erc20CustomTokensInitialized', 'get').mockImplementation(
+				() => erc20CustomTokensLoaded
+			);
+			vi.spyOn(splDerived, 'splCustomTokensInitialized', 'get').mockImplementation(
+				() => splCustomTokensLoaded
+			);
+
+			vi.spyOn(
+				tokensIcrcCkEnv,
+				'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
+				'get'
+			).mockReturnValue([icrc.ledgerCanisterId]);
+		});
+
+		it.each([
+			{ standard: 'ICRC', token: icrc, loaded: icrcCustomTokensLoaded },
+			{ standard: 'ERC-20', token: usdc, loaded: erc20CustomTokensLoaded },
+			{ standard: 'SPL', token: usdcSol, loaded: splCustomTokensLoaded }
+		])(
+			'should hold an $standard token until the custom tokens of its own standard have loaded',
+			async ({ token, loaded }) => {
+				vi.spyOn(tokensDerived, 'enabledTokens', 'get').mockImplementation(() => readable([token]));
+
+				render(SuggestedTokensSaver);
+
+				balancesStore.set({ id: token.id, data: { data: 100n, certified: true } });
+
+				await tick();
+
+				expect(saveSuggestedTokens).not.toHaveBeenCalled();
+
+				loaded.set(true);
+
+				await waitFor(() => {
+					expect(saveSuggestedTokens).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						tokens: [token]
+					});
+				});
+			}
+		);
+	});
 
 	it('should not fail when the save rejects', async () => {
 		vi.mocked(saveSuggestedTokens).mockRejectedValueOnce(new Error('Save failed'));

@@ -1,7 +1,12 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { enabledSplTokenAddresses, enabledSplTokens, splTokens } from '$sol/derived/spl.derived';
+import {
+	enabledSplTokenAddresses,
+	enabledSplTokens,
+	splCustomTokensInitialized,
+	splTokens
+} from '$sol/derived/spl.derived';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplToken } from '$sol/types/spl';
@@ -246,6 +251,27 @@ describe('spl.derived', () => {
 			const tokens = get(enabledSplTokenAddresses);
 
 			expect(tokens).toStrictEqual([]);
+		});
+	});
+
+	describe('splCustomTokensInitialized', () => {
+		it('should be false until the custom tokens have loaded', () => {
+			const subscribe = vi.spyOn(splCustomTokensStore, 'subscribe').mockImplementation((fn) => {
+				fn(undefined);
+
+				return () => {};
+			});
+
+			expect(get(splCustomTokensInitialized)).toBeFalsy();
+
+			subscribe.mockRestore();
+		});
+
+		it('should be true once the custom tokens have loaded, even without any', () => {
+			splCustomTokensStore.resetAll();
+			splCustomTokensStore.setAll([]);
+
+			expect(get(splCustomTokensInitialized)).toBeTruthy();
 		});
 	});
 });
