@@ -396,6 +396,59 @@ The Solana side of a conversion reads as one too, in the row and in the transact
 
 ---
 
+## Receive
+
+Receive starts from the asset the user wants on their OISY balance, then asks which network the sender uses, then shows the address for exactly that choice. One modal serves every fungible entry point: the hero **Receive** button on All networks, on a network overview and on a token page, and the **Receive** action of the ckBTC information panel. Receive on the NFT page keeps its own address list for NFT networks.
+
+### Choosing the token
+
+- **All networks** opens the token list. A **network overview** opens the same list with the tokens of that network first. A **token page** preselects the token, or the asset its versions form, and goes to its networks with the page's network first; when that leaves a single direct transfer, it goes straight to the address and offers **Change token** instead of Back.
+- The list is the whole fungible catalog on the enabled networks: enabled tokens, tokens with no balance, known tokens the user has not enabled, hidden tokens and imported ones. Test and local tokens appear in All networks while test networks are switched on, with a **Test network** badge on their entry, their routes and their address step.
+- Versions of one asset on several networks form one entry only through the curated token group, and never for a token on the Internet Computer or on a test network. USDC on Ethereum, Base, Arbitrum, Polygon, BSC and Solana is one entry; ckUSDC, the 1Sec ICRC USDC, USDC.e, a test USDC and a USDC the user imported are each their own. BTC and ckBTC, ETH and ckETH, SOL and ckSOL stay apart, although the portfolio groups them. Entries that would read the same show their network and a shortened contract, mint or ledger identifier.
+- The search matches name, symbol, and contract, mint or ledger identifier of any version, so "BTC" finds BTC and ckBTC as two entries. An empty result says no tokens match and offers **Import token**, the import and review steps of Manage tokens. The network is chosen in the form on any page, among the enabled networks that take custom tokens (not Bitcoin or XRP), starting from the page's network when it takes them. A contract that turns out to be an ERC-721 or ERC-1155 collection is not saved and the user is told to receive it from the NFT section. After the import, Receive selects the exact imported token once the reloaded catalog lists it; cancelling or a failed save returns to the list with the search kept.
+
+### Choosing the network
+
+A route is the asset the sender sends, the network they send it on, the asset OISY credits and where the address comes from. Every version of the selected asset on an enabled network is a direct transfer. The one conversion Receive offers is BTC deposited as ckBTC.
+
+- The Internet Computer twin of an asset is offered last in its list, as the faster and cheaper way to hold it: ckUSDC under USDC, ckETH under ETH, ckSOL under SOL, and every other ck token whose twin is in the list. The row reads **Internet Computer**, "As ckUSDC: fast and cheap", with the ck token's logo, and leads to the ck token's own address on Internet Computer (or **Enable ckUSDC** first). It is a direct transfer of the ck token, not a conversion: a sender with USDC on Ethereum cannot use it. ckBTC is left to the Bitcoin deposit. Because of the twin row, ETH and other assets with a single network now show the network choice instead of going straight to the address.
+- An address Convert can turn into a ck token, such as USDC or ETH on Ethereum or Sepolia, adds one line under the send-only line: "Convert to ckUSDC after it arrives for fast, cheap transfers." It has no button: How to convert leaves Receive, and the address is what the user came for. A deposit address that mints ckUSDC directly is the separate one-address deposit release.
+
+- Several routes need a choice. The step is titled after the asset ("Networks for USDC") and each row names only the choice: its network, with no line about what the sender does. A single direct transfer is picked for the user and named on the address step; a deposit route is always chosen explicitly, even alone.
+- A disabled credited token shows **Enable <token>** (busy: "Enabling <token>…") in place of any address, QR or Copy, as the step's only primary action (Done turns secondary). It enables that exact token only, through the same save as Manage tokens. The route is kept by network and asset identifier, so it resolves to the token the reload brings in, including an ICRC token whose catalog entry is replaced by a new one on first enable. A failed save keeps the selection and says to try again.
+- Back returns to the previous visible choice and keeps the search. Focus moves with the steps: to the line naming the asset and network on the address step, and back to the route the user left on Back, so Back then Enter reopens the same route. In Your addresses, focus goes to the QR code detail and returns to that row's QR button. Closing the modal drops the temporary choices; an enabled or imported token stays.
+- If the open route stops existing, because its network or token was disabled or removed, its address disappears at once and the user chooses again among what is left, with an info toast.
+
+### The address
+
+On the address step the modal title restates the option picked: "Receive USDC on Base", or for the ckBTC deposit "Receive BTC as ckBTC"; it wraps to a second line rather than cutting off the network. Then come a compact QR code and one address field holding the label in bold ("Bitcoin address"), the full address with its first and last six characters set in bold for checking and the middle in the secondary text colour (WCAG AA on the field), and Copy; right under it, one line with an info icon tells the user to send only that asset on that network, so the instruction is in view wherever the address is copied. Clipboard and QR carry exactly the address on screen. The Copy button is named for its action ("Copy Base address"); the confirmation says it was copied.
+
+- The address comes from the store of the route's own network: a change of token, route or format shows the new route's address or its loading state, never the previous one, and an answer for another route cannot fill it. Bitcoin, Solana, XRP and EVM wallet addresses show only once certified. A failed load shows a message and **Retry**.
+- Native **ICP** opens on the **Principal**, with a **Principal / Account ID** segmented control above the QR code; the pill slides to the chosen format, and arrow keys switch it. It changes label, address, QR and Copy together. One line under the control says what the chosen format takes, in place of the send instruction: the Principal "Receives ICP and every Internet Computer token, like ckBTC and CHAT.", the Account ID "ICP token only. Use it when an exchange asks for an Account ID." ICRC and chain-key tokens always show the ICRC address.
+- On Ethereum and Sepolia, native ETH keeps the **Receive from Metamask** handoff, for the route's own network and address.
+- EVM tokens use the shared EVM address, labelled with the route's network.
+
+### ckBTC and its Bitcoin deposit
+
+- ckBTC offers **Internet Computer**, a direct transfer to the ICRC address, and **Bitcoin**, described with its wait, "4 confirmations, then fast and cheap". The Bitcoin route is offered only for the mainnet ckBTC ledger with its minter, while Bitcoin mainnet is enabled, because that is the pair OISY's background deposit check covers (it asks the minter to mint every minute while ckBTC is enabled). Staging and local ckBTC, whose twin is Bitcoin testnet, get the direct route only. Native BTC offers the same deposit too: picking BTC asks between **Native Bitcoin**, "Stays BTC on the Bitcoin network" (its own direct route to the Bitcoin wallet address), and **Receive as ckBTC**, described as "4 confirmations, then fast and cheap" with the minter's live count. That is the honest trade: the deposit itself waits for the confirmations, and ckBTC moves in seconds for a tiny fee once it arrives. Nothing is preselected, the title reads **Networks for BTC**, and the choice leads to the same deposit route as starting from ckBTC.
+- The deposit address is the minter's Bitcoin address for the user, labelled **Bitcoin deposit address for ckBTC**, loaded when the route opens and shown once certified. Right under the address field, with an orange warning icon, one bold line in the text colour says **Send only BTC on Bitcoin to this address.**, the same sentence a direct address shows, at every width (the orange text did not reach WCAG AA on white).
+- Below, one compact card holds the minter's current **Bitcoin confirmations** and **Estimated deposit fee** (the minter's check fee, `kyt_fee`), the note that OISY credits ckBTC on Internet Computer after these confirmations and that a deposit smaller than the fee yields no ckBTC, and the **View ckBTC activity** link. Receive shows no minimum deposit: the minter publishes none for deposits. Terms that fail to load read **Unavailable** with a retry. A failed address load offers a retry and leaves the direct route usable.
+- **View ckBTC activity** appears once the address is shown; it closes Receive and opens ckBTC's transactions, where the existing status refresh lives.
+
+### ckETH and ckERC20
+
+These receive directly on the Internet Computer. When the exact Ethereum twin can be converted on an enabled Ethereum network (Ethereum or Sepolia; not ckUSDC while its conversion is switched off), the address step adds **How to convert** once the ck token is enabled. It enables a ckERC20's Ethereum twin if needed (on failure Receive stays on the address), closes Receive, opens the ck token's page and opens the existing conversion instructions there with that exact ck token and twin. The conversion takes its network, fee token and minter from the twin, not from the page. An unavailable twin never holds up the direct address. The one-address Ethereum deposit is a later release.
+
+### SOL and ckSOL
+
+SOL receives on the Solana wallet address and ckSOL on the ICRC address, as two entries. Receive never shows the ckSOL minter's deposit address and starts no deposit watch: SOL → ckSOL stays in the Chain Fusion swap.
+
+### Your addresses
+
+The account menu shows **Your addresses** on every signed-in page, including network and token pages, which no longer show a single network's address there. It opens a list titled **Your addresses** of each regular wallet address that is ready (certified), one row each: the coloured logo of its native token, its name, the address shortened to its first and last six characters, and QR and Copy, which carry the full address and use the app's blue link-style icon buttons. The rows are the ICP **Principal** (tagged "Tokens like ckBTC, CHAT, …") and the ICP **Account ID** (tagged "ICP token only"), the tag on the address line after a "·", cut short before the address is, one **EVM wallet address** for every enabled EVM network, and the Bitcoin, Solana and XRP addresses, test and local ones labelled as such. What an address is for (when to use the Principal or the Account ID, the EVM networks that share the address) shows with its QR code, above the full address. It never lists a conversion deposit address such as the ckBTC minter's. The contact address book is separate.
+
+---
+
 ## Send
 
 ### First-time destination addresses

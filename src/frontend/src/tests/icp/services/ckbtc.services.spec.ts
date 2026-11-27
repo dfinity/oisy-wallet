@@ -1,5 +1,10 @@
 import * as ckbtcMinterApi from '$icp/api/ckbtc-minter.api';
-import { loadAllCkBtcInfo, queryEstimateFee, updateBalance } from '$icp/services/ckbtc.services';
+import {
+	clearCkBtcMinterInfo,
+	loadAllCkBtcInfo,
+	queryEstimateFee,
+	updateBalance
+} from '$icp/services/ckbtc.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -240,6 +245,35 @@ describe('ckbtc.services', () => {
 					identity: mockIdentity
 				})
 			).rejects.toThrow();
+		});
+	});
+
+	describe('clearCkBtcMinterInfo', () => {
+		it('should forget a failed minter info so it reads as loading again', () => {
+			ckBtcMinterInfoStore.reset(mockToken.id);
+
+			expect(get(ckBtcMinterInfoStore)?.[mockToken.id]).toBeNull();
+
+			clearCkBtcMinterInfo(mockToken.id);
+
+			expect(get(ckBtcMinterInfoStore)?.[mockToken.id]).toBeUndefined();
+		});
+
+		it('should keep the minter info of other tokens', () => {
+			const otherId = Symbol('other') as typeof mockToken.id;
+
+			ckBtcMinterInfoStore.set({ id: otherId, data: { data: mockMinterInfo, certified: true } });
+			ckBtcMinterInfoStore.reset(mockToken.id);
+
+			clearCkBtcMinterInfo(mockToken.id);
+
+			expect(get(ckBtcMinterInfoStore)?.[otherId]?.data).toEqual(mockMinterInfo);
+		});
+
+		it('should leave a store that was never loaded as it is', () => {
+			clearCkBtcMinterInfo(mockToken.id);
+
+			expect(get(ckBtcMinterInfoStore)).toBeUndefined();
 		});
 	});
 

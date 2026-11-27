@@ -1,6 +1,6 @@
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
-import { isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
+import { isTokenErc4626, isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
@@ -17,9 +17,13 @@ import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { saveCustomTokensWithKey } from '$lib/services/manage-tokens.services';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { NullishIdentity } from '$lib/types/identity';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import type { Token, TokenId } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -38,7 +42,7 @@ import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import { filterEnabledToken, standardLabel } from '$lib/utils/token.utils';
+import { filterEnabledToken, mapTokenUi, standardLabel } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -358,6 +362,31 @@ export function sortTokens<T extends Token>({
 }
 
 /**
+ * The tokens with their balances and prices, sorted as `sortTokens` does. A list passes a snapshot of
+ * the exchange data taken when it opens, so it does not reorder under the pointer when a price updates.
+ */
+export const toSortedTokensUi = <T extends Token>({
+	tokens,
+	$balances,
+	$stakeBalances,
+	$exchanges,
+	$tokensToPin,
+	$networksToPin
+}: {
+	tokens: T[];
+	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
+	$exchanges: ExchangesData;
+	$tokensToPin: ReadonlyArray<TokenPin>;
+	$networksToPin: ReadonlyArray<NetworkPin>;
+}): TokenUi<T>[] =>
+	sortTokens({
+		$tokens: tokens.map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges })),
+		$tokensToPin,
+		$networksToPin
+	});
+
+/**
  * Calculates total USD balance of the provided UI tokens list.
  *
  * @param tokens - The list of UI tokens for total USD balance calculation.
@@ -500,7 +529,13 @@ export const doesTokenMatchFilter = ({
 			return true;
 		}
 
-		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
+		if (
+			isTokenErc20(token) ||
+			isTokenErc4626(token) ||
+			isTokenErc721(token) ||
+			isTokenErc1155(token) ||
+			isTokenSpl(token)
+		) {
 			return (
 				nonNullish(token.address) &&
 				areAddressesPartiallyEqual({

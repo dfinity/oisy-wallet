@@ -946,31 +946,18 @@
 				"use_for_all_tokens": "从钱包、用户或其他支持此地址格式的应用接收时使用此地址接收所有代币。",
 				"use_for_icrc_deposit": "在 ICP 网络中接收 ICRC-1 代币，例如 SNS、ck 代币等。",
 				"use_for_icp_deposit": "从仅支持账户 ID 的交易所或其他钱包接收 ICP 时使用此地址。",
-				"your_private_eth_address": "你所有 ERC20 代币的私有地址。",
-				"display_account_id_qr": "将 ICP 账户 ID 显示为二维码",
 				"account_id_copied": "ICP 账户 ID 已复制到剪贴板。",
 				"principal": "ICP 主标识",
-				"principal_title": "ICP 钱包地址 - ckBTC、CHAT 等",
-				"internet_computer_principal_copied": "Internet Computer Principal 已复制到剪贴板。",
-				"display_internet_computer_principal_qr": "以二维码形式显示 Internet Computer Principal",
-				"icp_account": "ICP 账户（用于交易所）",
-				"icp_account_title": "ICP 钱包地址 - 仅限 ICP 代币",
-				"icp_account_copied": "ICP 账户已复制到剪贴板。",
-				"display_icp_account_qr": "以二维码形式显示 ICP 账户"
+				"internet_computer_principal_copied": "Internet Computer Principal 已复制到剪贴板。"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "正在检查 $token 状态...",
-				"from_network": "从 $network 网络接收",
-				"eth_to_cketh_description": "将 $token 转换为 $ckToken 需要在 $network 上调用智能合约，并将你的 IC Principal 作为参数传入——$oisy_name 通过让你直接在钱包内完成转换来简化这一流程。",
-				"learn_how_to_convert": "了解如何将 $token 转换为 $ckToken",
 				"metamask": "从 Metamask 接收",
 				"ethereum": "以太坊",
-				"ethereum_title": "以太坊钱包地址",
 				"ethereum_address": "地址",
-				"ethereum_address_copied": "以太坊地址已复制到剪贴板。",
-				"display_ethereum_address_qr": "以二维码形式显示以太坊地址"
+				"ethereum_address_copied": "以太坊地址已复制到剪贴板。"
 			},
 			"error": {
 				"no_metamask": "Metamask 不可用。"
@@ -990,10 +977,7 @@
 				"bitcoin_testnet_address_title": "比特币（测试网）钱包地址",
 				"bitcoin_regtest_address": "比特币（Regtest）",
 				"bitcoin_regtest_address_title": "比特币（Regtest）钱包地址",
-				"display_bitcoin_address_qr": "以二维码形式显示比特币地址",
-				"bitcoin_address_copied": "比特币地址已复制到剪贴板。",
-				"from_network": "将 BTC 网络上的比特币转入该地址以接收 ckBTC。",
-				"fee_applied": "请注意，将收取约 $fee BTC 的跨网络手续费。"
+				"bitcoin_address_copied": "比特币地址已复制到剪贴板。"
 			},
 			"info": {
 				"no_new_btc": "没有新的已确认 BTC。",
@@ -1011,16 +995,81 @@
 				"solana_devnet_address_title": "Solana Devnet 钱包地址",
 				"solana_local_address": "Solana 本地地址",
 				"solana_local_address_title": "Solana 本地钱包地址",
-				"solana_address_copied": "Solana 地址已复制到剪贴板",
-				"display_solana_address_qr": "将 Solana 地址显示为二维码"
+				"solana_address_copied": "Solana 地址已复制到剪贴板"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
+			}
+		},
+		"token": {
+			"text": {
+				"select_token": "",
+				"networks_count": "",
+				"test_network": "",
+				"change_token": "",
+				"route_native": "",
+				"route_native_description": "",
+				"send_instruction": "",
+				"enable_info": "",
+				"enable_token": "",
+				"enabling_token": "",
+				"enable_error": "",
+				"address_loading": "",
+				"address_error": "",
+				"no_routes": "",
+				"route_unavailable": "",
+				"import_token": "",
+				"import_nft": "",
+				"address_format": "",
+				"principal": "",
+				"account_id": "",
+				"principal_label": "",
+				"account_id_label": "",
+				"address_label": "",
+				"address_copied": "",
+				"how_to_convert": "",
+				"how_to_convert_description": "",
+				"copy_address": "",
+				"copy_principal": "",
+				"copy_account_id": "",
+				"no_match": "",
+				"title_direct": "",
+				"title_as": "",
+				"route_title": "",
+				"ck_twin_benefit": "",
+				"convert_hint": "",
+				"principal_description": "",
+				"account_id_description": ""
+			}
+		},
+		"ckbtc": {
+			"text": {
+				"deposit_address": "",
+				"copy_deposit_address": "",
+				"deposit_address_copied": "",
+				"confirmations": "",
+				"estimated_fee": "",
+				"unavailable": "",
+				"terms_error": "",
+				"view_activity": "",
+				"receive_as": "",
+				"benefit": "",
+				"benefit_generic": "",
+				"credit_note": ""
+			}
+		},
+		"addresses": {
+			"text": {
+				"evm_title": "",
+				"evm_networks": "",
+				"principal_tag": "",
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},
@@ -1353,7 +1402,6 @@
 			"cketh_conversions_may_take": "ckETH 转换最多可能需要 20 分钟",
 			"ckerc20_conversions_may_take": "$ckErc20 转换最多可能需要 20 分钟",
 			"how_to_convert_eth_to_cketh": "以下是在 $oisy_name 上将 $token 转换为 $ckToken 的方法",
-			"send_eth": "将 $token 发送至你的 $oisy_name 地址",
 			"wait_eth_current_balance": "等待 $token 到账。当前余额",
 			"set_amount": "设置转换金额",
 			"check_balance_for_fees": "检查 $token 余额是否足以支付转换手续费",
@@ -1374,7 +1422,8 @@
 			"unsupported_token_conversion": "当前不支持所选代币的转换。",
 			"calculating_max_amount": "计算中...",
 			"send_to": "将转换资产发送至",
-			"custom_destination": "其他地址"
+			"custom_destination": "其他地址",
+			"send_token_on_network": ""
 		},
 		"assertion": {
 			"insufficient_funds": "余额不足"

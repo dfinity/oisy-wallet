@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type IcReceiveInfoCkBtc from '$icp/components/receive/IcReceiveInfoCkBtc.svelte';
-	import type IcReceiveInfoIcp from '$icp/components/receive/IcReceiveInfoIcp.svelte';
-	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
+	import { tick } from 'svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
@@ -16,20 +14,20 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 
 	interface Props {
-		infoCmp:
-			| typeof ReceiveAddresses
-			| typeof IcReceiveInfoCkBtc
-			| typeof IcReceiveInfoIcp
-			| typeof IcReceiveInfoIcrc;
+		infoCmp: typeof ReceiveAddresses;
+		// Your addresses names the list and each QR code after the address, not after Receive.
+		title?: string;
 		onClose?: () => void;
 	}
 
-	let { infoCmp: InfoCmp, onClose }: Props = $props();
+	let { infoCmp: InfoCmp, title: listTitle, onClose }: Props = $props();
 
+	// The title is fixed for the life of the modal.
+	// svelte-ignore state_referenced_locally
 	const steps: WizardSteps<WizardStepsReceiveAddress> = [
 		{
 			name: WizardStepsReceiveAddress.RECEIVE,
-			title: $i18n.receive.text.receive
+			title: listTitle ?? $i18n.receive.text.receive
 		},
 		{
 			name: WizardStepsReceiveAddress.QR_CODE,
@@ -44,15 +42,29 @@
 	let addressLabel = $state<undefined | string>();
 	let addressToken = $state<Token | undefined>();
 	let copyAriaLabel = $state<string | undefined>();
+	let key = $state<string | undefined>();
+	let description = $state<string | undefined>();
 
 	const displayQRCode = (detail: ReceiveQRCode) => {
 		if (isNullish(modal)) {
 			return;
 		}
 
-		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
+		({ address, addressLabel, addressToken, copyAriaLabel, description, key } = detail);
 
 		modal.next();
+
+		focusContent();
+	};
+
+	// The step's content is replaced on every change, so focus is placed again: on the QR code detail
+	// when it opens, and back on the QR button of the row it came from, which the list focuses itself.
+	let content = $state<HTMLDivElement | undefined>();
+	let returnFocusKey = $state<string | undefined>();
+
+	const focusContent = async () => {
+		await tick();
+		content?.focus({ preventScroll: true });
 	};
 
 	const displayAddresses = () => {
@@ -60,14 +72,29 @@
 			return;
 		}
 
+		returnFocusKey = key;
+
 		modal.back();
+
+		// The row focuses its own QR button once shown; if it is gone, focus stays in the dialog.
+		requestAnimationFrame(() => {
+			if (nonNullish(content) && !content.contains(document.activeElement)) {
+				content.focus({ preventScroll: true });
+			}
+		});
 
 		address = undefined;
 		addressLabel = undefined;
 		addressToken = undefined;
 		copyAriaLabel = undefined;
+		description = undefined;
+		key = undefined;
 	};
 </script>
+
+{#snippet descriptionText()}
+	{description}
+{/snippet}
 
 <WizardModal
 	bind:this={modal}
@@ -77,25 +104,32 @@
 	bind:currentStep
 >
 	{#snippet title()}
-		{#if currentStep?.name === steps[1].name}
+		{#if currentStep?.name === steps[1].name && nonNullish(listTitle) && nonNullish(addressLabel)}
+			{addressLabel}
+		{:else if currentStep?.name === steps[1].name}
 			<ReceiveTitle title={addressToken?.network.name} />
 		{:else}
-			{$i18n.receive.text.receive}
+			{listTitle ?? $i18n.receive.text.receive}
 		{/if}
 	{/snippet}
 
-	{#key currentStep?.name}
-		{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-			<ReceiveAddressQrCode
-				{address}
-				{addressLabel}
-				{addressToken}
-				copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
-				network={addressToken.network}
-				onBack={displayAddresses}
-			/>
-		{:else}
-			<InfoCmp onQRCode={displayQRCode} />
-		{/if}
-	{/key}
+	<div bind:this={content} class="outline-none" tabindex="-1">
+		{#key currentStep?.name}
+			{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
+				<!-- What the address is for stays beside its QR code: the EVM networks, or when to use it. -->
+				<ReceiveAddressQrCode
+					{address}
+					{addressLabel}
+					{addressToken}
+					copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+					network={addressToken.network}
+					onBack={displayAddresses}
+					qrSize="compact"
+					text={nonNullish(description) ? descriptionText : undefined}
+				/>
+			{:else}
+				<InfoCmp focusKey={returnFocusKey} onQRCode={displayQRCode} />
+			{/if}
+		{/key}
+	</div>
 </WizardModal>

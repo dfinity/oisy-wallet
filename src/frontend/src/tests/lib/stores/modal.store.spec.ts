@@ -1,3 +1,5 @@
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { modalStore } from '$lib/stores/modal.store';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { WalletKitTypes } from '@reown/walletkit';
@@ -8,18 +10,19 @@ describe('modal.store', () => {
 		expect(get(modalStore)).toBeUndefined();
 	});
 
-	it('should open eth-receive modal with modalId', () => {
+	it('should open receive modal with modalId', () => {
 		const id = Symbol('modalId');
-		modalStore.openEthReceive(id);
+		modalStore.openReceive(id);
 
-		expect(get(modalStore)).toEqual({ type: 'eth-receive', id });
+		expect(get(modalStore)).toEqual({ type: 'receive', id });
 	});
 
-	it('should open icp-receive modal with modalId', () => {
+	it('should open how-to-convert modal with its tokens', () => {
 		const id = Symbol('modalId');
-		modalStore.openIcpReceive(id);
+		const data = { sourceToken: ETHEREUM_TOKEN, destinationToken: ICP_TOKEN };
+		modalStore.openHowToConvertToTwinTokenEth({ id, data });
 
-		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
+		expect(get(modalStore)).toEqual({ type: 'how-to-convert-to-twin-token-eth', id, data });
 	});
 
 	it('should open wallet-connect-sign modal with data', () => {

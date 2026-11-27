@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
-	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
-	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
+	import { getAddTokenDataIdentifier } from '$icp-eth/utils/add-token.utils';
+	import AddTokenWizardSteps, {
+		type AddTokenWizardStep
+	} from '$lib/components/manage/AddTokenWizardSteps.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
-	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -70,6 +70,16 @@
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
+
+	const ADD_TOKEN_STEPS: Partial<Record<WizardStepsManageTokens, AddTokenWizardStep>> = {
+		[WizardStepsManageTokens.IMPORT]: 'import',
+		[WizardStepsManageTokens.REVIEW]: 'review',
+		[WizardStepsManageTokens.SAVING]: 'saving'
+	};
+
+	let addTokenStep = $derived(
+		nonNullish(currentStep) ? ADD_TOKEN_STEPS[currentStep.name] : undefined
+	);
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 	let initializedInitialStep = false;
 
@@ -95,14 +105,7 @@
 			return;
 		}
 
-		const address =
-			tokenData.ledgerCanisterId ??
-			tokenData.extCanisterId ??
-			tokenData.dip721CanisterId ??
-			tokenData.icPunksCanisterId ??
-			tokenData.icrc7CanisterId ??
-			tokenData.ethContractAddress ??
-			tokenData.splTokenAddress;
+		const address = getAddTokenDataIdentifier(tokenData);
 
 		const tokenNetwork = network?.id.description;
 
@@ -163,29 +166,18 @@
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#key currentStep?.name}
-		{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
-			<AddTokenReviewByNetwork
+		{#if nonNullish(addTokenStep)}
+			<AddTokenWizardSteps
 				{isNftsPage}
-				modalNext={() => modal?.set(3)}
-				{network}
 				onBack={modal.back}
+				onBackToImport={modal.back}
 				onError={() => modal?.set(0)}
+				onReview={modal.next}
+				onSaving={() => modal?.set(3)}
 				onSuccess={close}
-				{progress}
-				{tokenData}
-			/>
-		{:else if currentStep?.name === WizardStepsManageTokens.SAVING}
-			<InProgressWizard
-				progressStep={saveProgressStep}
-				steps={addTokenSteps($i18n)}
-				warningType="manage"
-			/>
-		{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
-			<AddTokenByNetwork
-				{isNftsPage}
-				onBack={modal.back}
-				onNext={modal.next}
+				step={addTokenStep}
 				bind:network
+				bind:progressStep={saveProgressStep}
 				bind:tokenData
 			/>
 		{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}

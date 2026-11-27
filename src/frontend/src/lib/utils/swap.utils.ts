@@ -64,7 +64,7 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { filterTokensForSelectedNetwork, isNetworkIdICP } from '$lib/utils/network.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { filterSwapTokens, networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { isTokenEnabled, isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { getTokenDisplaySymbol, mapTokenUi } from '$lib/utils/token.utils';
 import { findToken, sortTokens } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -662,7 +662,7 @@ export const sortSwapListTokens = <T extends Token>({
 	$tokensToPin: ReadonlyArray<TokenToPin>;
 	$networksToPin: ReadonlyArray<Pick<Network, 'id'>>;
 }): TokenUi<T>[] => {
-	const isActive = (token: TokenUi<T>): boolean => !isTokenToggleable(token) || token.enabled;
+	const isActive = (token: TokenUi<T>): boolean => isTokenEnabled(token);
 
 	return [
 		...sortTokens({ $tokens: tokens.filter(isActive), $tokensToPin, $networksToPin }),

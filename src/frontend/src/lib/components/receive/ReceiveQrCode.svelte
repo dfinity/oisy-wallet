@@ -10,9 +10,11 @@
 	interface Props {
 		address: string;
 		addressToken?: Token;
+		// `compact` for screens where the QR code shares the space with the address and its context.
+		size?: 'compact' | 'default';
 	}
 
-	let { address, addressToken }: Props = $props();
+	let { address, addressToken, size = 'default' }: Props = $props();
 
 	let symbol = $derived(addressToken?.symbol);
 
@@ -27,8 +29,16 @@
 <svelte:window onresize={rerender} />
 
 <div
-	class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-[100%] rounded-xl bg-white p-4"
+	class="mx-auto aspect-square max-w-[100%] rounded-xl bg-white"
+	class:h-56={size === 'compact'}
+	class:h-80={size === 'default'}
+	class:max-h-[36vh]={size === 'compact'}
+	class:max-h-[44vh]={size === 'default'}
+	class:mb-4={size === 'compact'}
+	class:mb-8={size === 'default'}
 	class:opacity-0={!render}
+	class:p-3={size === 'compact'}
+	class:p-4={size === 'default'}
 	in:fade
 >
 	{#if render}

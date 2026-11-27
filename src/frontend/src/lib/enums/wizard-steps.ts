@@ -68,6 +68,15 @@ export enum WizardStepsReceiveAddress {
 	QR_CODE = 'QR code'
 }
 
+export enum WizardStepsReceiveToken {
+	TOKEN = 'Token',
+	ROUTE = 'Route',
+	ADDRESS = 'Address',
+	IMPORT = 'Import',
+	IMPORT_REVIEW = 'Import review',
+	IMPORT_SAVING = 'Import saving'
+}
+
 export enum WizardStepsManageTokens {
 	MANAGE = 'Manage',
 	IMPORT = 'Import',

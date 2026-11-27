@@ -682,31 +682,18 @@ interface I18nReceive {
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
-			your_private_eth_address: string;
-			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
-			principal_title: string;
 			internet_computer_principal_copied: string;
-			display_internet_computer_principal_qr: string;
-			icp_account: string;
-			icp_account_title: string;
-			icp_account_copied: string;
-			display_icp_account_qr: string;
 		};
 	};
 	ethereum: {
 		text: {
 			checking_status: string;
-			from_network: string;
-			eth_to_cketh_description: string;
-			learn_how_to_convert: string;
 			metamask: string;
 			ethereum: string;
-			ethereum_title: string;
 			ethereum_address: string;
 			ethereum_address_copied: string;
-			display_ethereum_address_qr: string;
 		};
 		error: { no_metamask: string };
 	};
@@ -724,10 +711,7 @@ interface I18nReceive {
 			bitcoin_testnet_address_title: string;
 			bitcoin_regtest_address: string;
 			bitcoin_regtest_address_title: string;
-			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
-			from_network: string;
-			fee_applied: string;
 		};
 		info: { no_new_btc: string; check_btc_progress: string };
 		error: { unexpected_btc: string };
@@ -741,15 +725,74 @@ interface I18nReceive {
 			solana_local_address: string;
 			solana_local_address_title: string;
 			solana_address_copied: string;
-			display_solana_address_qr: string;
 		};
 	};
-	xrp: {
+	xrp: { text: { xrp_address: string; xrp_address_title: string; xrp_address_copied: string } };
+	token: {
 		text: {
-			xrp_address: string;
-			xrp_address_title: string;
-			xrp_address_copied: string;
-			display_xrp_address_qr: string;
+			select_token: string;
+			networks_count: string;
+			test_network: string;
+			change_token: string;
+			route_native: string;
+			route_native_description: string;
+			send_instruction: string;
+			enable_info: string;
+			enable_token: string;
+			enabling_token: string;
+			enable_error: string;
+			address_loading: string;
+			address_error: string;
+			no_routes: string;
+			route_unavailable: string;
+			import_token: string;
+			import_nft: string;
+			address_format: string;
+			principal: string;
+			account_id: string;
+			principal_label: string;
+			account_id_label: string;
+			address_label: string;
+			address_copied: string;
+			how_to_convert: string;
+			how_to_convert_description: string;
+			copy_address: string;
+			copy_principal: string;
+			copy_account_id: string;
+			no_match: string;
+			title_direct: string;
+			title_as: string;
+			route_title: string;
+			ck_twin_benefit: string;
+			convert_hint: string;
+			principal_description: string;
+			account_id_description: string;
+		};
+	};
+	ckbtc: {
+		text: {
+			deposit_address: string;
+			copy_deposit_address: string;
+			deposit_address_copied: string;
+			confirmations: string;
+			estimated_fee: string;
+			unavailable: string;
+			terms_error: string;
+			view_activity: string;
+			receive_as: string;
+			benefit: string;
+			benefit_generic: string;
+			credit_note: string;
+		};
+	};
+	addresses: {
+		text: {
+			evm_title: string;
+			evm_networks: string;
+			principal_tag: string;
+			account_id_tag: string;
+			show_qr: string;
+			copy: string;
 		};
 	};
 }
@@ -1078,7 +1121,6 @@ interface I18nConvert {
 		cketh_conversions_may_take: string;
 		ckerc20_conversions_may_take: string;
 		how_to_convert_eth_to_cketh: string;
-		send_eth: string;
 		wait_eth_current_balance: string;
 		set_amount: string;
 		check_balance_for_fees: string;
@@ -1100,6 +1142,7 @@ interface I18nConvert {
 		calculating_max_amount: string;
 		send_to: string;
 		custom_destination: string;
+		send_token_on_network: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };

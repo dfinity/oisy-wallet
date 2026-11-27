@@ -946,31 +946,18 @@
 				"use_for_all_tokens": "Použijte pro všechny tokeny při přijímání z peněženek, od uživatelů nebo z jiných aplikací, které podporují tento formát adresy.",
 				"use_for_icrc_deposit": "Použijte pro příjem tokenů ICRC-1 v síti ICP, jako jsou SNS, ck tokeny atd.",
 				"use_for_icp_deposit": "Použijte pro vklady ICP z burz nebo jiných peněženek, které podporují pouze ID ICP Účtu.",
-				"your_private_eth_address": "Vaše soukromá adresa pro všechny tokeny ERC20.",
-				"display_account_id_qr": "Zobrazit ID ICP Účtu jako QR kód",
 				"account_id_copied": "ID ICP Účtu zkopírováno do schránky.",
 				"principal": "Hlavní ICP ID",
-				"principal_title": "Adresa ICP peněženky – ckBTC, CHAT, …",
-				"internet_computer_principal_copied": "Hlavní ICP ID zkopírováno do schránky.",
-				"display_internet_computer_principal_qr": "Zobrazit Hlavní ICP ID jako QR kód",
-				"icp_account": "ID ICP Účtu (pro burzy)",
-				"icp_account_title": "Adresa ICP peněženky – pouze ICP token",
-				"icp_account_copied": "ID ICP Účtu zkopírováno do schránky.",
-				"display_icp_account_qr": "Zobrazit ID ICP Účtu jako QR kód"
+				"internet_computer_principal_copied": "Hlavní ICP ID zkopírováno do schránky."
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Kontrola stavu $tokenu...",
-				"from_network": "Přijmout ze sítě $network",
-				"eth_to_cketh_description": "Převod $tokenu na $ckToken vyžaduje volání chytré smlouvy na $network a předání vašeho ICP principal jako argumentu – $oisy_name tento postup zjednodušuje tím, že vám umožňuje provést převod přímo v peněžence.",
-				"learn_how_to_convert": "Zjistěte, jak převést $token na $ckToken",
 				"metamask": "Přijmout z Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Adresa Ethereum peněženky",
 				"ethereum_address": "Adresa",
-				"ethereum_address_copied": "Adresa Ethereum zkopírována do schránky.",
-				"display_ethereum_address_qr": "Zobrazit adresu Ethereum jako QR kód"
+				"ethereum_address_copied": "Adresa Ethereum zkopírována do schránky."
 			},
 			"error": {
 				"no_metamask": "Metamask není k dispozici."
@@ -990,10 +977,7 @@
 				"bitcoin_testnet_address_title": "Adresa Bitcoin (Testnet) peněženky",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Adresa Bitcoin (Regtest) peněženky",
-				"display_bitcoin_address_qr": "Zobrazit adresu Bitcoin jako QR kód",
-				"bitcoin_address_copied": "Adresa Bitcoin zkopírována do schránky.",
-				"from_network": "Převeďte Bitcoin na síti BTC na tuto adresu, abyste obdrželi ckBTC.",
-				"fee_applied": "Upozorňujeme, že bude účtován odhadovaný mezisíťový poplatek ve výši $fee BTC."
+				"bitcoin_address_copied": "Adresa Bitcoin zkopírována do schránky."
 			},
 			"info": {
 				"no_new_btc": "Žádné nové potvrzené BTC.",
@@ -1011,16 +995,81 @@
 				"solana_devnet_address_title": "Adresa Solana Devnet peněženky",
 				"solana_local_address": "Místní adresa Solana",
 				"solana_local_address_title": "Adresa Solana Local peněženky",
-				"solana_address_copied": "Adresa Solana zkopírována do schránky",
-				"display_solana_address_qr": "Zobrazit adresu Solana jako QR kód"
+				"solana_address_copied": "Adresa Solana zkopírována do schránky"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
+			}
+		},
+		"token": {
+			"text": {
+				"select_token": "",
+				"networks_count": "",
+				"test_network": "",
+				"change_token": "",
+				"route_native": "",
+				"route_native_description": "",
+				"send_instruction": "",
+				"enable_info": "",
+				"enable_token": "",
+				"enabling_token": "",
+				"enable_error": "",
+				"address_loading": "",
+				"address_error": "",
+				"no_routes": "",
+				"route_unavailable": "",
+				"import_token": "",
+				"import_nft": "",
+				"address_format": "",
+				"principal": "",
+				"account_id": "",
+				"principal_label": "",
+				"account_id_label": "",
+				"address_label": "",
+				"address_copied": "",
+				"how_to_convert": "",
+				"how_to_convert_description": "",
+				"copy_address": "",
+				"copy_principal": "",
+				"copy_account_id": "",
+				"no_match": "",
+				"title_direct": "",
+				"title_as": "",
+				"route_title": "",
+				"ck_twin_benefit": "",
+				"convert_hint": "",
+				"principal_description": "",
+				"account_id_description": ""
+			}
+		},
+		"ckbtc": {
+			"text": {
+				"deposit_address": "",
+				"copy_deposit_address": "",
+				"deposit_address_copied": "",
+				"confirmations": "",
+				"estimated_fee": "",
+				"unavailable": "",
+				"terms_error": "",
+				"view_activity": "",
+				"receive_as": "",
+				"benefit": "",
+				"benefit_generic": "",
+				"credit_note": ""
+			}
+		},
+		"addresses": {
+			"text": {
+				"evm_title": "",
+				"evm_networks": "",
+				"principal_tag": "",
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},
@@ -1353,7 +1402,6 @@
 			"cketh_conversions_may_take": "Převody ckETH mohou trvat až 20 minut",
 			"ckerc20_conversions_may_take": "Převody $ckErc20 mohou trvat až 20 minut",
 			"how_to_convert_eth_to_cketh": "Zde je návod, jak můžete převést $token na $ckToken na $oisy_name",
-			"send_eth": "Odeslat $token na vaši adresu $oisy_name",
 			"wait_eth_current_balance": "Počkejte na příchod $tokenu. Aktuální zůstatek",
 			"set_amount": "Nastavit částku pro převod",
 			"check_balance_for_fees": "Zkontrolujte zůstatek $tokenu pro poplatky za převod",
@@ -1374,7 +1422,8 @@
 			"unsupported_token_conversion": "Převod pro vybraný token není podporován.",
 			"calculating_max_amount": "Výpočet...",
 			"send_to": "Odeslat převedená aktiva na",
-			"custom_destination": "Jiná adresa"
+			"custom_destination": "Jiná adresa",
+			"send_token_on_network": ""
 		},
 		"assertion": {
 			"insufficient_funds": "Nedostatečný zůstatek"

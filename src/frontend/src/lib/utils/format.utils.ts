@@ -85,6 +85,25 @@ export const shortenWithMiddleEllipsis = ({
 		: text;
 };
 
+/**
+ * Splits a text into its start, middle and end, for an address shown in full whose ends are what
+ * people compare when they check it. A text too short to have a middle is all start.
+ */
+export const splitTextEnds = ({
+	text,
+	endLength = 6
+}: {
+	text: string;
+	endLength?: number;
+}): { start: string; middle: string; end: string } =>
+	text.length > endLength * 2 + 4
+		? {
+				start: text.slice(0, endLength),
+				middle: text.slice(endLength, text.length - endLength),
+				end: text.slice(-endLength)
+			}
+		: { start: text, middle: '', end: '' };
+
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	month: 'short',
 	day: 'numeric',

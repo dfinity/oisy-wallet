@@ -15,6 +15,7 @@
 		copyButtonTestId?: string;
 		network: Network;
 		copyAriaLabel: string;
+		qrSize?: 'compact' | 'default';
 		text?: Snippet;
 	}
 
@@ -26,13 +27,14 @@
 		copyButtonTestId,
 		network,
 		copyAriaLabel,
+		qrSize,
 		text
 	}: Props = $props();
 
 	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
 </script>
 
-<ReceiveQrCode address={address ?? ''} {addressToken} />
+<ReceiveQrCode address={address ?? ''} {addressToken} size={qrSize} />
 
 <ReceiveAddress
 	address={address ?? ''}

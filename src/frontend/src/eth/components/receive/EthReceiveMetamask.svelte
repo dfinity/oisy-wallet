@@ -1,15 +1,20 @@
 <script lang="ts">
-	import { assertNonNullish } from '@dfinity/utils';
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
+	import type { EthAddress } from '$eth/types/address';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { networkEthereum } from '$lib/derived/network.derived';
-	import { pageTokenStandard } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+
+	interface Props {
+		// The network of the Receive route and the address resolved for it.
+		network: EthereumNetwork;
+		address: EthAddress;
+	}
+
+	let { network, address }: Props = $props();
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {
@@ -19,22 +24,16 @@
 			return;
 		}
 
-		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
-		assertNonNullish($selectedEthereumNetwork);
-
 		await openMetamaskTransaction({
-			address: $ethAddress,
-			network: $selectedEthereumNetwork
+			address,
+			network
 		});
 	};
-
-	// TODO: The Metamask button currently does not support sending ERC20 tokens - it always populates an ETH transaction.
-	// We aim to fix this, but for now, the functionality is commented out.
-	let tokenStandardEth = $derived($pageTokenStandard === 'ethereum');
 </script>
 
-{#if $metamaskAvailable && $networkEthereum && tokenStandardEth}
-	<Button colorStyle="primary" fullWidth onclick={receiveModal} styleClass="mt-8 mb-2">
+<!-- The Metamask handoff always populates an ETH transaction, so it is offered for native ETH only. -->
+{#if $metamaskAvailable}
+	<Button colorStyle="primary" fullWidth onclick={receiveModal} styleClass="mt-4 mb-2">
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
 	</Button>

@@ -17,7 +17,8 @@ import {
 	formatToShortDateString,
 	formatToken,
 	formatTokenBigintToNumber,
-	shortenWithMiddleEllipsis
+	shortenWithMiddleEllipsis,
+	splitTextEnds
 } from '$lib/utils/format.utils';
 
 describe('format.utils', () => {
@@ -358,6 +359,32 @@ describe('format.utils', () => {
 
 		it('should not shorten text at the minimum length boundary', () => {
 			expect(shortenWithMiddleEllipsis({ text: '12345678', splitLength: 3 })).toBe('12345678');
+		});
+	});
+
+	describe('splitTextEnds', () => {
+		it('should split a long text into its ends and middle', () => {
+			expect(splitTextEnds({ text: 'abcdef1234567890uvwxyz' })).toEqual({
+				start: 'abcdef',
+				middle: '1234567890',
+				end: 'uvwxyz'
+			});
+		});
+
+		it('should keep a short text whole', () => {
+			expect(splitTextEnds({ text: 'abcdef1234uvwxyz' })).toEqual({
+				start: 'abcdef1234uvwxyz',
+				middle: '',
+				end: ''
+			});
+		});
+
+		it('should respect a custom end length', () => {
+			expect(splitTextEnds({ text: '123456789012', endLength: 3 })).toEqual({
+				start: '123',
+				middle: '456789',
+				end: '012'
+			});
 		});
 	});
 
