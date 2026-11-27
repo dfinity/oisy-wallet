@@ -49,7 +49,8 @@ a closed tab or a re-login.
 
 Verified against Rift's published docs and OpenAPI spec (2026-11-25):
 https://www.rift.trade/docs/llms.txt (full docs dump) and https://www.rift.trade/docs/openapi.json.
-No live API call has been made yet.
+Live keyless `format: "raw"` quotes and CORS preflights (2026-11-26) pinned the asset ids and
+answered the CORS question. No order has been created.
 
 - **Model: deposit address.** `POST /quote` → `POST /order` (returns a unique `deposit_address`) →
   the user sends `amount_in` of the `from` asset there in one plain transfer → `GET /order/{id}`
@@ -59,7 +60,10 @@ No live API call has been made yet.
 - **Base URL:** `https://api.rift.trade`. Endpoints: `POST /quote`, `POST /order` (201),
   `GET /order/{id}`, `GET /order?deposit_tx=`, `GET /health`. Errors are `{ error: string }`.
 - **Auth and limits.** API key optional, in `x-api-key`. Keyless: 1 request/second (scope not
-  stated). Keys come from Rift's Telegram support bot. CORS is not documented. There is no SDK for
+  stated). Keys come from Rift's Telegram support bot. CORS is not documented, but every origin is
+  allowed: a preflight from `https://oisy.com`, staging or localhost (2026-11-26) answers
+  `access-control-allow-origin: *` for `GET` and `POST` with `content-type` and `x-api-key`, and
+  `Retry-After` is exposed to the page. There is no SDK for
   the current API (`@riftresearch/sdk@0.19.0` targets an older camelCase API with `slippageBps`; do
   not use it). There is no testnet.
 - **Chains** (OISY overlap in bold): **Ethereum, Arbitrum, Base, Polygon, Robinhood, Bitcoin**
@@ -68,8 +72,15 @@ No live API call has been made yet.
   asset is a symbol, a contract address, or `eth` / `btc` for the native coin. With
   `format: "raw"`, amounts are base-unit integers and assets are written canonically,
   `evm:<chainId>.<address>` on EVM chains. Rift's own advice: "Key on assets with `raw`: symbols
-  are presentation and may be reassigned." The canonical form of a native coin is not documented
-  (see [Open questions](#open-questions-facts-to-confirm)).
+  are presentation and may be reassigned." Native coins are not documented. Live quotes
+  (2026-11-26) pinned them:
+  - `bitcoin.btc` for BTC;
+  - `evm:<chainId>.eth` on Ethereum, Arbitrum, Base and Robinhood Chain;
+  - `evm:137.pol` on Polygon (`matic` is refused as an unknown asset).
+
+  Rift rewrites any other spelling into the canonical one in its echo: `ethereum.eth` becomes
+  `evm:1.eth`, and a checksummed address becomes lowercase.
+
 - **`POST /quote`.** Required `from`, `to`, `amount_in`; extra properties are rejected. Optional:
   `format` (`formatted` | `raw`), `quote_mode` (`fast` ≈ 1.5 s, or `optimal`, which gives each venue
   up to 10 s), `venue_allowlist` / `venue_blocklist`, `integrator_id` (`[A-Za-z0-9._-]{1,64}`),
@@ -165,8 +176,10 @@ New `src/frontend/src/env/rest/rift.env.ts`:
   shipped in the bundle as LI.FI's is. Request an origin restriction from Rift if it offers one.
   Unset means keyless, so local development works without a key.
 - `RIFT_INTEGRATOR_ID = 'oisy'`: sent on every quote for attribution.
-- `RIFT_EVM_NETWORK_IDS`: Ethereum, Arbitrum, Base, Polygon, Robinhood Chain, each with the Rift
-  chain prefix (`evm:<chainId>`). A network not listed is never asked about.
+- `RIFT_EVM_NATIVE_ASSETS`: Rift's name for the native coin of each EVM network it is asked
+  about: `eth` on Ethereum, Arbitrum, Base and Robinhood Chain, and `pol` on Polygon. Its keys are
+  the network list: a network without an entry is never asked about. `RIFT_BTC_ASSET_ID` is
+  `bitcoin.btc`.
 - Gates widened to `|| RIFT_SWAP_ENABLED`: Bitcoin networks in `cross-chain-networks.derived.ts`,
   `swapUniverseBitcoinTokens` in `swap.derived.ts`, and the BTC entries of
   `SUPPORTED_CROSS_SWAP_NETWORKS`.
@@ -179,7 +192,9 @@ OpenAPI spec above. REST clients live in `lib/rest/`, as `lifi.rest.ts` and `nea
 do; `lib/api/` wraps canister declarations.
 
 - Every request carries `x-api-key` when `RIFT_API_KEY` is set.
-- Responses are parsed, not cast. A response missing a required field is an error, not an offer.
+- Responses are parsed, not cast, with the zod schemas in `lib/schema/rift.schema.ts`. A response
+  missing a required field is an error (`RiftInvalidResponseError`), not an offer. An error status
+  is a `RiftApiError` carrying the status.
 - Every **quote** request sets `format: "raw"`, so amounts are base-unit integers and assets are
   canonical ids. The order body is exactly `{ quote_id, to_address, refund_address }`: `POST /order`
   rejects extra properties, so `format` is never added there. An order inherits its quote's format
@@ -192,31 +207,35 @@ through one limiter in `rift.rest.ts`:
 - Request **starts** are at least `RIFT_MIN_REQUEST_INTERVAL_MS` (1 s) apart, with or without a key
   (keyed limits are not documented). Caching alone does not bound the rate: the form debounces input
   changes by only 300 ms (`SwapAmountsContext.svelte`), and every change of inputs is a new request.
-- A 429 starts one shared cooldown until its `Retry-After` elapses. Nothing is sent to Rift before
-  then.
-- Order creation is served before any waiting quote or status read. A waiting quote request is
-  replaced by a newer one, so only the latest inputs are quoted.
+- A 429 starts one shared cooldown until its `Retry-After` elapses, or for
+  `RIFT_DEFAULT_RETRY_AFTER_MS` (5 s) when the header is missing or unreadable. Nothing is sent to
+  Rift before then.
+- Order creation, and the order read right before a broadcast (`getRiftOrder({ urgent: true })`),
+  are served before any waiting quote or status read. A waiting quote request is replaced by a newer
+  one (`RiftRequestSupersededError`, nothing sent), so only the latest inputs are quoted.
 
 ### Asset identifiers
 
 `lib/utils/rift.utils.ts` maps an OISY token to a Rift asset id:
 
-- Native BTC (mainnet) → the Bitcoin native id.
-- An EVM native coin on a Rift network → that chain's native id.
+- Native BTC (mainnet) → `bitcoin.btc`.
+- An EVM native coin on a Rift network → `evm:<chainId>.<name>`, with the name from
+  `RIFT_EVM_NATIVE_ASSETS`.
 - An ERC-20 on a Rift network → `evm:<chainId>.<contract address>`, lowercased. Any enabled ERC-20
-  qualifies (decided 2026-11-25); Rift answers 422 when it has no route, which is no offer.
+  qualifies (decided 2026-11-25). An ERC-4626 vault share counts as one, under its own contract
+  address, as it does for LI.FI. Rift answers 422 when it has no route, which is no offer.
 - Anything else → `undefined` (never asked about).
 
-The native-coin ids are confirmed with a live `format: "raw"` call in the implementation PR and
-pinned there (see [Open questions](#open-questions-facts-to-confirm)). Comparisons against Rift's
-echoes are case-insensitive on the address part.
+The native-coin ids are pinned from live `format: "raw"` quotes (2026-11-26; see
+[Background — Rift](#background--rift)). Comparisons against Rift's echoes are case-insensitive
+(`isSameRiftAssetId`).
 
 ### Quoting
 
 - **BTC → EVM.** `btcSwapProviders` gains a `SwapProvider.RIFT` entry:
   - `getSupportedTokens` → native BTC mainnet only.
   - `getSupportedDestinations` → `{ evm: 'any' }`; `getQuote` returns no offer for a destination
-    outside `RIFT_EVM_NETWORK_IDS`.
+    outside `RIFT_EVM_NATIVE_ASSETS`.
   - The recipient is `recipientAddress` (the user's ETH address) and the refund address is
     `userBtcAddress`.
 - **EVM → BTC.** `evmSwapProviders` gains a `SwapProvider.RIFT` entry:
@@ -605,10 +624,11 @@ flip, gated as in [Flag and env](#flag-and-env).
 
 ## Open questions (facts to confirm)
 
-1. **CORS.** Does `api.rift.trade` answer browser requests from OISY's origins (local, staging,
-   production)? This gates production.
-2. **Native asset ids** in `format: "raw"`: the canonical form for BTC, ETH on each chain, and POL
-   on Polygon. Confirm with a live call in PR 2.
+1. **CORS.** Resolved (2026-11-26): every origin is allowed (see
+   [Background — Rift](#background--rift)). The browser check on staging still confirms it before
+   the production flip.
+2. **Native asset ids.** Resolved (2026-11-26): pinned from live quotes (see
+   [Background — Rift](#background--rift)).
 3. **Signed orders or TEE attestation.** Can Rift sign the order, or attest the `deposit_address`,
    so OISY can verify it? This is not a production gate.
 4. **Rate limit and keys.** Is the keyless limit per IP or global? Can a key be restricted to

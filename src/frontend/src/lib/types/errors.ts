@@ -160,6 +160,33 @@ export class LifiSolFeeChangedError extends Error {
 export class VeloraSwapRejectedError extends Error {}
 
 /**
+ * Rift answered a request with an error status. `status` lets callers tell a missing route (422) or
+ * an expired quote (410) apart from a failure; the message is Rift's own text, which is never shown or
+ * reported as is.
+ */
+export class RiftApiError extends Error {
+	readonly status: number;
+
+	constructor({ status, message }: { status: number; message: string }) {
+		super(`Rift request failed (${status}): ${message}`);
+
+		this.status = status;
+	}
+}
+
+/**
+ * Rift answered with a body that is not the one its API describes, or not in the `raw` format OISY
+ * asked for. Rift's answers are unsigned, so such an answer is never acted on.
+ */
+export class RiftInvalidResponseError extends Error {}
+
+/**
+ * A quote request was still waiting for its turn under Rift's rate limit when a newer one replaced it:
+ * only the latest inputs are worth quoting. Nothing was sent to Rift.
+ */
+export class RiftRequestSupersededError extends Error {}
+
+/**
  * Why a SOL → ckSOL conversion stopped at the minter's `watch_deposit_address`, before any SOL was
  * sent: `inFlight` when a deposit of the account is already in flight, `changed` when the deposit
  * address, the minimum or the fee is not the one the offer was priced with, `quarantined` when an

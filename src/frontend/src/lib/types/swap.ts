@@ -58,7 +58,8 @@ export enum SwapProvider {
 	ONE_SEC = 'oneSec',
 	CHAIN_FUSION = 'chainFusion',
 	OISY_TRADE = 'oisyTrade',
-	LIFI = 'lifi'
+	LIFI = 'lifi',
+	RIFT = 'rift'
 }
 
 export enum VeloraSwapTypes {

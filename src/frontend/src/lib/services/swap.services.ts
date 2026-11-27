@@ -1513,6 +1513,10 @@ export const swapService = {
 	// LI.FI has no ICP side, so no swap from an ICP token can reach this entry.
 	[SwapProvider.LIFI]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// Nor has Rift.
+	[SwapProvider.RIFT]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
 
