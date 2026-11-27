@@ -107,8 +107,8 @@ export const LLM_CANISTER_ID = LOCAL
 			: import.meta.env.VITE_IC_LLM_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
-// e.g. BigInt(60 * 60 * 1_000 * 1_000 * 1_000) = 1 hour in nanoseconds
-export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1_000 * 1_000 * 1_000);
+// 5 minutes, only to test what happens when the session expires.
+export const AUTH_MAX_TIME_TO_LIVE = BigInt(1 * 60 * 1_000 * 1_000 * 1_000);
 
 const DOMAIN_URL_HOSTNAME =
 	typeof window !== 'undefined'
