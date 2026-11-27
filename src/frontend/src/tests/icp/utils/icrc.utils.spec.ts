@@ -730,6 +730,10 @@ describe('icrc.utils', () => {
 			'\\\\host.example/icon.png',
 			' //host.example/icon.png',
 			'/\t/host.example/icon.png',
+			'//oisy.invalid/icon.png',
+			'/\\oisy.invalid/icon.png',
+			'//relative-logo.invalid/icon.png',
+			'/\\relative-logo.invalid/icon.png',
 			'ipfs://bafybeigdyrzt/icon.png',
 			'data:text/html;base64,PGgxPjwvaDE+'
 		])('should refuse a logo that loads from anywhere else: %s', (logo) => {

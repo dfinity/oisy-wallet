@@ -74,9 +74,10 @@ export const CUSTOM_NAMES_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, st
 const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
 	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
-// Any origin works here: it only tells a relative logo, which resolves against it, from one that
-// names its own host.
-const LOGO_BASE_ORIGIN = 'https://oisy.invalid';
+// Any two origins work here: a relative logo resolves to whichever one it is given, while a URL
+// that names a host resolves to that host under both, so it never matches both. One alone is not
+// enough, as a URL can name it.
+const LOGO_BASE_ORIGINS = ['https://oisy.invalid', 'https://relative-logo.invalid'];
 
 const parseUrl = ({ url, base }: { url: string; base?: string }): URL | undefined => {
 	try {
@@ -110,7 +111,7 @@ export const isEmbeddedImage = (logo: string): boolean => {
 export const isLocalOrInlineLogo = (logo: string): boolean =>
 	isEmbeddedImage(logo) ||
 	(isNullish(parseUrl({ url: logo })) &&
-		parseUrl({ url: logo, base: LOGO_BASE_ORIGIN })?.origin === LOGO_BASE_ORIGIN);
+		LOGO_BASE_ORIGINS.every((base) => parseUrl({ url: logo, base })?.origin === base));
 
 // OISY's static token data names its own icon for a ledger it lists after the ledger, in these
 // folders.
