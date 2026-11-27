@@ -150,14 +150,10 @@ import {
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
 import {
-	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
-	isNetworkIdEthereum,
-	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSolana,
-	isNetworkIdXRPMainnet,
 	isNetworkIdXrp
 } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -166,6 +162,7 @@ import {
 	geSwapEthTokenAddress,
 	getWithdrawableToken,
 	isKongSupportedIcToken,
+	resolveSwapRecipientAddress,
 	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
@@ -457,66 +454,6 @@ export const loadDisabledErc20AndSplTokensExchanges = async ({
 	);
 };
 
-type SwapRecipientResolution =
-	// The destination network has no cross-chain payout address (e.g. ICP, where
-	// providers credit the user's principal); quotes proceed without a recipient.
-	| { type: 'not-required' }
-	// The user's destination-chain address is known and becomes the quote's recipient.
-	| { type: 'resolved'; recipientAddress: string }
-	// The destination needs a payout address the user does not have (yet). Such a pair
-	// must not be quoted at all: a cross-chain quote request falls back to the
-	// source-chain user address as recipient, which would pay out to a wrong-chain
-	// address.
-	| { type: 'missing' };
-
-/**
- * A cross-chain swap pays out on the destination chain, so the quote's recipient is the
- * user's address for the destination token's network, never the source-chain address.
- */
-const resolveSwapRecipientAddress = ({
-	destinationToken,
-	userEthAddress,
-	userSolAddress,
-	userBtcAddress,
-	userXrpAddress
-}: Pick<
-	FetchSwapAmountsParams,
-	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress'
->): SwapRecipientResolution => {
-	const {
-		network: { id: networkId }
-	} = destinationToken;
-
-	if (isNetworkIdSolana(networkId)) {
-		return nonNullish(userSolAddress)
-			? { type: 'resolved', recipientAddress: userSolAddress }
-			: { type: 'missing' };
-	}
-
-	// Mainnet only: the address at hand is the user's mainnet address, and cross-chain
-	// providers do not serve BTC testnets.
-	if (isNetworkIdBTCMainnet(networkId)) {
-		return nonNullish(userBtcAddress)
-			? { type: 'resolved', recipientAddress: userBtcAddress }
-			: { type: 'missing' };
-	}
-
-	// Mainnet only, for the same reason: XRP has no testnet in the wallet.
-	if (isNetworkIdXRPMainnet(networkId)) {
-		return nonNullish(userXrpAddress)
-			? { type: 'resolved', recipientAddress: userXrpAddress }
-			: { type: 'missing' };
-	}
-
-	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
-		return nonNullish(userEthAddress)
-			? { type: 'resolved', recipientAddress: userEthAddress }
-			: { type: 'missing' };
-	}
-
-	return { type: 'not-required' };
-};
-
 export const fetchSwapAmounts = async ({
 	identity,
 	sourceToken,
@@ -529,6 +466,7 @@ export const fetchSwapAmounts = async ({
 	userSolAddress,
 	userBtcAddress,
 	userXrpAddress,
+	customRecipientAddress,
 	onProviderParticipating
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
@@ -575,6 +513,10 @@ export const fetchSwapAmounts = async ({
 	const recipientAddress =
 		recipientResolution.type === 'resolved' ? recipientResolution.recipientAddress : undefined;
 
+	const fanOut: SwapQuoteFanOut = nonNullish(customRecipientAddress)
+		? { customRecipientAddress }
+		: {};
+
 	// Ahead of the EVM fall-through, which would otherwise cast a Bitcoin token to
 	// `Erc20Token` and hand it to providers that cannot quote it.
 	if (isNetworkIdBitcoin(sourceToken.network.id)) {
@@ -589,7 +531,8 @@ export const fetchSwapAmounts = async ({
 			userBtcAddress,
 			recipientAddress,
 			slippage,
-			...(onProviderParticipating && { onProviderParticipating })
+			...(onProviderParticipating && { onProviderParticipating }),
+			...fanOut
 		});
 	}
 
@@ -603,7 +546,8 @@ export const fetchSwapAmounts = async ({
 			userAddress: userXrpAddress,
 			recipientAddress,
 			slippage,
-			...(onProviderParticipating && { onProviderParticipating })
+			...(onProviderParticipating && { onProviderParticipating }),
+			...fanOut
 		});
 	}
 
@@ -624,7 +568,8 @@ export const fetchSwapAmounts = async ({
 			userAddress: sourceAddress,
 			recipientAddress,
 			slippage,
-			...(onProviderParticipating && { onProviderParticipating })
+			...(onProviderParticipating && { onProviderParticipating }),
+			...fanOut
 		});
 	}
 
@@ -635,7 +580,8 @@ export const fetchSwapAmounts = async ({
 		userAddress: userEthAddress,
 		recipientAddress,
 		slippage,
-		...(onProviderParticipating && { onProviderParticipating })
+		...(onProviderParticipating && { onProviderParticipating }),
+		...fanOut
 	});
 };
 
@@ -1670,6 +1616,21 @@ const collectSwapQuotes = <T>({
 	});
 };
 
+interface SwapQuoteFanOut {
+	// The address the user picked to receive the swap. Only NEAR Intents pays out to one, so it alone
+	// is asked with it; every other provider is still asked, for the user's own address.
+	customRecipientAddress?: string;
+}
+
+const quoteRecipientAddress = ({
+	key,
+	recipientAddress,
+	customRecipientAddress
+}: SwapQuoteFanOut & { key: SwapProvider; recipientAddress?: string }): string | undefined =>
+	key === SwapProvider.NEAR_INTENTS
+		? (customRecipientAddress ?? recipientAddress)
+		: recipientAddress;
+
 // Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
 // provider quoted at all but one refused the amount as below its minimum, rethrow that
 // refusal so the UI can name the reason instead of the generic "swap is not offered".
@@ -1749,8 +1710,9 @@ export const fetchSwapAmountsEVM = async ({
 	userAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: EvmQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	customRecipientAddress
+}: EvmQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
 	}
@@ -1759,14 +1721,18 @@ export const fetchSwapAmountsEVM = async ({
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
-			({ getQuote }) =>
+			({ key, getQuote }) =>
 				(observer) =>
 					getQuote({
 						sourceToken,
 						destinationToken,
 						amount,
 						userAddress,
-						recipientAddress,
+						recipientAddress: quoteRecipientAddress({
+							key,
+							recipientAddress,
+							customRecipientAddress
+						}),
 						slippage,
 						...observer
 					})
@@ -1786,20 +1752,25 @@ export const fetchSwapAmountsBTC = async ({
 	userBtcAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: BtcQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	customRecipientAddress
+}: BtcQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
-			({ getQuote }) =>
+			({ key, getQuote }) =>
 				(observer) =>
 					getQuote({
 						sourceToken,
 						destinationToken,
 						amount,
 						userBtcAddress,
-						recipientAddress,
+						recipientAddress: quoteRecipientAddress({
+							key,
+							recipientAddress,
+							customRecipientAddress
+						}),
 						slippage,
 						...observer
 					})
@@ -1820,8 +1791,9 @@ export const fetchSwapAmountsSOL = async ({
 	userAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	customRecipientAddress
+}: NearIntentsQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
 	}
@@ -1830,14 +1802,18 @@ export const fetchSwapAmountsSOL = async ({
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
-			({ getQuote }) =>
+			({ key, getQuote }) =>
 				(observer) =>
 					getQuote({
 						sourceToken,
 						destinationToken,
 						amount,
 						userAddress,
-						recipientAddress,
+						recipientAddress: quoteRecipientAddress({
+							key,
+							recipientAddress,
+							customRecipientAddress
+						}),
 						slippage,
 						...observer
 					})
@@ -1855,8 +1831,9 @@ export const fetchSwapAmountsXRP = async ({
 	userAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	customRecipientAddress
+}: NearIntentsQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
 	}
@@ -1865,14 +1842,18 @@ export const fetchSwapAmountsXRP = async ({
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
-			({ getQuote }) =>
+			({ key, getQuote }) =>
 				(observer) =>
 					getQuote({
 						sourceToken,
 						destinationToken,
 						amount,
 						userAddress,
-						recipientAddress,
+						recipientAddress: quoteRecipientAddress({
+							key,
+							recipientAddress,
+							customRecipientAddress
+						}),
 						slippage,
 						...observer
 					})

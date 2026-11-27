@@ -17,6 +17,7 @@ import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
@@ -47,10 +48,17 @@ describe('SwapXrpWizard', () => {
 
 	// 10 XRP at $2 against 0.01 ETH at $2000: no value difference for the review step to warn about,
 	// which would otherwise hold the swap button behind a confirmation.
+	// Paying out to the user's own address on the receive network, as a quote OISY requests does
+	// when no other destination is picked: Review holds a quote for another recipient back.
+	const nearIntentsQuote = {
+		...mockNearIntentsQuoteResponse,
+		quoteRequest: { ...mockNearIntentsQuoteResponse.quoteRequest, recipient: mockEthAddress }
+	};
+
 	const offer: SwapMappedResult = {
 		provider: SwapProvider.NEAR_INTENTS,
 		receiveAmount: 10_000_000_000_000_000n,
-		swapDetails: mockNearIntentsQuoteResponse,
+		swapDetails: nearIntentsQuote,
 		type: undefined
 	};
 
@@ -150,6 +158,7 @@ describe('SwapXrpWizard', () => {
 		mockAuthStore();
 
 		vi.spyOn(addrDerived, 'xrpAddressMainnet', 'get').mockReturnValue(readable(mockXrpAddress));
+		vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 		vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 		vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
 
@@ -215,7 +224,7 @@ describe('SwapXrpWizard', () => {
 					sourceToken,
 					destinationToken,
 					swapAmount: '10',
-					swapDetails: mockNearIntentsQuoteResponse,
+					swapDetails: nearIntentsQuote,
 					slippageValue: '0.5',
 					userAddress: mockXrpAddress,
 					network: XrpNetworks.mainnet,

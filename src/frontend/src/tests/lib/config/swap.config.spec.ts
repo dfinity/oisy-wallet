@@ -35,6 +35,14 @@ describe('swap.config', () => {
 				{
 					name: WizardStepsSwap.MOVE_TOKEN,
 					title: en.swap.text.move_token_to
+				},
+				{
+					name: WizardStepsSwap.DESTINATION,
+					title: en.core.text.destination
+				},
+				{
+					name: WizardStepsSwap.QR_CODE_SCAN,
+					title: en.send.text.scan_qr
 				}
 			]);
 		});

@@ -115,11 +115,16 @@ describe('SwapSolWizard', () => {
 		onStopTriggerAmount: vi.fn()
 	};
 
+	// Paying out to the user's own address on the receive network, as a quote OISY requests does
+	// when no other destination is picked: Review holds a quote for another recipient back.
 	const nearIntentsSwapProviders: SwapMappedResult[] = [
 		{
 			provider: SwapProvider.NEAR_INTENTS,
 			receiveAmount: 890000000n,
-			swapDetails: mockNearIntentsQuoteResponse as NearIntentsQuoteResponse,
+			swapDetails: {
+				...(mockNearIntentsQuoteResponse as NearIntentsQuoteResponse),
+				quoteRequest: { ...mockNearIntentsQuoteResponse.quoteRequest, recipient: mockSolAddress }
+			},
 			type: undefined
 		}
 	];

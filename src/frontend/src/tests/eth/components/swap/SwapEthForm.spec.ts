@@ -6,7 +6,9 @@ import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	CONVERT_AMOUNT_DISPLAY_VALUE,
 	MAX_BUTTON,
+	SWAP_DESTINATION,
 	SWAP_FEE_ROW,
+	SWAP_PROVIDER_CELL,
 	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -14,14 +16,17 @@ import {
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { SWAP_DESTINATION_PICKER_CONTEXT_KEY } from '$lib/stores/swap-destination-picker.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext, type SwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import { withLifiMaxFeeHeadroom } from '$lib/utils/lifi-fee.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import SwapEthFormLifiTest from '$tests/eth/components/swap/SwapEthFormLifiTest.svelte';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -190,6 +195,36 @@ describe('SwapFormEth', () => {
 			get(i18n).swap.text.finding_best_rate
 		);
 		expect(getByText(get(i18n).swap.text.review_button).closest('button')).toBeDisabled();
+	});
+
+	it('shows the Destination row between the provider and the fees', () => {
+		const nearIntentsOffer: SwapMappedResult = {
+			provider: SwapProvider.NEAR_INTENTS,
+			receiveAmount: 900_000n,
+			receiveOutMinimum: 890_000n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+		const store = initSwapAmountsStore();
+		store.setSwaps({
+			swaps: [nearIntentsOffer],
+			selectedProvider: nearIntentsOffer,
+			amountForSwap: '1'
+		});
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store });
+		mockContext.set(SWAP_DESTINATION_PICKER_CONTEXT_KEY, { showDestinationPicker: vi.fn() });
+
+		const { getByTestId } = render(SwapEthForm, { props, context: mockContext });
+
+		const provider = getByTestId(SWAP_PROVIDER_CELL);
+		const destination = getByTestId(SWAP_DESTINATION);
+		const fees = getByTestId(SWAP_FEE_ROW);
+
+		expect(provider.compareDocumentPosition(destination) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING
+		);
+		expect(destination.compareDocumentPosition(fees) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING
+		);
 	});
 
 	it('should render all fields', () => {

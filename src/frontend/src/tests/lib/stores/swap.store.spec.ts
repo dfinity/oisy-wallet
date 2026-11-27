@@ -13,6 +13,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
@@ -269,6 +270,72 @@ describe('swapStore', () => {
 
 			expect(get(amountSetToMax)).toBeTruthy();
 			expect(get(lifiMaxFee)).toEqual({ fee: 1n, destinationTokenId: mockToken2.id });
+		});
+	});
+
+	// An address picked for the receive token is valid on its network only, and goes with the token.
+	describe('customDestination', () => {
+		it('should hold an address picked for the receive token', () => {
+			const { customDestination, setCustomDestination } = initSwapContext({
+				sourceToken: mockToken1,
+				destinationToken: ETHEREUM_TOKEN
+			});
+
+			setCustomDestination(mockEthAddress);
+
+			expect(get(customDestination)).toBe(mockEthAddress);
+
+			setCustomDestination(undefined);
+
+			expect(get(customDestination)).toBeUndefined();
+		});
+
+		it.each([
+			{ label: 'the receive token changes', change: 'setDestinationToken' },
+			{ label: 'the receive token is cleared', change: 'clearDestinationToken' },
+			{ label: 'the tokens switch', change: 'switchTokens' }
+		] as const)('should be dropped when $label', ({ change }) => {
+			const context = initSwapContext({
+				sourceToken: mockToken1,
+				destinationToken: ETHEREUM_TOKEN
+			});
+
+			context.setCustomDestination(mockEthAddress);
+
+			if (change === 'setDestinationToken') {
+				context.setDestinationToken(PEPE_TOKEN);
+			} else {
+				context[change]();
+			}
+
+			expect(get(context.customDestination)).toBeUndefined();
+		});
+
+		it('should not apply once the receive token is on another network', () => {
+			mockSwappableTokens.set({ sourceToken: mockToken1, destinationToken: ETHEREUM_TOKEN });
+
+			const { customDestination, setCustomDestination } = initSwapContext();
+
+			setCustomDestination(mockEthAddress);
+
+			expect(get(customDestination)).toBe(mockEthAddress);
+
+			mockSwappableTokens.set({ sourceToken: mockToken1, destinationToken: BTC_MAINNET_TOKEN });
+
+			expect(get(customDestination)).toBeUndefined();
+		});
+
+		it('should be dropped, with the address being entered, when reset', () => {
+			const { customDestination, customDestinationDraft, setCustomDestination, reset } =
+				initSwapContext({ sourceToken: mockToken1, destinationToken: ETHEREUM_TOKEN });
+
+			setCustomDestination(mockEthAddress);
+			customDestinationDraft.set(mockEthAddress);
+
+			reset();
+
+			expect(get(customDestination)).toBeUndefined();
+			expect(get(customDestinationDraft)).toBe('');
 		});
 	});
 

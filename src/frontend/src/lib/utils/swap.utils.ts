@@ -43,6 +43,7 @@ import {
 	SwapProvider,
 	VeloraSwapTypes,
 	type DeltaSwapResponse,
+	type FetchSwapAmountsParams,
 	type FormatSlippageParams,
 	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
@@ -61,7 +62,15 @@ import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { formatList, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { filterTokensForSelectedNetwork, isNetworkIdICP } from '$lib/utils/network.utils';
+import {
+	filterTokensForSelectedNetwork,
+	isNetworkIdBTCMainnet,
+	isNetworkIdEthereum,
+	isNetworkIdEvm,
+	isNetworkIdICP,
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet
+} from '$lib/utils/network.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { filterSwapTokens, networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
@@ -416,6 +425,75 @@ export const buildNearIntentsQuoteRequest = ({
 	// https://docs.near-intents.org/integration/distribution-channels/1click-api/quickstart/confidential-swaps
 	confidentiality: 'advanced'
 });
+
+type SwapRecipientResolution =
+	// The destination network has no cross-chain payout address (e.g. ICP, where
+	// providers credit the user's principal); quotes proceed without a recipient.
+	| { type: 'not-required' }
+	// The user's destination-chain address is known and becomes the quote's recipient.
+	| { type: 'resolved'; recipientAddress: string }
+	// The destination needs a payout address the user does not have (yet). Such a pair
+	// must not be quoted at all: a cross-chain quote request falls back to the
+	// source-chain user address as recipient, which would pay out to a wrong-chain
+	// address.
+	| { type: 'missing' };
+
+/**
+ * A cross-chain swap pays out on the destination chain, so the quote's recipient is the
+ * user's address for the destination token's network, never the source-chain address.
+ */
+export const resolveSwapRecipientAddress = ({
+	destinationToken,
+	userEthAddress,
+	userSolAddress,
+	userBtcAddress,
+	userXrpAddress
+}: Pick<
+	FetchSwapAmountsParams,
+	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress'
+>): SwapRecipientResolution => {
+	const {
+		network: { id: networkId }
+	} = destinationToken;
+
+	if (isNetworkIdSolana(networkId)) {
+		return nonNullish(userSolAddress)
+			? { type: 'resolved', recipientAddress: userSolAddress }
+			: { type: 'missing' };
+	}
+
+	// Mainnet only: the address at hand is the user's mainnet address, and cross-chain
+	// providers do not serve BTC testnets.
+	if (isNetworkIdBTCMainnet(networkId)) {
+		return nonNullish(userBtcAddress)
+			? { type: 'resolved', recipientAddress: userBtcAddress }
+			: { type: 'missing' };
+	}
+
+	// Mainnet only, for the same reason: XRP has no testnet in the wallet.
+	if (isNetworkIdXRPMainnet(networkId)) {
+		return nonNullish(userXrpAddress)
+			? { type: 'resolved', recipientAddress: userXrpAddress }
+			: { type: 'missing' };
+	}
+
+	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
+		return nonNullish(userEthAddress)
+			? { type: 'resolved', recipientAddress: userEthAddress }
+			: { type: 'missing' };
+	}
+
+	return { type: 'not-required' };
+};
+
+// The receive networks where a NEAR Intents swap can pay out to an address the user picks. XRP is left
+// out: an exchange address there usually needs a destination tag, and whether 1Click can carry one on
+// a payout is not known yet.
+export const isSwapCustomDestinationNetworkId = (networkId: NetworkId | undefined): boolean =>
+	isNetworkIdEthereum(networkId) ||
+	isNetworkIdEvm(networkId) ||
+	isNetworkIdSolana(networkId) ||
+	isNetworkIdBTCMainnet(networkId);
 
 export const geSwapEthTokenAddress = (token: ErcFungibleToken) => {
 	if (isDefaultEthereumToken(token)) {

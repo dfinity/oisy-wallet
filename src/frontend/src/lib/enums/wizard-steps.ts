@@ -28,7 +28,9 @@ export enum WizardStepsSwap {
 	SWAPPING = 'Swapping',
 	TOKENS_LIST = 'Tokens List',
 	SELECT_PROVIDER = 'Select swap provider',
-	MOVE_TOKEN = 'Move token'
+	MOVE_TOKEN = 'Move token',
+	DESTINATION = 'Destination',
+	QR_CODE_SCAN = 'QR Code Scan'
 }
 
 export enum WizardStepsAuthHelp {

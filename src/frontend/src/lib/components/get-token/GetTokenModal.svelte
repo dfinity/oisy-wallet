@@ -77,7 +77,9 @@
 			currentStep?.name === WizardStepsGetToken.SWAPPING ||
 			currentStep?.name === WizardStepsGetToken.SELECT_PROVIDER ||
 			currentStep?.name === WizardStepsGetToken.TOKENS_LIST ||
-			currentStep?.name === WizardStepsGetToken.MOVE_TOKEN
+			currentStep?.name === WizardStepsGetToken.MOVE_TOKEN ||
+			currentStep?.name === WizardStepsGetToken.DESTINATION ||
+			currentStep?.name === WizardStepsGetToken.QR_CODE_SCAN
 	);
 
 	// "Move <symbol> to" names the pay token's group, which its step config cannot know.

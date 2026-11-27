@@ -1390,7 +1390,8 @@
 	},
 	"swap": {
 		"alt": {
-			"clear_destination": "Clear receive token and show suggestions"
+			"clear_destination": "Clear receive token and show suggestions",
+			"reset_destination": "Receive in OISY instead"
 		},
 		"text": {
 			"swap": "Swap",

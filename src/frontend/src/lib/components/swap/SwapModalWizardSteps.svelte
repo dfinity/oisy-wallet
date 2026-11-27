@@ -4,6 +4,8 @@
 	import { get } from 'svelte/store';
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
+	import SwapDestinationStep from '$lib/components/swap/SwapDestinationStep.svelte';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
@@ -38,6 +40,10 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import {
+		SWAP_DESTINATION_PICKER_CONTEXT_KEY,
+		type SwapDestinationPickerContext
+	} from '$lib/stores/swap-destination-picker.store';
+	import {
 		SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY,
 		type SwapReceiveShortcutsContext
 	} from '$lib/stores/swap-receive-shortcuts.store';
@@ -49,13 +55,14 @@
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
+	import { SwapProvider, type SwapMappedResult, type SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
+	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { getReceiveNetworkIds } from '$lib/utils/swap.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -95,7 +102,10 @@
 		setTokenListFilters,
 		markTokensPriced,
 		tokenListReturnFocus,
-		receiveTokenPickerStep
+		receiveTokenPickerStep,
+		customDestination,
+		customDestinationDraft,
+		setCustomDestination
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -332,6 +342,33 @@
 		goToStep(WizardStepsSwap.SWAP);
 	};
 
+	// The address being entered starts from the one the swap pays out to now.
+	setContext<SwapDestinationPickerContext>(SWAP_DESTINATION_PICKER_CONTEXT_KEY, {
+		showDestinationPicker: () => {
+			customDestinationDraft.set(get(customDestination) ?? '');
+
+			goToStep(WizardStepsSwap.DESTINATION);
+		}
+	});
+
+	// Only NEAR Intents pays out to another address. Once another provider is selected, picked by the
+	// user or as the top offer because NEAR Intents has none, the swap pays the user's own address, so
+	// a picked address goes: the provider above decides what the row below it can hold.
+	$effect(() => {
+		const provider = $swapAmountsStore?.selectedProvider?.provider;
+
+		if (
+			nonNullish(provider) &&
+			provider !== SwapProvider.NEAR_INTENTS &&
+			nonNullish(get(customDestination))
+		) {
+			setCustomDestination(undefined);
+		}
+	});
+
+	// An amount in a scanned code is left out: the swap amount is in the pay token.
+	let scannedAmount = $state<OptionAmount>();
+
 	const goToStep = (stepName: WizardStepsSwap | WizardStepsGetTokenType) => {
 		if (isNullish(modal)) {
 			return;
@@ -377,6 +414,20 @@
 
 					goToStep(WizardStepsSwap.SWAP);
 				}}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.DESTINATION && nonNullish($destinationToken)}
+			<SwapDestinationStep
+				onBack={() => goToStep(WizardStepsSwap.SWAP)}
+				onQRCodeScan={() => goToStep(WizardStepsSwap.QR_CODE_SCAN)}
+				token={$destinationToken}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.QR_CODE_SCAN}
+			<SendQrCodeScan
+				expectedToken={$destinationToken}
+				onDecodeQrCode={decodeQrCode}
+				onQRCodeBack={() => goToStep(WizardStepsSwap.DESTINATION)}
+				bind:destination={$customDestinationDraft}
+				bind:amount={scannedAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard

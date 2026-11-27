@@ -217,7 +217,7 @@ vi.mock('$lib/providers/evm-swap.providers', () => ({
 			isEnabled: true
 		},
 		{
-			key: 'near_intents',
+			key: 'nearIntents',
 			getQuote: mockEvmNearIntentsGetQuote,
 			isEnabled: true
 		}
@@ -227,7 +227,7 @@ vi.mock('$lib/providers/evm-swap.providers', () => ({
 vi.mock('$lib/providers/sol-swap.providers', () => ({
 	solSwapProviders: [
 		{
-			key: 'near_intents',
+			key: 'nearIntents',
 			getQuote: mockSolGetQuote,
 			isEnabled: true
 		}
@@ -257,7 +257,7 @@ vi.mock('$lib/providers/btc-swap.providers', () => ({
 vi.mock('$lib/providers/xrp-swap.providers', () => ({
 	xrpSwapProviders: [
 		{
-			key: 'near_intents',
+			key: 'nearIntents',
 			getQuote: mockXrpGetQuote,
 			isEnabled: true
 		}
@@ -1928,6 +1928,91 @@ describe('swap.services', () => {
 			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
 
 			expect(settled).toHaveBeenCalledExactlyOnceWith([]);
+		});
+	});
+
+	describe('fetchSwapAmounts with an address the user picked', () => {
+		const evmSource = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+		const evmDest = { ...mockValidErc20Token, network: BASE_NETWORK } as Erc20Token;
+
+		const nearIntentsOffer = {
+			provider: SwapProvider.NEAR_INTENTS as const,
+			receiveAmount: 900_000n,
+			receiveOutMinimum: 890_000n,
+			swapDetails: {} as NearIntentsQuoteResponse
+		};
+
+		const params = {
+			identity: mockIdentity,
+			sourceToken: evmSource,
+			destinationToken: evmDest,
+			amount: 1,
+			tokens: [evmSource, evmDest],
+			slippage: 1,
+			userEthAddress: mockEthAddress,
+			userSolAddress: mockSolAddress,
+			userBtcAddress: undefined,
+			userXrpAddress: undefined
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('asks NEAR Intents to pay out to that address, and every other provider to pay the user', async () => {
+			mockEvmNearIntentsGetQuote.mockResolvedValueOnce(nearIntentsOffer);
+			mockVeloraGetQuote.mockResolvedValueOnce(undefined);
+
+			const result = await fetchSwapAmounts({
+				...params,
+				customRecipientAddress: mockEthAddress2
+			});
+
+			expect(result).toEqual([nearIntentsOffer]);
+			expect(mockEvmNearIntentsGetQuote).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					userAddress: mockEthAddress,
+					recipientAddress: mockEthAddress2
+				})
+			);
+			expect(mockVeloraGetQuote).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ recipientAddress: mockEthAddress })
+			);
+		});
+
+		it('asks every provider, paying out to the user, without one', async () => {
+			mockEvmNearIntentsGetQuote.mockResolvedValueOnce(nearIntentsOffer);
+			mockVeloraGetQuote.mockResolvedValueOnce(undefined);
+
+			await fetchSwapAmounts(params);
+
+			expect(mockEvmNearIntentsGetQuote).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ recipientAddress: mockEthAddress })
+			);
+			expect(mockVeloraGetQuote).toHaveBeenCalledOnce();
+		});
+
+		// NEAR Intents serves no Internet Computer token; the wizard drops the address once one of
+		// these offers is selected.
+		it('asks the Internet Computer providers as usual from an Internet Computer token', async () => {
+			const [icSource, icDest] = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValueOnce({
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValueOnce({ receiveAmount: 975n });
+
+			await fetchSwapAmounts({
+				...params,
+				sourceToken: icSource,
+				destinationToken: icDest,
+				tokens: [icSource, icDest],
+				isSourceTokenIcrc2: true,
+				customRecipientAddress: mockEthAddress2
+			});
+
+			expect(kongBackendApi.kongSwapAmounts).toHaveBeenCalledOnce();
+			expect(icpSwapBackend.icpSwapAmounts).toHaveBeenCalledOnce();
 		});
 	});
 
