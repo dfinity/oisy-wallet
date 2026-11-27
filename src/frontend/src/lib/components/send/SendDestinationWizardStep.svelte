@@ -105,7 +105,7 @@
 	});
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar styleClass="send-destination-content max-sm:scroll-fade">
 	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>

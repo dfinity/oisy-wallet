@@ -259,6 +259,40 @@ div.modal {
 			min-height: auto;
 		}
 	}
+
+	// On phones the destination form owns scrolling, leaving its toolbar outside the fade.
+	// Capping the nested lists would create a second scroll area in the sheet.
+	// Short windows keep the default content scroller so an oversized toolbar stays reachable.
+	@media (width < theme(--breakpoint-sm)) and (height >= 24rem) {
+		div.container > div.content:has(.send-destination-content) {
+			overflow-y: hidden !important;
+
+			> div.transition {
+				min-height: 0;
+			}
+
+			div.stretch.send-destination-content {
+				min-height: 0;
+				flex-basis: 0;
+				overflow-y: auto;
+				overscroll-behavior: contain;
+
+				+ div {
+					flex-shrink: 0;
+				}
+			}
+		}
+	}
+
+	@media (width < theme(--breakpoint-sm)) and (height < 24rem) {
+		div.container > div.content:has(.send-destination-content) {
+			@apply scroll-fade;
+		}
+
+		div.stretch.send-destination-content + div {
+			position: static !important;
+		}
+	}
 }
 
 div.segment-button {
