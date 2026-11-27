@@ -983,6 +983,11 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: UserTransactionError
 	});
+	const SetOnramperSigningKeyError = IDL.Variant({ InvalidKey: IDL.Null });
+	const SetOnramperSigningKeyResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SetOnramperSigningKeyError
+	});
 	const SetPersonalNoteResult = IDL.Variant({
 		Ok: IDL.Null,
 		Err: PersonalNoteError
@@ -1021,6 +1026,27 @@ export const idlFactory = ({ IDL }) => {
 	const SignOnramperWidgetUrlResult = IDL.Variant({
 		Ok: SignOnramperWidgetUrlResponse,
 		Err: SignOnramperWidgetUrlError
+	});
+	const SignOnramperWidgetUrlV2Request = IDL.Record({
+		network_wallets: IDL.Vec(OnramperSignedEntry),
+		params: IDL.Vec(OnramperSignedEntry)
+	});
+	const OnramperSignedQueryV2 = IDL.Record({ query: IDL.Text });
+	const SignOnramperWidgetUrlV2Response = IDL.Variant({
+		V1: SignOnramperWidgetUrlResponse,
+		V2: OnramperSignedQueryV2
+	});
+	const SignOnramperWidgetUrlV2Error = IDL.Variant({
+		InvalidParam: IDL.Text,
+		AddressMismatch: IDL.Null,
+		RateLimited: RateLimitError,
+		NotConfigured: IDL.Null,
+		NonceUnavailable: IDL.Null,
+		AddressDerivationFailed: IDL.Null
+	});
+	const SignOnramperWidgetUrlV2Result = IDL.Variant({
+		Ok: SignOnramperWidgetUrlV2Response,
+		Err: SignOnramperWidgetUrlV2Error
 	});
 	const Stats = IDL.Record({
 		active_user_transactions_count: IDL.Nat64,
@@ -1173,6 +1199,7 @@ export const idlFactory = ({ IDL }) => {
 		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)]),
 		get_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
 		get_my_tips: IDL.Func([], [GetMyTipsResult]),
+		get_onramper_signing_public_key: IDL.Func([], [IDL.Opt(IDL.Text)]),
 		get_personal_note_share: IDL.Func([IDL.Text], [GetPersonalNoteShareResult]),
 		get_personal_note_shares_count: IDL.Func([], [GetPersonalNoteSharesCountResult]),
 		get_personal_notes: IDL.Func([], [GetPersonalNotesResult]),
@@ -1213,6 +1240,7 @@ export const idlFactory = ({ IDL }) => {
 		set_exchange_rate_replicated: IDL.Func([IDL.Bool], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
+		set_onramper_signing_key: IDL.Func([IDL.Opt(IDL.Text)], [SetOnramperSigningKeyResult], []),
 		set_onramper_signing_secret: IDL.Func([IDL.Opt(IDL.Text)], [], []),
 		set_personal_note: IDL.Func([PersonalNoteEntry], [SetPersonalNoteResult], []),
 		set_tip_secret: IDL.Func([SetTipSecretRequest], [CancelTipResult], []),
@@ -1220,6 +1248,11 @@ export const idlFactory = ({ IDL }) => {
 		sign_onramper_widget_url: IDL.Func(
 			[SignOnramperWidgetUrlRequest],
 			[SignOnramperWidgetUrlResult],
+			[]
+		),
+		sign_onramper_widget_url_v2: IDL.Func(
+			[SignOnramperWidgetUrlV2Request],
+			[SignOnramperWidgetUrlV2Result],
 			[]
 		),
 		stats: IDL.Func([], [Stats]),

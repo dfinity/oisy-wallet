@@ -8,20 +8,31 @@
 //! value. So a caller can only ever obtain a signature over addresses they provably own (closing
 //! the signing oracle), and a frontend/backend derivation mismatch fails loudly instead of
 //! producing a URL that pays an unspendable address.
+//!
+//! Signature V2 keeps that wallet rule. It reads its Ed25519 key from its own stable cell, signs
+//! only the parameters [`super::model`] lets through, and falls back to V1 while no key is set.
 
 use std::collections::HashMap;
 
 use candid::Principal;
 use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
+use ic_ed25519::PrivateKey;
+use serde_bytes::ByteBuf;
 use shared::types::onramper::{
-    OnramperSignedEntry, SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest,
-    SignOnramperWidgetUrlResponse,
+    OnramperSignedEntry, OnramperSignedQueryV2, SetOnramperSigningKeyError,
+    SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest, SignOnramperWidgetUrlResponse,
+    SignOnramperWidgetUrlV2Error, SignOnramperWidgetUrlV2Request, SignOnramperWidgetUrlV2Response,
 };
 
-use super::model::sign_widget_url;
+use super::model::{
+    check_widget_params, network_wallets_value, sign_widget_url, sign_widget_url_v2,
+    sorted_network_wallets, NETWORK_WALLETS_PARAM,
+};
 use crate::{
     signer,
-    state::{mutate_api_keys, with_api_keys},
+    state::{mutate_api_keys, mutate_state, read_state, with_api_keys},
+    types::storable::Candid,
+    utils::random,
 };
 
 // `OnRamper` network ids for the `networkWallets` parameter — must match the frontend's
@@ -121,4 +132,100 @@ async fn derive_network_address(id: &str, principal: &Principal) -> Option<Strin
 /// `set_api_keys` call.
 pub fn set_signing_secret(secret: Option<String>) {
     mutate_api_keys(|keys| keys.onramper_signing_secret = secret);
+}
+
+/// Signs the widget URL with Signature V2 when the backend holds a V2 key, and otherwise with V1,
+/// exactly as [`sign_onramper_widget_url`] does. So each environment switches to V2 when its key
+/// is set, and back to V1 when it is cleared.
+///
+/// With V2, the parameters are checked against the list in [`super::model`] before anything else,
+/// then the network wallets are verified as for V1. The signature gets a fresh nonce from
+/// `raw_rand` and the canister's time.
+///
+/// Errors:
+/// - [`SignOnramperWidgetUrlV2Error::NotConfigured`] — neither a V2 key nor a V1 secret is set.
+/// - [`SignOnramperWidgetUrlV2Error::InvalidParam`] — V2 only: a parameter outside the list or its
+///   form, a network that comes twice, or no `apiKey`.
+/// - [`SignOnramperWidgetUrlV2Error::AddressMismatch`] and
+///   [`SignOnramperWidgetUrlV2Error::AddressDerivationFailed`] — as for V1.
+/// - [`SignOnramperWidgetUrlV2Error::NonceUnavailable`] — `raw_rand` failed.
+pub async fn sign_onramper_widget_url_v2(
+    principal: Principal,
+    req: SignOnramperWidgetUrlV2Request,
+) -> Result<SignOnramperWidgetUrlV2Response, SignOnramperWidgetUrlV2Error> {
+    let Some(private_key) = read_signing_key() else {
+        // V1 signs only the network wallets; the other parameters are not signed, so they are
+        // not checked either. Checking them here would let a parameter V2 refuses break Buy on an
+        // environment that V1 still serves.
+        let v1_request = SignOnramperWidgetUrlRequest {
+            network_wallets: req.network_wallets,
+            ..SignOnramperWidgetUrlRequest::default()
+        };
+        return sign_onramper_widget_url(principal, v1_request)
+            .await
+            .map(SignOnramperWidgetUrlV2Response::V1)
+            .map_err(SignOnramperWidgetUrlV2Error::from);
+    };
+
+    let mut params = check_widget_params(&req.params)?;
+    let network_wallets = sorted_network_wallets(&req.network_wallets)?;
+
+    let verified = verify_caller_network_wallets(&principal, &network_wallets).await?;
+    if let Some(value) = network_wallets_value(&verified) {
+        params.push((NETWORK_WALLETS_PARAM, value));
+    }
+
+    let nonce = random::generate_random_bytes::<16>()
+        .await
+        .map_err(|error| {
+            ic_cdk::println!("OnRamper signature V2: no nonce: {error}");
+            SignOnramperWidgetUrlV2Error::NonceUnavailable
+        })?;
+
+    Ok(SignOnramperWidgetUrlV2Response::V2(OnramperSignedQueryV2 {
+        query: sign_widget_url_v2(&private_key, &params, ic_cdk::api::time(), nonce),
+    }))
+}
+
+/// The Signature V2 private key, when controllers have set one.
+fn read_signing_key() -> Option<PrivateKey> {
+    read_state(|state| {
+        state
+            .onramper_signing_key
+            .get()
+            .as_ref()
+            .and_then(|Candid(seed)| <[u8; 32]>::try_from(seed.as_slice()).ok())
+            .map(|seed| PrivateKey::deserialize_raw_32(&seed))
+    })
+}
+
+/// Sets, replaces or clears (with `None`) the Signature V2 private key, given as PKCS#8 PEM.
+/// Only the 32-byte seed is stored, outside the `ApiKeys` cell so that `get_api_keys` cannot
+/// return it.
+///
+/// # Errors
+/// [`SetOnramperSigningKeyError::InvalidKey`] when the text is not an Ed25519 private key in
+/// PKCS#8 PEM. Nothing is stored then.
+pub fn set_signing_key(private_key_pem: Option<String>) -> Result<(), SetOnramperSigningKeyError> {
+    let seed = private_key_pem
+        .map(|pem| {
+            PrivateKey::deserialize_pkcs8_pem(&pem)
+                .map(|key| Candid(ByteBuf::from(key.serialize_raw().to_vec())))
+                .map_err(|_| SetOnramperSigningKeyError::InvalidKey)
+        })
+        .transpose()?;
+
+    mutate_state(|state| {
+        state.onramper_signing_key.set(seed);
+    });
+    Ok(())
+}
+
+/// The public key of the Signature V2 private key as PEM (SPKI, RFC 8410), as
+/// `openssl pkey -pubout` writes it, or `None` when no key is set.
+#[must_use]
+pub fn signing_public_key_pem() -> Option<String> {
+    read_signing_key().map(|key| {
+        String::from_utf8_lossy(&key.public_key().serialize_rfc8410_pem()).replace("\r\n", "\n")
+    })
 }

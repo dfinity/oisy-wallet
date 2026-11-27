@@ -36,3 +36,24 @@ pub(crate) async fn generate_random_u64() -> Result<u64, String> {
 
     Ok(random_id)
 }
+
+/// Returns `N` cryptographically secure random bytes from the Management Canister API
+/// `raw_rand()`, which returns 32 bytes per call.
+///
+/// # Errors
+/// - When the `raw_rand()` call fails, or returns fewer than `N` bytes.
+pub(crate) async fn generate_random_bytes<const N: usize>() -> Result<[u8; N], String> {
+    let random_bytes: Vec<u8> = ic_cdk_management_canister::raw_rand()
+        .await
+        .map_err(|e| format!("raw_rand failed: {e:?}"))?;
+
+    random_bytes
+        .get(..N)
+        .and_then(|bytes| <[u8; N]>::try_from(bytes).ok())
+        .ok_or_else(|| {
+            format!(
+                "raw_rand returned {} bytes, fewer than {N}",
+                random_bytes.len()
+            )
+        })
+}

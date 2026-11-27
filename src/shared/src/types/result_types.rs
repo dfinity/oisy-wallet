@@ -24,7 +24,10 @@ use crate::types::{
     contact::{Contact, ContactError, ContactImageEntry, ContactsPage},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
+    onramper::{
+        SetOnramperSigningKeyError, SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse,
+        SignOnramperWidgetUrlV2Error, SignOnramperWidgetUrlV2Response,
+    },
     personal_note::{PersonalNoteEntry, PersonalNoteError},
     personal_note_share::{PersonalNoteShareContent, PersonalNoteShareError},
     tip::{MyTip, PublicTip, TipClaim, TipDetails, TipError},
@@ -559,6 +562,38 @@ impl From<Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError>>
         match result {
             Ok(response) => SignOnramperWidgetUrlResult::Ok(response),
             Err(err) => SignOnramperWidgetUrlResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SignOnramperWidgetUrlV2Result {
+    /// The query signed with V2, or the V1 signature while the backend holds no V2 key.
+    Ok(SignOnramperWidgetUrlV2Response),
+    Err(SignOnramperWidgetUrlV2Error),
+}
+impl From<Result<SignOnramperWidgetUrlV2Response, SignOnramperWidgetUrlV2Error>>
+    for SignOnramperWidgetUrlV2Result
+{
+    fn from(result: Result<SignOnramperWidgetUrlV2Response, SignOnramperWidgetUrlV2Error>) -> Self {
+        match result {
+            Ok(response) => SignOnramperWidgetUrlV2Result::Ok(response),
+            Err(err) => SignOnramperWidgetUrlV2Result::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetOnramperSigningKeyResult {
+    /// The key was set, replaced or cleared.
+    Ok(()),
+    Err(SetOnramperSigningKeyError),
+}
+impl From<Result<(), SetOnramperSigningKeyError>> for SetOnramperSigningKeyResult {
+    fn from(result: Result<(), SetOnramperSigningKeyError>) -> Self {
+        match result {
+            Ok(()) => SetOnramperSigningKeyResult::Ok(()),
+            Err(err) => SetOnramperSigningKeyResult::Err(err),
         }
     }
 }
