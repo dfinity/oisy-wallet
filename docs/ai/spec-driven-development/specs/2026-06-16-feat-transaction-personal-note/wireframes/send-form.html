@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>OISY — send flow: personal note wireframe</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f4f5f7;
+				--color-background-tertiary: #f7f7f5;
+				--color-background-info: #e9eefc;
+				--color-text-primary: #1a1a1a;
+				--color-text-secondary: #5f6470;
+				--color-text-tertiary: #8a8f98;
+				--color-text-info: #1f6feb;
+				--color-text-danger: #d92d20;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.22);
+				--color-border-info: rgba(31, 111, 235, 0.4);
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--border-radius-xl: 16px;
+				--font-sans:
+					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--color-background-primary: #1e1f22;
+					--color-background-secondary: #26272b;
+					--color-background-tertiary: #191a1c;
+					--color-background-info: #1b2740;
+					--color-text-primary: #ececec;
+					--color-text-secondary: #a8adb6;
+					--color-text-tertiary: #7c818b;
+					--color-text-info: #5aa0ff;
+					--color-text-danger: #ff6b5e;
+					--color-border-tertiary: rgba(255, 255, 255, 0.14);
+					--color-border-secondary: rgba(255, 255, 255, 0.26);
+					--color-border-info: rgba(90, 160, 255, 0.45);
+				}
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				padding: 28px 16px;
+				font-family: var(--font-sans);
+				background: var(--color-background-tertiary);
+				color: var(--color-text-primary);
+				line-height: 1.5;
+			}
+			.wrap {
+				max-width: 680px;
+				margin: 0 auto;
+			}
+			textarea {
+				font-family: inherit;
+				font-size: 14px;
+				padding: 10px 12px;
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				background: var(--color-background-primary);
+				color: var(--color-text-primary);
+			}
+			textarea:focus {
+				outline: none;
+				box-shadow: 0 0 0 2px var(--color-border-info);
+			}
+			button {
+				font-family: inherit;
+			}
+			.seg {
+				display: inline-flex;
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				overflow: hidden;
+			}
+			.seg button {
+				border: none;
+				background: transparent;
+				padding: 7px 16px;
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
+			}
+			.seg button.on {
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				font-weight: 500;
+			}
+			.ib {
+				border: none;
+				background: transparent;
+				color: var(--color-text-info);
+				cursor: pointer;
+				padding: 4px;
+				font-size: 18px;
+				line-height: 1;
+			}
+			.ib:disabled {
+				color: var(--color-text-tertiary);
+				cursor: not-allowed;
+				opacity: 0.7;
+			}
+			.addmini {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				border: 0.5px solid var(--color-border-secondary);
+				background: transparent;
+				border-radius: var(--border-radius-md);
+				padding: 5px 12px;
+				font-size: 13px;
+				color: var(--color-text-info);
+				cursor: pointer;
+			}
+			.addmini:disabled {
+				color: var(--color-text-tertiary);
+				cursor: not-allowed;
+				opacity: 0.7;
+			}
+			.tx-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 12px 2px;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				font-size: 15px;
+			}
+			.tx-lbl {
+				color: var(--color-text-secondary);
+			}
+			.note-text {
+				font-size: 15px;
+				color: var(--color-text-primary);
+				white-space: pre-wrap;
+				word-break: break-word;
+				line-height: 1.5;
+				margin-top: 4px;
+			}
+			.linkbtn {
+				border: none;
+				background: transparent;
+				color: var(--color-text-info);
+				cursor: pointer;
+				font-size: 13px;
+				font-weight: 500;
+				padding: 0;
+			}
+			.capmsg {
+				color: var(--color-text-tertiary);
+				font-size: 12px;
+				margin-top: 6px;
+			}
+			.flab {
+				font-weight: 500;
+				font-size: 14px;
+				margin: 0 0 8px;
+			}
+			.savebtn {
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				border: 0.5px solid var(--color-border-info);
+				border-radius: var(--border-radius-md);
+				padding: 7px 18px;
+				font-size: 14px;
+				font-weight: 500;
+				cursor: pointer;
+			}
+			.savebtn:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+			.cbtn {
+				border: 0.5px solid var(--color-border-secondary);
+				background: transparent;
+				border-radius: var(--border-radius-md);
+				padding: 7px 16px;
+				font-size: 14px;
+				color: var(--color-text-primary);
+				cursor: pointer;
+			}
+			.primary {
+				width: 100%;
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				border: none;
+				border-radius: var(--border-radius-lg);
+				padding: 13px;
+				font-size: 15px;
+				font-weight: 500;
+				cursor: pointer;
+			}
+			.primary:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+			.secondary {
+				flex: 1;
+				background: transparent;
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-lg);
+				padding: 13px;
+				font-size: 15px;
+				color: var(--color-text-primary);
+				cursor: pointer;
+			}
+			.sr-only {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				border: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<h1 style="font-size: 18px; font-weight: 500; margin: 0 0 16px">
+				OISY — send flow: personal note (wireframe)
+			</h1>
+
+			<div
+				style="
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					gap: 16px;
+					flex-wrap: wrap;
+					margin: 0 0 14px;
+				"
+			>
+				<div class="seg" role="group" aria-label="Device">
+					<button id="dev-desktop" class="on" data-dev="desktop">
+						<i class="ti ti-device-desktop" aria-hidden="true"></i>&nbsp; Desktop
+					</button>
+					<button id="dev-mobile" data-dev="mobile">
+						<i class="ti ti-device-mobile" aria-hidden="true"></i>&nbsp; Mobile
+					</button>
+				</div>
+				<label
+					style="
+						display: inline-flex;
+						align-items: center;
+						gap: 6px;
+						font-size: 13px;
+						color: var(--color-text-secondary);
+						cursor: pointer;
+					"
+					><input type="checkbox" id="cap" /> Simulate: at note cap</label
+				>
+			</div>
+
+			<div
+				id="stage"
+				style="
+					position: relative;
+					overflow: hidden;
+					min-height: 620px;
+					background: rgba(0, 0, 0, 0.45);
+					border-radius: var(--border-radius-lg);
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: 24px;
+				"
+			>
+				<div
+					id="modal"
+					style="
+						width: 100%;
+						max-width: 420px;
+						background: var(--color-background-primary);
+						border-radius: var(--border-radius-xl);
+						overflow: hidden;
+					"
+				>
+					<div
+						style="
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							position: relative;
+							padding: 18px 20px;
+							border-bottom: 0.5px solid var(--color-border-tertiary);
+						"
+					>
+						<span
+							id="modal-title"
+							style="font-size: 18px; font-weight: 500; color: var(--color-text-primary)"
+							>Send</span
+						>
+						<button class="ib" style="position: absolute; right: 14px" aria-label="Close">
+							<i class="ti ti-x"></i>
+						</button>
+					</div>
+					<div id="body" style="padding: 18px 20px 20px"></div>
+				</div>
+
+				<div
+					id="overlay"
+					style="
+						position: absolute;
+						inset: 0;
+						background: rgba(0, 0, 0, 0.35);
+						opacity: 0;
+						pointer-events: none;
+						transition: opacity 0.2s;
+					"
+				></div>
+				<div
+					id="sheet"
+					style="
+						position: absolute;
+						left: 0;
+						right: 0;
+						bottom: 0;
+						background: var(--color-background-primary);
+						border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+						border-top: 0.5px solid var(--color-border-tertiary);
+						padding: 14px 18px 20px;
+						transform: translateY(115%);
+						transition: transform 0.25s;
+					"
+				></div>
+			</div>
+
+			<p style="font-size: 12px; color: var(--color-text-tertiary); margin-top: 14px">
+				Layout/interaction wireframe of the send flow. Empty state shows a "+ Add" button (like the
+				details modal); once a note exists, the row shows the text with an edit pencil. Length
+				validation (demo limit 50; real 500, error-only); Clear empties without leaving edit mode;
+				OK confirms, Cancel discards. Toggle "Simulate: at note cap" to see the disabled add +
+				message. The note shows read-only on review. On Mobile the entry opens as a bottom sheet.
+			</p>
+		</div>
+
+		<script>
+			(function () {
+				var MAX = 50;
+				var CAPMSG =
+					'You’ve reached the maximum of 10,000 saved notes. Delete one from a transaction’s details to add a new note.';
+				var state = {
+					step: 'form',
+					device: 'desktop',
+					note: '',
+					open: false,
+					draft: '',
+					atCap: false
+				};
+				var modal = document.getElementById('modal');
+				var body = document.getElementById('body');
+				var title = document.getElementById('modal-title');
+				var overlay = document.getElementById('overlay');
+				var sheet = document.getElementById('sheet');
+
+				function esc(s) {
+					return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+				}
+				function effVal() {
+					return state.open ? state.draft : state.note;
+				}
+				function tooLong() {
+					return effVal().length > MAX;
+				}
+				function rowTop(right) {
+					return (
+						'<div style="display:flex;justify-content:space-between;align-items:center;width:100%"><span class="tx-lbl">Personal note</span><span style="display:inline-flex;align-items:center">' +
+						right +
+						'</span></div>'
+					);
+				}
+				function addBtn() {
+					return '<button class="addmini" data-action="edit"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>';
+				}
+				function addBtnDisabled() {
+					return '<button class="addmini" disabled aria-disabled="true"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>';
+				}
+
+				function editorFields() {
+					var tl = state.draft.length > MAX;
+					return (
+						'<textarea id="note-input" rows="3" placeholder="e.g. Rent, refund to Alice" style="width:100%;resize:vertical;margin-top:8px">' +
+						esc(state.draft) +
+						'</textarea>' +
+						'<div id="note-error" style="color:var(--color-text-danger);font-size:12px;margin-top:6px;' +
+						(tl ? '' : 'display:none') +
+						'">Note must be ' +
+						MAX +
+						' characters or fewer.</div>' +
+						'<div style="color:var(--color-text-tertiary);font-size:12px;margin-top:6px">Private — only you can see this. The other party can’t, and it’s stored only in OISY.</div>' +
+						'<div style="color:var(--color-text-tertiary);font-size:11px;margin-top:4px">Demo limit ' +
+						MAX +
+						' chars to show validation (real limit: 500).</div>' +
+						'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
+						'<button class="linkbtn" data-action="clear" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-eraser" aria-hidden="true"></i> Clear</button>' +
+						'<span style="display:flex;gap:8px"><button class="cbtn" data-action="cancel">Cancel</button><button class="savebtn" id="note-ok" data-action="ok">OK</button></span></div>'
+					);
+				}
+
+				function noteRegionHtml() {
+					if (state.open && state.device === 'desktop') return rowTop('') + editorFields();
+					if (state.note !== '') {
+						return (
+							rowTop(
+								'<button class="ib" data-action="edit" aria-label="Edit note"><i class="ti ti-pencil"></i></button>'
+							) +
+							'<div class="note-text">' +
+							esc(state.note) +
+							'</div>'
+						);
+					}
+					if (state.atCap) {
+						return rowTop(addBtnDisabled()) + '<div class="capmsg">' + CAPMSG + '</div>';
+					}
+					return rowTop(addBtn());
+				}
+
+				function formHtml() {
+					var amount =
+						'<div style="background:var(--color-background-info);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:14px">' +
+						'<div class="flab">Amount</div>' +
+						'<div style="display:flex;align-items:center;justify-content:space-between;background:var(--color-background-primary);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:10px 12px">' +
+						'<span style="font-size:22px;font-weight:500">1.75381</span>' +
+						'<span style="display:inline-flex;align-items:center;gap:6px;font-weight:500"><i class="ti ti-infinity" style="color:var(--color-text-info)" aria-hidden="true"></i> ICP <i class="ti ti-chevron-down" style="font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i></span></div>' +
+						'<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px"><span style="color:var(--color-text-secondary)">≈ $4.24</span><span style="color:var(--color-text-info);font-weight:500">Max: 1.9999 ICP</span></div></div>';
+					var to =
+						'<div style="margin-bottom:6px"><div class="flab">To</div>' +
+						'<div style="display:flex;align-items:center;gap:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:12px 14px">' +
+						'<div style="width:42px;height:42px;border-radius:50%;background:var(--color-background-info);color:var(--color-text-info);display:flex;align-items:center;justify-content:center;font-weight:500;flex:none">WS</div>' +
+						'<div style="min-width:0;flex:1"><div style="font-weight:500;font-size:15px">Waylon Smithers</div><div style="font-size:13px;color:var(--color-text-secondary)">da29b27…00e0f0e</div></div>' +
+						'<button class="ib" aria-label="Edit recipient"><i class="ti ti-pencil"></i></button></div></div>';
+					var rows =
+						'<div style="margin-top:10px">' +
+						'<div class="tx-row"><span class="tx-lbl">Fee</span><span>0.0001 ICP <span style="color:var(--color-text-tertiary)">&lt; $0.01</span></span></div>' +
+						'<div style="padding:12px 2px">' +
+						noteRegionHtml() +
+						'</div></div>';
+					return (
+						amount +
+						to +
+						rows +
+						'<button class="primary" id="review-btn" data-action="review" style="margin-top:14px"' +
+						(tooLong() ? ' disabled' : '') +
+						'>Next</button>'
+					);
+				}
+
+				function reviewHtml() {
+					var noteRow =
+						state.note !== ''
+							? '<div style="padding:12px 2px 0"><div class="tx-lbl" style="font-size:13px">Personal note</div><div class="note-text">' +
+								esc(state.note) +
+								'</div></div>'
+							: '';
+					return (
+						'<div style="background:var(--color-background-info);border-radius:var(--border-radius-lg);padding:16px;text-align:center;margin-bottom:14px">' +
+						'<div style="font-size:14px;font-weight:500">You send</div><div style="font-size:24px;font-weight:500;margin-top:2px">1.75381 ICP</div><div style="font-size:13px;color:var(--color-text-secondary);margin-top:2px">≈ $4.24</div></div>' +
+						'<div style="display:flex;align-items:center;gap:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:12px 14px;margin-bottom:6px">' +
+						'<div style="width:42px;height:42px;border-radius:50%;background:var(--color-background-info);color:var(--color-text-info);display:flex;align-items:center;justify-content:center;font-weight:500;flex:none">WS</div>' +
+						'<div style="min-width:0;flex:1"><div style="font-weight:500;font-size:15px">To: Waylon Smithers</div><div style="font-size:13px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">da29b27beb16a842882149b5380ff3b20f701c33c…</div></div></div>' +
+						'<div class="tx-row"><span class="tx-lbl">Network</span><span>Internet Computer</span></div>' +
+						'<div class="tx-row" style="border-bottom:' +
+						(noteRow ? '0.5px solid var(--color-border-tertiary)' : 'none') +
+						'"><span class="tx-lbl">Fee</span><span>0.0001 ICP <span style="color:var(--color-text-tertiary)">&lt; $0.01</span></span></div>' +
+						noteRow +
+						'<div style="display:flex;gap:10px;margin-top:18px"><button class="secondary" data-action="back">Back</button><button class="primary" style="flex:1" data-action="send">Send</button></div>'
+					);
+				}
+
+				function sentHtml() {
+					return (
+						'<div style="text-align:center;padding:24px 0"><div style="width:56px;height:56px;border-radius:50%;background:var(--color-background-info);color:var(--color-text-info);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px"><i class="ti ti-check"></i></div>' +
+						'<div style="font-size:17px;font-weight:500">Transaction sent</div>' +
+						'<div style="color:var(--color-text-tertiary);font-size:13px;margin-top:4px">Wireframe — the note is saved after the send succeeds.</div></div>' +
+						'<button class="primary" data-action="reset">Done</button>'
+					);
+				}
+
+				function bindInput() {
+					var ta = document.getElementById('note-input');
+					if (!ta) return;
+					var ok = document.getElementById('note-ok');
+					var err = document.getElementById('note-error');
+					var review = document.getElementById('review-btn');
+					function upd() {
+						var v = ta.value;
+						state.draft = v;
+						var tl = v.length > MAX;
+						if (err) err.style.display = tl ? 'block' : 'none';
+						if (ok) ok.disabled = tl;
+						if (review) review.disabled = tl;
+					}
+					ta.addEventListener('input', upd);
+					upd();
+					ta.focus();
+					ta.setSelectionRange(ta.value.length, ta.value.length);
+				}
+
+				function openSheet() {
+					sheet.innerHTML =
+						'<div style="width:36px;height:4px;border-radius:2px;background:var(--color-border-secondary);margin:0 auto 12px"></div>' +
+						'<div style="font-weight:500;margin-bottom:6px">' +
+						(state.note ? 'Edit note' : 'Add a personal note') +
+						'</div>' +
+						editorFields();
+					overlay.style.opacity = '1';
+					overlay.style.pointerEvents = 'auto';
+					sheet.style.transform = 'translateY(0)';
+				}
+				function closeSheet() {
+					overlay.style.opacity = '0';
+					overlay.style.pointerEvents = 'none';
+					sheet.style.transform = 'translateY(115%)';
+					sheet.innerHTML = '';
+				}
+
+				function render() {
+					modal.style.maxWidth = state.device === 'desktop' ? '420px' : '360px';
+					document.getElementById('dev-desktop').classList.toggle('on', state.device === 'desktop');
+					document.getElementById('dev-mobile').classList.toggle('on', state.device === 'mobile');
+					title.textContent =
+						state.step === 'review' ? 'Review' : state.step === 'sent' ? 'Sent' : 'Send';
+					if (state.step === 'form') {
+						body.innerHTML = formHtml();
+						if (state.open && state.device === 'mobile') {
+							openSheet();
+						} else {
+							closeSheet();
+						}
+						bindInput();
+					} else if (state.step === 'review') {
+						body.innerHTML = reviewHtml();
+						closeSheet();
+					} else {
+						body.innerHTML = sentHtml();
+						closeSheet();
+					}
+				}
+
+				document.getElementById('cap').addEventListener('change', function (e) {
+					state.atCap = e.target.checked;
+					if (state.atCap && !state.note) {
+						state.open = false;
+					}
+					render();
+				});
+				document.addEventListener('click', function (e) {
+					var dev = e.target.closest('[data-dev]');
+					if (dev) {
+						state.device = dev.getAttribute('data-dev');
+						render();
+						return;
+					}
+					var b = e.target.closest('[data-action]');
+					if (!b) return;
+					var a = b.getAttribute('data-action');
+					if (a === 'edit') {
+						state.draft = state.note;
+						state.open = true;
+						render();
+					} else if (a === 'cancel') {
+						state.open = false;
+						render();
+					} else if (a === 'clear') {
+						state.draft = '';
+						render();
+					} else if (a === 'ok') {
+						var v = state.draft.trim();
+						if (v.length > MAX) return;
+						state.note = v;
+						state.open = false;
+						render();
+					} else if (a === 'review') {
+						if (state.open) {
+							var v2 = state.draft.trim();
+							if (v2.length > MAX) return;
+							state.note = v2;
+							state.open = false;
+						}
+						state.step = 'review';
+						render();
+					} else if (a === 'back') {
+						state.step = 'form';
+						render();
+					} else if (a === 'send') {
+						state.step = 'sent';
+						render();
+					} else if (a === 'reset') {
+						state.step = 'form';
+						render();
+					}
+				});
+				overlay.addEventListener('click', function () {
+					state.open = false;
+					render();
+				});
+
+				render();
+			})();
+		</script>
+	</body>
+</html>
