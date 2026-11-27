@@ -1,4 +1,5 @@
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
+import type * as riftEnv from '$env/rest/rift.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -357,8 +358,8 @@ describe('swap.derived', () => {
 		});
 	});
 
-	// Bitcoin joins the swap universe only when a provider can move it: Chain Fusion or
-	// NEAR Intents. It is kept out of `allCrossChainSwapTokens`, which is typed around
+	// Bitcoin joins the swap universe only when a provider can move it: Chain Fusion, NEAR
+	// Intents or Rift. It is kept out of `allCrossChainSwapTokens`, which is typed around
 	// the EVM / SOL custom-token unions.
 	describe('allSwapUniverseTokens', () => {
 		beforeEach(() => {
@@ -405,6 +406,43 @@ describe('swap.derived', () => {
 			} finally {
 				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
+				vi.resetModules();
+			}
+		});
+
+		it('should include the enabled mainnet Bitcoin token when only Rift is on', async () => {
+			vi.resetModules();
+			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: false }));
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: false
+			}));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: true
+			}));
+
+			try {
+				const [
+					{ allSwapUniverseTokens: universe },
+					{ setupUserNetworksStore: setupNetworks },
+					{ setupTestnetsStore: setupTestnets },
+					{ BTC_MAINNET_TOKEN: bitcoin }
+				] = await Promise.all([
+					import('$lib/derived/swap.derived'),
+					import('$tests/utils/user-networks.test-utils'),
+					import('$tests/utils/testnets.test-utils'),
+					import('$env/tokens/tokens.btc.env')
+				]);
+
+				setupTestnets('reset');
+				setupNetworks('allEnabled');
+
+				expect(get(universe).find(({ id }) => id === bitcoin.id)).toBeDefined();
+			} finally {
+				vi.doUnmock('$env/chain-fusion-swap.env');
+				vi.doUnmock('$env/rest/near-intents.env');
+				vi.doUnmock('$env/rest/rift.env');
 				vi.resetModules();
 			}
 		});

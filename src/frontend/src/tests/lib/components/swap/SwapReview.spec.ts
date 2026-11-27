@@ -3,7 +3,10 @@ import {
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
-import { SWAP_LIFI_BTC_RELAY_WARNING } from '$lib/constants/test-ids.constants';
+import {
+	SWAP_LIFI_BTC_RELAY_WARNING,
+	SWAP_RIFT_ESTIMATE_WARNING
+} from '$lib/constants/test-ids.constants';
 import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
@@ -13,6 +16,7 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockLifiBtcRelayQuote } from '$tests/mocks/lifi-btc.mock';
+import { mockRiftQuote } from '$tests/mocks/rift.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockNearIntentsProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { ChainId } from '@lifi/sdk';
@@ -761,6 +765,53 @@ describe('SwapReview', () => {
 			});
 
 			expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).not.toBeInTheDocument();
+		});
+	});
+
+	// Rift guarantees no minimum, and the max slippage does not apply to its offer.
+	describe('Rift estimate warning', () => {
+		const riftOffer: SwapMappedResult = {
+			provider: SwapProvider.RIFT,
+			receiveAmount: 121_475_958n,
+			swapDetails: mockRiftQuote
+		};
+
+		const createRiftContext = () => {
+			const { context } = createSwapContext();
+
+			const swapAmountsStore = initSwapAmountsStore();
+			swapAmountsStore.setSwaps({
+				swaps: [riftOffer],
+				amountForSwap: 1,
+				selectedProvider: riftOffer
+			});
+
+			context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+			return context;
+		};
+
+		it('should warn without holding the swap back when the Rift offer is selected', () => {
+			const { getByTestId, getByText } = render(SwapReview, {
+				props: baseProps,
+				context: createRiftContext()
+			});
+
+			expect(getByTestId(SWAP_RIFT_ESTIMATE_WARNING)).toHaveTextContent(
+				en.swap.text.rift_estimate_warning
+			);
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+		});
+
+		it('should not warn when another provider is selected', () => {
+			const { context } = createSwapContext();
+
+			const { queryByTestId } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(queryByTestId(SWAP_RIFT_ESTIMATE_WARNING)).not.toBeInTheDocument();
 		});
 	});
 });

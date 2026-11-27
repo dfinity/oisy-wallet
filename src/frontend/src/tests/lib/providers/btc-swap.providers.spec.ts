@@ -1,5 +1,6 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
+import type * as riftEnv from '$env/rest/rift.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
@@ -142,6 +143,77 @@ describe('btc-swap.providers', () => {
 			expect(lifi.getSupportedDestinations(destinationParams)).toEqual(
 				service.lifiBtcSupportedDestinations(destinationParams)
 			);
+		});
+	});
+
+	// Rift's flag is off in every environment until it can execute a swap.
+	describe('Rift entry', () => {
+		const loadProviders = async ({ rift }: { rift: boolean }) => {
+			vi.resetModules();
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: rift
+			}));
+
+			const { btcSwapProviders: providers } = await import('$lib/providers/btc-swap.providers');
+
+			return providers;
+		};
+
+		const keys = (providers: typeof btcSwapProviders) => providers.map(({ key }) => key);
+
+		afterEach(() => {
+			btcSendViaBackend.enabled = false;
+			vi.doUnmock('$env/rest/rift.env');
+			vi.resetModules();
+		});
+
+		it('should leave Rift out under the default test env', () => {
+			expect(keys(btcSwapProviders)).not.toContain(SwapProvider.RIFT);
+		});
+
+		it('should register Rift last once its flag is on and BTC is sent through the backend', async () => {
+			btcSendViaBackend.enabled = true;
+
+			const providers = await loadProviders({ rift: true });
+
+			expect(keys(providers).at(-1)).toBe(SwapProvider.RIFT);
+			expect(providers.every(({ isEnabled }) => isEnabled)).toBeTruthy();
+		});
+
+		// The row is created between signing and broadcasting, which only the backend path allows.
+		it('should leave Rift out while BTC is not sent through the backend', async () => {
+			expect(keys(await loadProviders({ rift: true }))).not.toContain(SwapProvider.RIFT);
+		});
+
+		it('should leave Rift out while its flag is off', async () => {
+			btcSendViaBackend.enabled = true;
+
+			expect(keys(await loadProviders({ rift: false }))).not.toContain(SwapProvider.RIFT);
+		});
+
+		// The destinations themselves are `riftBtcSupportedDestinations`'s, tested with its service.
+		it('should list native BTC, and every EVM destination', async () => {
+			btcSendViaBackend.enabled = true;
+
+			const rift = (await loadProviders({ rift: true })).find(
+				({ key }) => key === SwapProvider.RIFT
+			);
+			// From the same module graph as the providers: a network id is a symbol of its own module.
+			const { BTC_MAINNET_TOKEN: btcToken } = await import('$env/tokens/tokens.btc.env');
+
+			assertNonNullish(rift);
+
+			await expect(rift.getSupportedTokens?.()).resolves.toEqual(
+				new Set([nativeSwapTokenIdentifier({ networkId: BTC_MAINNET_NETWORK_ID, symbol: 'BTC' })])
+			);
+			expect(
+				rift.getSupportedDestinations({
+					sourceToken: btcToken,
+					supportedSourceTokens: undefined,
+					findProviderSourceTokens: () => undefined
+				})
+			).toStrictEqual({ evm: 'any' });
 		});
 	});
 

@@ -182,7 +182,8 @@ New `src/frontend/src/env/rest/rift.env.ts`:
   `bitcoin.btc`.
 - Gates widened to `|| RIFT_SWAP_ENABLED`: Bitcoin networks in `cross-chain-networks.derived.ts`,
   `swapUniverseBitcoinTokens` in `swap.derived.ts`, and the BTC entries of
-  `SUPPORTED_CROSS_SWAP_NETWORKS`.
+  `SUPPORTED_CROSS_SWAP_NETWORKS`. With BTC → EVM (PR 3), the Bitcoin row gains the networks in
+  `RIFT_EVM_NATIVE_ASSETS`. With EVM → BTC (PR 6), those networks' rows gain Bitcoin.
 
 ### REST client (no SDK, no new dependency)
 
@@ -254,7 +255,8 @@ The native-coin ids are pinned from live `format: "raw"` quotes (2026-11-26; see
 - **Quote checks, before an offer is shown.** The offer is dropped, silently, unless:
   - `format` is `raw`, and `from`, `to` and `amount_in` equal the request;
   - `estimated_amount_out` is a positive integer;
-  - `integrator_fee_bps` is absent or 0, and the `delivery` step's `integrator_fee` is `0`;
+  - `integrator_fee_bps` is absent or 0, the route has exactly one `delivery` step, and that step's
+    `integrator_fee` is `0`;
   - `expires_at` is in the future.
 - **Offer shape.** A new `SwapMappedResult` member:
 
@@ -284,11 +286,15 @@ Until the no-slippage redesign:
   `static/images/dapps/rift-logo.svg` (a placeholder, as LI.FI's was; the official logo replaces the
   file later).
 - `SwapDetailsRift.svelte` in the provider sheet (`SwapProviderDetails.svelte`):
-  - the estimated receive amount, labelled as an estimate;
-  - the route, as the venue names of `route[]` in order;
-  - the network cost Rift deducts (`estimated_execution_cost`, in the destination token);
+  - the estimated receive amount, labelled as an estimate (`swap.text.you_receive_estimate`);
+  - the route, as the venues of `route[]` in order, under `swap.text.rift_route_via`. Rift's own
+    venue ids are shown (`rift_otc`, `velora`, …), since Rift publishes no display names for them;
+  - the network cost Rift deducts (`estimated_execution_cost`, in the destination token), under
+    `swap.text.included_network_fees`;
   - no minimum-received row;
-  - the disclosure line below.
+  - the disclosure below, in a `MessageBox`.
+- The form's fee row (`SwapBtcFees.svelte`) shows the Bitcoin network fee of the deposit for a Rift
+  offer, as for NEAR Intents. The deposit is a plain transfer, which the UTXO fee loader prices.
 - `SwapRiftEstimateWarning.svelte` on Review: a `MessageBox` (pattern: `SwapLifiBtcRelayWarning`)
   shown while the selected offer is Rift's. Its copy says that Rift guarantees no minimum, swaps at
   the best price it finds once the deposit arrives, may deliver more or less than shown, and that the
@@ -527,7 +533,8 @@ Status mapping (decided 2026-11-25):
 New keys in `en.json`, the other locales and `i18n.d.ts`. The i18n types are generated
 (`npm run i18n`), so each key lands in the PR that first uses it, never later:
 
-- **PR 3** (presentation): `swap.text.rift_estimate_warning`, `swap.text.rift_route_via`.
+- **PR 3** (presentation): `swap.text.you_receive_estimate`, `swap.text.rift_estimate_warning`,
+  `swap.text.rift_route_via`.
 - **PR 4** (execution and tracking): `swap.error.rift_quote_expired`,
   `swap.error.rift_order_refused`, `swap.error.rift_order_unverified`,
   `swap.error.rift_deposit_expired`, `swap.error.rift_order_frozen`,
@@ -547,13 +554,13 @@ Each PR is atomic and updates `docs/ai/PRODUCT.md` when it changes behaviour.
 2. **Frontend foundation:** `SwapProvider.RIFT`, `rift.env.ts` (`RIFT_SWAP_ENABLED = false`),
    `rift.rest.ts` and `rift.ts` types, `rift.utils.ts` asset ids (native ids pinned from a live call),
    the `swapService` stub, `swapProvidersDetails` entry and placeholder logo. No behaviour change.
-3. **BTC → EVM quoting and presentation:** the `btcSwapProviders` entry, quote checks, offer
-   mapping, cadence, `SwapDetailsRift`, `SwapRiftEstimateWarning`, their two
-   [i18n keys](#i18n) and the widened gates. The flag is still `false`.
+3. **BTC → EVM quoting and presentation:** the `btcSwapProviders` entry (which also requires
+   `BTC_SEND_VIA_BACKEND_ENABLED`), quote checks, offer mapping, cadence, `SwapDetailsRift`,
+   `SwapRiftEstimateWarning`, the BTC fee row, their three [i18n keys](#i18n) and the widened gates.
+   The flag is still `false`.
 4. **BTC → EVM execution and tracking:** pre-send checks, `fetchRiftBtcSwap`, `SwapBtcWizard`
    dispatch, the poller and utils, loader and item branches, analytics and the error
-   [i18n keys](#i18n). The flag becomes
-   `LOCAL || STAGING`; the BTC entry also requires `BTC_SEND_VIA_BACKEND_ENABLED`.
+   [i18n keys](#i18n). The flag becomes `LOCAL || STAGING`.
 5. **Refactor:** an optional `beforeBroadcast` on `send` (`eth/services/send.services.ts`), with no
    behaviour change.
 6. **EVM → BTC:** the `evmSwapProviders` entry with the BTC destination, `fetchRiftEvmSwap`,

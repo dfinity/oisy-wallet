@@ -7,6 +7,7 @@ import {
 	NEAR_INTENTS_SWAP_ENABLED,
 	NEAR_INTENTS_XRP_SWAP_ENABLED
 } from '$env/rest/near-intents.env';
+import { RIFT_SWAP_ENABLED } from '$env/rest/rift.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -40,9 +41,11 @@ export const crossChainSwapNetworks: Readable<Network[]> = derived(
 		// Solana's providers are NEAR Intents and LI.FI; either one keeps it in the swap filter.
 		...(NEAR_INTENTS_SWAP_ENABLED || LIFI_SWAP_ENABLED ? $enabledSolanaNetworks : []),
 		// Bitcoin only joins the swap filter when a provider reaches it: Chain Fusion
-		// (ck conversion) or NEAR Intents (bridging). `crossChainSwapNetworksMainnets`
+		// (ck conversion), NEAR Intents or Rift (bridging). `crossChainSwapNetworksMainnets`
 		// drops the testnets below.
-		...(CHAIN_FUSION_SWAP_ENABLED || NEAR_INTENTS_BTC_SWAP_ENABLED ? $enabledBitcoinNetworks : []),
+		...(CHAIN_FUSION_SWAP_ENABLED || NEAR_INTENTS_BTC_SWAP_ENABLED || RIFT_SWAP_ENABLED
+			? $enabledBitcoinNetworks
+			: []),
 		// XRP's only provider is NEAR Intents.
 		...(NEAR_INTENTS_XRP_SWAP_ENABLED ? $enabledXrpNetworks : [])
 	]

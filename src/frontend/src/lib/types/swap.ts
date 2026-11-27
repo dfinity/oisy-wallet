@@ -13,6 +13,7 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import type { OisyTradeQuote, OisyTradeSwapDetails } from '$lib/types/oisy-trade-swap';
+import type { RiftQuote } from '$lib/types/rift';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
@@ -219,6 +220,16 @@ export type SwapMappedResult =
 			// `outputVSizes` are those of LI.FI's deposit, memo and fee, without the change. What the
 			// form budgets, the review shows and execution pays.
 			btcSelection?: { utxosFee: UtxosFee; outputVSizes: number[] };
+			type?: string;
+	  }
+	| {
+			provider: SwapProvider.RIFT;
+			// Rift's estimate, `estimated_amount_out`. No `receiveOutMinimum`: Rift executes at
+			// whatever price it finds once the deposit arrives, so the slippage control must not
+			// affect this offer.
+			receiveAmount: bigint;
+			// The whole quote, which execution orders from.
+			swapDetails: RiftQuote;
 			type?: string;
 	  };
 

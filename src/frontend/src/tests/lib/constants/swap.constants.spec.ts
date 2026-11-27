@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
+import type * as riftEnv from '$env/rest/rift.env';
 import { NEAR_INTENTS_BLOCKCHAIN_MAP } from '$lib/constants/swap.constants';
 import type { NetworkId } from '$lib/types/network';
 
@@ -33,13 +34,15 @@ describe('swap.constants', () => {
 			chainFusion,
 			ckSol = false,
 			nearIntentsBtc = false,
-			nearIntentsXrp = false
+			nearIntentsXrp = false,
+			rift = false
 		}: {
 			oneSec: boolean;
 			chainFusion: boolean;
 			ckSol?: boolean;
 			nearIntentsBtc?: boolean;
 			nearIntentsXrp?: boolean;
+			rift?: boolean;
 		}) => {
 			vi.resetModules();
 			vi.doMock('$env/rest/onesec.env', () => ({ ONESEC_SWAP_ENABLED: oneSec }));
@@ -49,6 +52,10 @@ describe('swap.constants', () => {
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: nearIntentsBtc,
 				NEAR_INTENTS_XRP_SWAP_ENABLED: nearIntentsXrp
+			}));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: rift
 			}));
 
 			const [
@@ -93,6 +100,7 @@ describe('swap.constants', () => {
 			vi.doUnmock('$env/chain-fusion-swap.env');
 			vi.doUnmock('$env/cksol.env');
 			vi.doUnmock('$env/rest/near-intents.env');
+			vi.doUnmock('$env/rest/rift.env');
 			vi.resetModules();
 		});
 
@@ -205,6 +213,37 @@ describe('swap.constants', () => {
 			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
 			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: SOLANA_MAINNET_NETWORK_ID })).toBeTruthy();
 			expect(reaches({ from: SOLANA_MAINNET_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+		});
+
+		// Rift is asked about BTC to its EVM networks only; the other direction joins with its own change.
+		it("opens Bitcoin to Rift's EVM networks, one way only, with the Rift flag", async () => {
+			const {
+				reaches,
+				BTC_MAINNET_NETWORK_ID,
+				ETHEREUM_NETWORK_ID,
+				BASE_NETWORK_ID,
+				ROBINHOOD_ID,
+				SOLANA_MAINNET_NETWORK_ID
+			} = await loadMatrix({ oneSec: false, chainFusion: false, rift: true });
+
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ETHEREUM_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: BASE_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ROBINHOOD_ID })).toBeTruthy();
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: SOLANA_MAINNET_NETWORK_ID })).toBeFalsy();
+			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
+		});
+
+		it("lists each of Bitcoin's destinations once with both NEAR Intents and Rift on", async () => {
+			const { BTC_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: false,
+				chainFusion: false,
+				nearIntentsBtc: true,
+				rift: true
+			});
+			const { SUPPORTED_CROSS_SWAP_NETWORKS } = await import('$lib/constants/swap.constants');
+			const destinations = SUPPORTED_CROSS_SWAP_NETWORKS[BTC_MAINNET_NETWORK_ID];
+
+			expect(new Set(destinations).size).toBe(destinations.length);
 		});
 
 		it('does not pair Bitcoin with ICP through the NEAR Intents BTC flag alone', async () => {

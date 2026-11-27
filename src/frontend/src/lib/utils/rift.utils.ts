@@ -3,9 +3,11 @@ import { RIFT_BTC_ASSET_ID, RIFT_EVM_NATIVE_ASSETS } from '$env/rest/rift.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import type { RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
 import type { Token } from '$lib/types/token';
 import { isNetworkEthereum, isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Rift's canonical asset id for a token, as a `format: "raw"` quote writes it, or `undefined` for a
@@ -47,3 +49,56 @@ export const toRiftAssetId = (token: Token): string | undefined => {
 // Rift's ids are lowercase, but an EVM address is hex, so an echo is compared without case.
 export const isSameRiftAssetId = ({ a, b }: { a: string; b: string }): boolean =>
 	a.toLowerCase() === b.toLowerCase();
+
+// Native BTC on mainnet, the one Bitcoin asset Rift is asked about.
+export const isRiftBtcSource = (token: Token): boolean =>
+	toRiftAssetId(token) === RIFT_BTC_ASSET_ID;
+
+/**
+ * Whether a quote answers `request` and may be shown as an offer at `now`. A quote is unsigned, so
+ * every field the offer rests on is checked against what OISY asked for: the raw format, the two
+ * assets and the amount; a positive estimate; no integrator fee, which OISY never asks for; and an
+ * expiry still ahead.
+ *
+ * Rift's route has exactly one delivery step, which carries the fee. A route with none or several is
+ * dropped, so a fee cannot hide in a step the check does not read.
+ */
+export const isRiftQuoteForRequest = ({
+	quote: {
+		format,
+		from,
+		to,
+		amount_in,
+		estimated_amount_out,
+		integrator_fee_bps,
+		route,
+		expires_at
+	},
+	request,
+	now
+}: {
+	quote: RiftQuote;
+	request: RiftQuoteRequest;
+	now: number;
+}): boolean => {
+	const [delivery, ...otherDeliveries] = route.flatMap((step) =>
+		step.type === 'delivery' ? [step] : []
+	);
+
+	return (
+		format === 'raw' &&
+		isSameRiftAssetId({ a: from, b: request.from }) &&
+		isSameRiftAssetId({ a: to, b: request.to }) &&
+		BigInt(amount_in) === BigInt(request.amount_in) &&
+		BigInt(estimated_amount_out) > ZERO &&
+		(integrator_fee_bps ?? 0) === 0 &&
+		nonNullish(delivery) &&
+		otherDeliveries.length === 0 &&
+		BigInt(delivery.integrator_fee) === ZERO &&
+		Date.parse(expires_at) > now
+	);
+};
+
+// The venues of a quote's route, in the order the swap passes through them.
+export const riftRouteVenues = ({ route }: RiftQuote): string[] =>
+	route.flatMap((step) => (step.type === 'venue' ? [step.venue] : []));

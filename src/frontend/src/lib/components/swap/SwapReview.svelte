@@ -6,6 +6,7 @@
 	import SwapLifiBtcRelayWarning from '$lib/components/swap/SwapLifiBtcRelayWarning.svelte';
 	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import SwapRiftEstimateWarning from '$lib/components/swap/SwapRiftEstimateWarning.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -193,6 +194,8 @@
 	{/if}
 
 	<SwapLifiBtcRelayWarning />
+
+	<SwapRiftEstimateWarning />
 
 	{#if isSlippageWarning}
 		<div class="mt-4">
