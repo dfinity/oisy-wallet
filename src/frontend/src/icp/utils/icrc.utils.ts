@@ -87,6 +87,18 @@ const parseUrl = ({ url, base }: { url: string; base?: string }): URL | undefine
 };
 
 /**
+ * Whether an `<img>` with this logo loads nothing: the image is embedded in the string, as a
+ * `data:image` URL (base64 or not).
+ */
+export const isEmbeddedImage = (logo: string): boolean => {
+	const url = parseUrl({ url: logo });
+
+	return (
+		nonNullish(url) && url.protocol === 'data:' && url.pathname.toLowerCase().startsWith('image/')
+	);
+};
+
+/**
  * Whether a token logo can be shown as it is: an `<img>` with it loads from OISY itself (a relative
  * path, such as the shipped icons) or from the string (a `data:image` URL), and never from another
  * host.
@@ -95,14 +107,51 @@ const parseUrl = ({ url, base }: { url: string; base?: string }): URL | undefine
  * relative (`//host/logo.png`, `/\host/logo.png`, a leading space or tab) resolve to their host
  * here too.
  */
-export const isLocalOrInlineLogo = (logo: string): boolean => {
-	const absolute = parseUrl({ url: logo });
+export const isLocalOrInlineLogo = (logo: string): boolean =>
+	isEmbeddedImage(logo) ||
+	(isNullish(parseUrl({ url: logo })) &&
+		parseUrl({ url: logo, base: LOGO_BASE_ORIGIN })?.origin === LOGO_BASE_ORIGIN);
 
-	if (nonNullish(absolute)) {
-		return absolute.protocol === 'data:' && absolute.pathname.toLowerCase().startsWith('image/');
+// OISY's static token data names its own icon for a ledger it lists after the ledger, in these
+// folders.
+const OWN_ICON_FOLDERS = ['/icons/icrc/', '/icons/sns/'];
+
+const isOwnIconFile = ({
+	logo,
+	ledgerCanisterId
+}: {
+	logo: string;
+	ledgerCanisterId: LedgerCanisterIdText;
+}): boolean => OWN_ICON_FOLDERS.some((folder) => logo.startsWith(`${folder}${ledgerCanisterId}.`));
+
+const mapIcon = ({
+	listedIcon,
+	metadataIcon,
+	staticIcon,
+	ledgerCanisterId
+}: {
+	listedIcon: string | undefined;
+	metadataIcon: string | undefined;
+	staticIcon: string;
+	ledgerCanisterId: LedgerCanisterIdText;
+}): string | undefined => {
+	// OISY's own icon for a ledger it lists.
+	if (nonNullish(listedIcon)) {
+		return isLocalOrInlineLogo(listedIcon) ? listedIcon : staticIcon;
 	}
 
-	return parseUrl({ url: logo, base: LOGO_BASE_ORIGIN })?.origin === LOGO_BASE_ORIGIN;
+	// A logo from the token's metadata shows only when the image is embedded in it, or when it is
+	// OISY's own icon file for this ledger, so showing a token never loads an image the ledger chose.
+	if (
+		isNullish(metadataIcon) ||
+		isEmbeddedImage(metadataIcon) ||
+		isOwnIconFile({ logo: metadataIcon, ledgerCanisterId })
+	) {
+		return metadataIcon;
+	}
+
+	// The static icon stands in for it, even if it does not exist.
+	return staticIcon;
 };
 
 export const mapIcrcToken = ({
@@ -122,12 +171,12 @@ export const mapIcrcToken = ({
 
 	const staticIcon = `/icons/icrc/${ledgerCanisterId}.png`;
 
-	const dynamicIcon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
-
-	// A logo that would load from another host is never shown, so the static icon stands in for it,
-	// even if it does not exist.
-	const icon =
-		isNullish(dynamicIcon) || isLocalOrInlineLogo(dynamicIcon) ? dynamicIcon : staticIcon;
+	const icon = mapIcon({
+		listedIcon: icrcCustomTokens?.[ledgerCanisterId]?.icon,
+		metadataIcon: tokenIcon,
+		staticIcon,
+		ledgerCanisterId
+	});
 
 	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
 

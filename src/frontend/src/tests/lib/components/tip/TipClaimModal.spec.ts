@@ -243,19 +243,22 @@ describe('TipClaimModal', () => {
 			expect(container.querySelector(`img[src="${logo}"]`)).toBeInTheDocument();
 		});
 
-		it('spells out the symbol instead of loading a logo from another host', async () => {
-			const { container, getByText } = await renderWithLogo('//host.example/logo.png');
+		it.each(['//host.example/logo.png', '/icons/icrc/logo.png'])(
+			'spells out the symbol instead of loading a logo the ledger does not embed: %s',
+			async (logo) => {
+				const { container, getByText } = await renderWithLogo(logo);
 
-			await waitFor(() => expect(getByText(/0\.005 ICP Received!/)).toBeInTheDocument());
+				await waitFor(() => expect(getByText(/0\.005 ICP Received!/)).toBeInTheDocument());
 
-			expect(container.querySelector('img[src*="host.example"]')).not.toBeInTheDocument();
+				expect(container.querySelector(`img[src="${logo}"]`)).not.toBeInTheDocument();
 
-			const hero = container.querySelector(
-				`[aria-label="${get(i18n).tip.alt.claim_illustration}"]`
-			) as HTMLElement;
+				const hero = container.querySelector(
+					`[aria-label="${get(i18n).tip.alt.claim_illustration}"]`
+				) as HTMLElement;
 
-			expect(within(hero).getByText('ICP')).toBeInTheDocument();
-		});
+				expect(within(hero).getByText('ICP')).toBeInTheDocument();
+			}
+		);
 	});
 
 	it('says a link is unavailable without ever attempting a payout', async () => {

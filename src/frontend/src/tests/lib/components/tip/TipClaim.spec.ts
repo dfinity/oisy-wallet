@@ -264,19 +264,22 @@ describe('TipClaim', () => {
 				expect(container.querySelector(`img[src="${logo}"]`)).toBeInTheDocument();
 			});
 
-			it('spells out the symbol instead of loading a logo from another host', async () => {
-				const { container, getByText } = renderWithLogo('//host.example/logo.png');
+			it.each(['//host.example/logo.png', '/icons/icrc/logo.png'])(
+				'spells out the symbol instead of loading a logo the ledger does not embed: %s',
+				async (logo) => {
+					const { container, getByText } = renderWithLogo(logo);
 
-				await waitFor(() => expect(getByText(/0\.005 TOK Tip is Ready/)).toBeInTheDocument());
+					await waitFor(() => expect(getByText(/0\.005 TOK Tip is Ready/)).toBeInTheDocument());
 
-				expect(container.querySelector('img[src*="host.example"]')).not.toBeInTheDocument();
+					expect(container.querySelector(`img[src="${logo}"]`)).not.toBeInTheDocument();
 
-				const hero = container.querySelector(
-					`[aria-label="${get(i18n).tip.alt.claim_illustration}"]`
-				) as HTMLElement;
+					const hero = container.querySelector(
+						`[aria-label="${get(i18n).tip.alt.claim_illustration}"]`
+					) as HTMLElement;
 
-				expect(within(hero).getByText('TOK')).toBeInTheDocument();
-			});
+					expect(within(hero).getByText('TOK')).toBeInTheDocument();
+				}
+			);
 		});
 
 		it('offers sign-in but never the message', async () => {

@@ -17,7 +17,7 @@
 	import { icrcCustomTokensInitialized, icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-	import { isLocalOrInlineLogo } from '$icp/utils/icrc.utils';
+	import { isEmbeddedImage } from '$icp/utils/icrc.utils';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 	import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 	import failedTipImg from '$lib/assets/failed-vip-reward.svg';
@@ -318,7 +318,7 @@
 			if (nonNullish(meta)) {
 				({ symbol, decimals } = meta);
 				// Without a logo the hero spells out the symbol instead.
-				logo = nonNullish(meta.icon) && isLocalOrInlineLogo(meta.icon) ? meta.icon : undefined;
+				logo = nonNullish(meta.icon) && isEmbeddedImage(meta.icon) ? meta.icon : undefined;
 			}
 		} catch (_: unknown) {
 			// Non-fatal: a missing symbol costs a label, and no label is a better

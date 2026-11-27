@@ -10,6 +10,7 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import {
 	CUSTOM_NAMES_BY_LEDGER_CANISTER_ID,
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
+	isEmbeddedImage,
 	isLocalOrInlineLogo,
 	isTokenDip20,
 	isTokenIc,
@@ -264,6 +265,42 @@ describe('icrc.utils', () => {
 		it('should keep an inline image logo from metadata', () => {
 			const logo = 'data:image/png;base64,iVBORw0KGgo=';
 
+			const token = mapIcrcToken({
+				...mockParams,
+				metadata: [
+					...mockMetadata.slice(0, mockMetadata.length - 1),
+					[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+				],
+				icrcCustomTokens: {}
+			});
+
+			expect(token?.icon).toBe(logo);
+		});
+
+		it.each([
+			'/icons/icrc/ryjl3-tyaaa-aaaaa-aaaba-cai.png',
+			'/_app/immutable/assets/icon.svg',
+			'icon.png'
+		])(
+			'should use the static icon for a metadata logo that is a file on OISY but not its icon for this ledger: %s',
+			(logo) => {
+				const token = mapIcrcToken({
+					...mockParams,
+					metadata: [
+						...mockMetadata.slice(0, mockMetadata.length - 1),
+						[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+					],
+					icrcCustomTokens: {}
+				});
+
+				expect(token?.icon).toBe(`/icons/icrc/${mockToken.ledgerCanisterId}.png`);
+			}
+		);
+
+		it.each([
+			`/icons/sns/${mockValidIcToken.ledgerCanisterId}.png`,
+			`/icons/icrc/${mockValidIcToken.ledgerCanisterId}.svg`
+		])('should keep OISY own icon file for this ledger from metadata: %s', (logo) => {
 			const token = mapIcrcToken({
 				...mockParams,
 				metadata: [
@@ -627,6 +664,29 @@ describe('icrc.utils', () => {
 
 				expect(token?.mintingAccount).toBeUndefined();
 			});
+		});
+	});
+
+	describe('isEmbeddedImage', () => {
+		it.each([
+			'data:image/png;base64,iVBORw0KGgo=',
+			'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+			'data:image/svg+xml,%3Csvg%3E%3C/svg%3E',
+			'DATA:IMAGE/PNG;base64,iVBORw0KGgo='
+		])('should accept an image embedded in the string: %s', (logo) => {
+			expect(isEmbeddedImage(logo)).toBeTruthy();
+		});
+
+		it.each([
+			'/icons/sns/ledger.png',
+			'/_app/immutable/assets/icon.svg',
+			'icon.png',
+			'https://host.example/icon.png',
+			'//host.example/icon.png',
+			'ipfs://bafy/icon.png',
+			'data:text/html;base64,PGgxPjwvaDE+'
+		])('should refuse a logo that is not an embedded image: %s', (logo) => {
+			expect(isEmbeddedImage(logo)).toBeFalsy();
 		});
 	});
 
