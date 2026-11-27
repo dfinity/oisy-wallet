@@ -17,6 +17,7 @@ import {
 	SUPPORTED_CROSS_SWAP_NETWORKS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_PROVIDER_GUARANTEES_MINIMUM,
 	SWAP_SLIPPAGE_INVALID_VALUE,
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE,
@@ -509,9 +510,46 @@ export const calculateValueDifference = ({
 	return ((receivedValue - paidValue) / paidValue) * 100;
 };
 
+export const isProtectedOffer = ({ provider }: SwapMappedResult): boolean =>
+	SWAP_PROVIDER_GUARANTEES_MINIMUM[provider];
+
+// Protected offers first, then unprotected ones, each by receive amount descending. An estimate and
+// a guaranteed minimum are not comparable on one number, so a higher estimate never outranks a
+// protected offer, and the first offer, the automatic pick, is protected whenever one exists.
+export const sortSwapOffers = (offers: SwapMappedResult[]): SwapMappedResult[] =>
+	offers.sort((a, b) => {
+		const protectedA = isProtectedOffer(a);
+
+		if (protectedA !== isProtectedOffer(b)) {
+			return protectedA ? -1 : 1;
+		}
+
+		return a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1;
+	});
+
+// Best Rate claims a price that is guaranteed, so an estimate never holds it, even when only
+// estimates are on offer.
+export const isBestRateOffer = ({
+	offer,
+	swaps
+}: {
+	offer: SwapMappedResult | undefined;
+	swaps: SwapMappedResult[] | undefined;
+}): boolean => {
+	const [best] = swaps ?? [];
+
+	return (
+		nonNullish(offer) &&
+		nonNullish(best) &&
+		offer.provider === best.provider &&
+		isProtectedOffer(best)
+	);
+};
+
 // What the selected offer is worth above the lowest offer, in USD. Offers are ranked by receive
-// amount, so this is the same measure that makes an offer the best rate. `undefined` when there
-// is nothing to compare, no price to compare in, or no gain.
+// amount, so this is the same measure that makes an offer the best rate. Only protected offers
+// count, on either side: an estimate is no amount to gain on, nor one to beat. `undefined` when
+// there is nothing to compare, no price to compare in, or no gain.
 export const calculateSwapGainUsd = ({
 	swaps,
 	selectedProvider,
@@ -523,11 +561,13 @@ export const calculateSwapGainUsd = ({
 	decimals: number;
 	exchangeRate: number | undefined;
 }): number | undefined => {
-	if (swaps.length < 2 || isNullish(exchangeRate)) {
+	const protectedSwaps = swaps.filter(isProtectedOffer);
+
+	if (protectedSwaps.length < 2 || !isProtectedOffer(selectedProvider) || isNullish(exchangeRate)) {
 		return;
 	}
 
-	const lowest = swaps.reduce(
+	const lowest = protectedSwaps.reduce(
 		(min, { receiveAmount }) => (receiveAmount < min ? receiveAmount : min),
 		selectedProvider.receiveAmount
 	);

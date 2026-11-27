@@ -25,7 +25,12 @@
 	import type { TokenId } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { calculateSwapGainUsd, findSwapProvider } from '$lib/utils/swap.utils';
+	import {
+		calculateSwapGainUsd,
+		findSwapProvider,
+		isBestRateOffer,
+		isProtectedOffer
+	} from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -118,7 +123,12 @@
 		}
 	});
 	let offerCount = $derived($swapAmountsStore?.swaps.length ?? 0);
-	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
+	let isBestRate = $derived(
+		isBestRateOffer({ offer: selectedProvider, swaps: $swapAmountsStore?.swaps })
+	);
+	// "Best of" claims the selected offer beat each one counted, and it is only measured against
+	// protected offers, so a higher estimate left out of the comparison is left out of the count.
+	let protectedOfferCount = $derived($swapAmountsStore?.swaps.filter(isProtectedOffer).length ?? 0);
 	let swapDApp = $derived(
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
@@ -159,7 +169,7 @@
 			isBestRate
 				? $i18n.swap.text.smart_swap_best_of_offers
 				: $i18n.swap.text.smart_swap_offers_compared,
-			{ $count: `${offerCount}` }
+			{ $count: `${isBestRate ? protectedOfferCount : offerCount}` }
 		)
 	);
 

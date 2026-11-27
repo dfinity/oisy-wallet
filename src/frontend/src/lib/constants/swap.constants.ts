@@ -243,6 +243,21 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 	}
 };
 
+// Whether a provider's offer guarantees a minimum receive amount, enforced by its protocol or by
+// OISY's check before signing (exact offers included). A property of the provider, not of the offer:
+// KongSwap and Velora enforce a minimum without carrying it on the offer. A full record, so a new
+// provider fails type-checking until its protection is declared.
+export const SWAP_PROVIDER_GUARANTEES_MINIMUM: Record<SwapProvider, boolean> = {
+	[SwapProvider.ICP_SWAP]: true,
+	[SwapProvider.KONG_SWAP]: true,
+	[SwapProvider.VELORA]: true,
+	[SwapProvider.NEAR_INTENTS]: true,
+	[SwapProvider.ONE_SEC]: true,
+	[SwapProvider.CHAIN_FUSION]: true,
+	[SwapProvider.OISY_TRADE]: true,
+	[SwapProvider.LIFI]: true
+};
+
 const SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS = [
 	ETHEREUM_NETWORK_ID,
 	...SUPPORTED_EVM_MAINNET_NETWORK_IDS

@@ -14,7 +14,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { findSwapProvider } from '$lib/utils/swap.utils';
+	import { findSwapProvider, isBestRateOffer } from '$lib/utils/swap.utils';
 	import { fly, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -26,7 +26,9 @@
 	let { slippageValue }: Props = $props();
 
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
-	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
+	let isBestRate = $derived(
+		isBestRateOffer({ offer: selectedProvider, swaps: $swapAmountsStore?.swaps })
+	);
 	let swapDApp = $derived(
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);

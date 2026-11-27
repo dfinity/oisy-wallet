@@ -166,7 +166,8 @@ import {
 	geSwapEthTokenAddress,
 	getWithdrawableToken,
 	isKongSupportedIcToken,
-	slippagePercentToBasisPoints
+	slippagePercentToBasisPoints,
+	sortSwapOffers
 } from '$lib/utils/swap.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import {
@@ -770,9 +771,7 @@ const fetchSwapAmountsICP = async ({
 		[]
 	);
 
-	return mappedProvidersResults.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return sortSwapOffers(mappedProvidersResults);
 };
 
 export const fetchIcpSwap = async ({
@@ -1705,9 +1704,7 @@ const reduceSettledSwapResults = (
 		}
 	}
 
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return sortSwapOffers(results);
 };
 
 const fetchSwapAmountsICPBridge = async ({

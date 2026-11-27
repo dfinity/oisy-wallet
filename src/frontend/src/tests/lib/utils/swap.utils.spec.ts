@@ -36,6 +36,7 @@ import {
 	SUPPORTED_CROSS_SWAP_NETWORKS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_PROVIDER_GUARANTEES_MINIMUM,
 	SWAP_SLIPPAGE_INVALID_VALUE,
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
@@ -84,6 +85,7 @@ import {
 	getSwapSlippageInvalidValue,
 	getSwapSlippageStatus,
 	getWithdrawableToken,
+	isBestRateOffer,
 	isSwapError,
 	keepSwapSlippage,
 	mapIcpSwapResult,
@@ -116,7 +118,28 @@ import {
 } from '$tests/mocks/velora.mock';
 import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
 
+// Every provider on main guarantees a minimum, so a spec marks one unprotected on this copy.
+vi.mock('$lib/constants/swap.constants', async (importOriginal) => {
+	const actual = await importOriginal<{
+		SWAP_PROVIDER_GUARANTEES_MINIMUM: typeof SWAP_PROVIDER_GUARANTEES_MINIMUM;
+	}>();
+
+	return {
+		...actual,
+		SWAP_PROVIDER_GUARANTEES_MINIMUM: { ...actual.SWAP_PROVIDER_GUARANTEES_MINIMUM }
+	};
+});
+
 describe('swap utils', () => {
+	const markUnprotected = (...providers: SwapProvider[]) =>
+		providers.forEach((provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = false));
+
+	afterEach(() => {
+		Object.values(SwapProvider).forEach(
+			(provider) => (SWAP_PROVIDER_GUARANTEES_MINIMUM[provider] = true)
+		);
+	});
+
 	const ICP_LP_FEE = 4271n;
 	const ICP_GAS_FEE = ZERO;
 
@@ -1005,6 +1028,71 @@ describe('swap utils', () => {
 			expect(
 				calculateSwapGainUsd({ swaps, selectedProvider, decimals: 8, exchangeRate })
 			).toBeUndefined();
+		});
+
+		it('measures against the lowest protected offer, not a lower unprotected one', () => {
+			markUnprotected(SwapProvider.VELORA);
+
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(20);
+		});
+
+		it('returns undefined for an unprotected offer selected', () => {
+			markUnprotected(SwapProvider.KONG_SWAP);
+
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBeUndefined();
+		});
+
+		it('returns undefined when the other offers are all unprotected', () => {
+			markUnprotected(SwapProvider.ICP_SWAP, SwapProvider.VELORA);
+
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBeUndefined();
+		});
+	});
+
+	describe('isBestRateOffer', () => {
+		const [icpSwap, kongSwap] = mockSwapProviders;
+
+		it('is the first offer when it is protected', () => {
+			expect(isBestRateOffer({ offer: kongSwap, swaps: [kongSwap, icpSwap] })).toBeTruthy();
+		});
+
+		it('is not an offer after the first', () => {
+			expect(isBestRateOffer({ offer: icpSwap, swaps: [kongSwap, icpSwap] })).toBeFalsy();
+		});
+
+		it('is no offer when the first one is unprotected', () => {
+			markUnprotected(SwapProvider.KONG_SWAP, SwapProvider.ICP_SWAP);
+
+			expect(isBestRateOffer({ offer: kongSwap, swaps: [kongSwap, icpSwap] })).toBeFalsy();
+		});
+
+		it.each([
+			{ case: 'no offer', offer: undefined, swaps: [kongSwap] },
+			{ case: 'no offers', offer: kongSwap, swaps: [] },
+			{ case: 'nothing at all', offer: undefined, swaps: undefined }
+		])('is not the best rate for $case', ({ offer, swaps }) => {
+			expect(isBestRateOffer({ offer, swaps })).toBeFalsy();
 		});
 	});
 
