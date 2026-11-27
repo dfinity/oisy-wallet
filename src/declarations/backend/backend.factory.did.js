@@ -424,6 +424,7 @@ export const idlFactory = ({ IDL }) => {
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
 		Lifi: LifiData,
+		Rift: LifiData,
 		OisyTrade: OisyTradeData,
 		CyclesTopUp: CyclesTopUpData,
 		NearIntents: NearIntentsData,

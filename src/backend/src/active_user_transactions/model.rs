@@ -13,7 +13,7 @@ use shared::types::{
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN, RIFT_REF_ORDER_ID,
         XRP_LEDGER_RESULT_EXPIRED, XRP_LEDGER_RESULT_SUCCESS, XRP_REF_LAST_LEDGER_SEQUENCE,
         XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
     },
@@ -87,6 +87,22 @@ pub fn create(
         require_lifi_refs(data, &request.external_refs)?;
     }
 
+    if let ActiveUserTransactionData::Rift(_) = &request.data {
+        // Required for the same reason as LI.FI's poll keys: the order id is the
+        // only thing the poller reads.
+        let order_id = require_rift_order_id(&request.external_refs)?;
+
+        // Rift answers a repeated `POST /order` with the same order, and until it
+        // sees the first deposit that order still reads `awaiting_deposit`. So a
+        // retry after an unclear broadcast, or a second tab on the same quote,
+        // would pass every frontend check and send a second deposit to the same
+        // address. As for XRP, only this call sees the check and the write at
+        // once, so this is what actually holds the invariant.
+        if has_rift_order(map, principal, order_id) {
+            return Err(ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
     make_room(map, principal)?;
 
     let tx = ActiveUserTransaction {
@@ -137,6 +153,17 @@ pub fn update(
         // just as well.
         if let ActiveUserTransactionData::Lifi(data) = &current.data {
             require_lifi_refs(data, refs)?;
+        }
+        // And for a Rift row, whose order id is also what the one-row-per-order
+        // guard is keyed by: swapping it for another order's would let that order
+        // be paid twice, so it can be neither stripped nor changed.
+        if let ActiveUserTransactionData::Rift(_) = &current.data {
+            let order_id = require_rift_order_id(refs)?;
+            if rift_order_id(&current.external_refs) != Some(order_id) {
+                return Err(ActiveUserTransactionError::InvalidData(format!(
+                    "{RIFT_REF_ORDER_ID} cannot change"
+                )));
+            }
         }
     }
     if let Some(err) = request.error.as_deref() {
@@ -271,6 +298,27 @@ fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
 fn has_sol_mint_in_flight(map: &ActiveUserTransactionsMap, principal: Principal) -> bool {
     scan_principal(map, principal)
         .any(|(_, Candid(tx))| is_sol_mint(&tx.data) && !tx.status.is_terminal())
+}
+
+/// Whether any of the caller's Rift rows, **in any status**, already tracks
+/// `order_id`. A finished one counts too: a delivered or refunded order's deposit
+/// address must not be paid again either. A row the frontend deleted after a
+/// definitive broadcast refusal no longer counts, rightly, since nothing was sent.
+///
+/// Nor does a finished row the user dismissed, or `make_room` evicted at the cap.
+/// Both happen only once the first deposit has settled, so a tab that stalled
+/// before broadcasting could then pass this check. The frontend covers that gap
+/// by re-reading the order right before it broadcasts, and sends nothing unless
+/// the order still awaits its first deposit. Keeping used order ids here past
+/// their row would need state of its own, which the spec chose not to add.
+///
+/// Per user, like every other check here: rows are principal-scoped, and an order
+/// is created for one user's addresses. Compared without case, since a UUID is hex.
+fn has_rift_order(map: &ActiveUserTransactionsMap, principal: Principal, order_id: &str) -> bool {
+    scan_principal(map, principal).any(|(_, Candid(tx))| {
+        matches!(tx.data, ActiveUserTransactionData::Rift(_))
+            && rift_order_id(&tx.external_refs).is_some_and(|id| id.eq_ignore_ascii_case(order_id))
+    })
 }
 
 fn is_sol_mint(data: &ActiveUserTransactionData) -> bool {
@@ -467,6 +515,9 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
         ActiveUserTransactionData::CyclesTopUp(d) => {
             require_valid_amount(&d.amount, "amount")?;
             require_cycles_top_up(d)?;
+        }
+        ActiveUserTransactionData::Rift(d) => {
+            require_valid_amount(&d.amount, "amount")?;
         }
     }
     Ok(())
@@ -756,6 +807,45 @@ fn require_lifi_refs(
     Ok(())
 }
 
+fn rift_order_id(refs: &[ActiveUserTransactionRef]) -> Option<&str> {
+    refs.iter()
+        .find(|ActiveUserTransactionRef { key, .. }| key == RIFT_REF_ORDER_ID)
+        .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+}
+
+/// The order id a Rift row needs (see `RIFT_REF_ORDER_ID`), in the shape Rift's
+/// API gives it: a UUID. Shape only: the frontend reads it from the order it has
+/// just checked against the reviewed quote.
+fn require_rift_order_id(
+    refs: &[ActiveUserTransactionRef],
+) -> Result<&str, ActiveUserTransactionError> {
+    let Some(order_id) = rift_order_id(refs) else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{RIFT_REF_ORDER_ID} is required"
+        )));
+    };
+    if !is_uuid(order_id) {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{RIFT_REF_ORDER_ID} must be a UUID"
+        )));
+    }
+    Ok(order_id)
+}
+
+/// The textual form of a UUID: 32 hex digits in groups of 8, 4, 4, 4 and 12,
+/// joined by hyphens.
+fn is_uuid(value: &str) -> bool {
+    const GROUP_LENS: [usize; 5] = [8, 4, 4, 4, 12];
+
+    let mut groups = value.split('-');
+    let groups_match = GROUP_LENS.iter().all(|len| {
+        groups.next().is_some_and(|group| {
+            group.len() == *len && group.chars().all(|c| c.is_ascii_hexdigit())
+        })
+    });
+    groups_match && groups.next().is_none()
+}
+
 /// `0x` plus the 32-byte hash in hex.
 const EVM_TX_HASH_LEN: usize = 66;
 /// A 32-byte BTC txid in hex.
@@ -1028,10 +1118,10 @@ mod tests {
             ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
             ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
             CyclesTopUpData, LifiData, LiquidiumAction, LiquidiumData, NearIntentsData,
-            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData, RiftData,
             UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
             LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
-            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN, RIFT_REF_ORDER_ID,
             XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
         custom_token::{ErcTokenId, SplTokenId},
@@ -3860,5 +3950,313 @@ mod tests {
             ids
         };
         assert_eq!(after_write, vec!["a".to_string(), "b".to_string()]);
+    }
+
+    const RIFT_ORDER_ID: &str = "0f8fad5b-d9cb-469f-a165-70867728950e";
+    const OTHER_RIFT_ORDER_ID: &str = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
+
+    fn rift_data(
+        amount: u64,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Rift(RiftData {
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    fn rift_order_ref(order_id: &str) -> ActiveUserTransactionRef {
+        ActiveUserTransactionRef {
+            key: RIFT_REF_ORDER_ID.to_string(),
+            value: order_id.to_string(),
+        }
+    }
+
+    fn rift_req(id: &str, order_id: &str) -> CreateActiveUserTransactionRequest {
+        CreateActiveUserTransactionRequest {
+            data: rift_data(100_000, TokenId::BtcNativeMainnet, erc20(USDC_ETHEREUM, 1)),
+            external_refs: vec![rift_order_ref(order_id)],
+            ..create_req(id)
+        }
+    }
+
+    fn rift_update_refs(
+        id: &str,
+        refs: Vec<ActiveUserTransactionRef>,
+    ) -> UpdateActiveUserTransactionRequest {
+        UpdateActiveUserTransactionRequest {
+            id: id.to_string(),
+            status: None,
+            progress_step: None,
+            external_refs: Some(refs),
+            error: None,
+        }
+    }
+
+    #[test]
+    fn rift_create_roundtrip() {
+        // Both v1 directions, with a native coin and an ERC-20 on the EVM side.
+        for (i, (source_token, dest_token)) in [
+            (TokenId::BtcNativeMainnet, TokenId::EvmNative(8453)),
+            (TokenId::BtcNativeMainnet, erc20(USDC_ETHEREUM, 1)),
+            (erc20(USDC_ETHEREUM, 1), TokenId::BtcNativeMainnet),
+            (TokenId::EvmNative(42161), TokenId::BtcNativeMainnet),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let (mut map, _mm) = setup();
+            let data = rift_data(100_000, source_token, dest_token);
+            let refs = vec![rift_order_ref(RIFT_ORDER_ID)];
+            let req = CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: refs.clone(),
+                ..create_req(&format!("rift-{i}"))
+            };
+
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs, refs);
+            assert_eq!(list(&map, principal())[0].data, data);
+        }
+    }
+
+    #[test]
+    fn rift_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            data: rift_data(0, TokenId::BtcNativeMainnet, TokenId::EvmNative(1)),
+            ..rift_req("rift-1", RIFT_ORDER_ID)
+        };
+
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn rift_without_order_id_rejected() {
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            external_refs: vec![],
+            ..rift_req("rift-1", RIFT_ORDER_ID)
+        };
+
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("rift_order_id is required".to_string())
+        );
+        assert_eq!(list(&map, principal()).len(), 0);
+    }
+
+    #[test]
+    fn rift_malformed_order_id_rejected() {
+        for order_id in [
+            "",
+            "0f8fad5bd9cb469fa16570867728950e",
+            "{0f8fad5b-d9cb-469f-a165-70867728950e}",
+            "0f8fad5b-d9cb-469f-a165-70867728950",
+            "0f8fad5b-d9cb-469f-a165-70867728950e0",
+            "0f8fad5b-d9cb-469f-a165-70867728950e-",
+            "0f8fad5b-d9cb-469f-a16-570867728950e",
+            "0f8fad5g-d9cb-469f-a165-70867728950e",
+            "+f8fad5b-d9cb-469f-a165-70867728950e",
+        ] {
+            let (mut map, _mm) = setup();
+
+            let err = create(&mut map, principal(), rift_req("rift-1", order_id), 1).unwrap_err();
+
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData("rift_order_id must be a UUID".to_string()),
+                "{order_id:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn rift_order_id_accepted_in_either_case() {
+        let (mut map, _mm) = setup();
+        let upper = RIFT_ORDER_ID.to_ascii_uppercase();
+
+        create(&mut map, principal(), rift_req("rift-1", &upper), 1).expect("create");
+    }
+
+    // The invariant the guard exists for: a second row, and so a second deposit, for
+    // an order that already has one. Refused whatever the first row's status, since
+    // a settled order's deposit address must not be paid again either.
+    #[test]
+    fn rift_second_row_for_the_same_order_rejected_in_any_status() {
+        for status in [
+            None,
+            Some(ActiveUserTransactionStatus::Executing),
+            Some(ActiveUserTransactionStatus::Succeeded),
+            Some(ActiveUserTransactionStatus::Failed),
+        ] {
+            let (mut map, _mm) = setup();
+            create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+            if let Some(status) = status.clone() {
+                set_status(&mut map, "rift-1", status);
+            }
+
+            let err =
+                create(&mut map, principal(), rift_req("rift-2", RIFT_ORDER_ID), 3).unwrap_err();
+
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::AlreadyInFlight,
+                "{status:?}"
+            );
+            assert_eq!(list(&map, principal()).len(), 1);
+        }
+    }
+
+    #[test]
+    fn rift_second_row_for_the_same_order_rejected_in_another_case() {
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+        let upper = RIFT_ORDER_ID.to_ascii_uppercase();
+
+        let err = create(&mut map, principal(), rift_req("rift-2", &upper), 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn rift_second_row_for_the_same_order_allowed_once_the_first_is_deleted() {
+        // The frontend deletes the row of a deposit the network refused outright,
+        // which sent nothing.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+        delete(&mut map, principal(), "rift-1".to_string()).expect("delete");
+
+        create(&mut map, principal(), rift_req("rift-2", RIFT_ORDER_ID), 2).expect("retry");
+    }
+
+    #[test]
+    fn rift_order_freed_once_its_finished_row_is_dismissed() {
+        // By design (spec, "Re-check before broadcast"): the guard lives with the
+        // row. A finished row is dismissed only after the first deposit settled,
+        // and the frontend re-reads the order right before broadcasting, which is
+        // what stops a stalled tab from paying the order again.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+        set_status(&mut map, "rift-1", ActiveUserTransactionStatus::Succeeded);
+        delete(&mut map, principal(), "rift-1".to_string()).expect("dismiss");
+
+        create(&mut map, principal(), rift_req("rift-2", RIFT_ORDER_ID), 3).expect("recreate");
+    }
+
+    #[test]
+    fn rift_rows_for_different_orders_allowed() {
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+
+        create(
+            &mut map,
+            principal(),
+            rift_req("rift-2", OTHER_RIFT_ORDER_ID),
+            2,
+        )
+        .expect("second");
+
+        assert_eq!(list(&map, principal()).len(), 2);
+    }
+
+    #[test]
+    fn rift_order_does_not_block_another_user() {
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+
+        create(
+            &mut map,
+            other_principal(),
+            rift_req("rift-1", RIFT_ORDER_ID),
+            2,
+        )
+        .expect("other user");
+    }
+
+    #[test]
+    fn rift_order_id_ref_on_another_variant_does_not_count() {
+        // Only a Rift row tracks a Rift order, whatever refs another row carries.
+        let (mut map, _mm) = setup();
+        let other = CreateActiveUserTransactionRequest {
+            external_refs: vec![rift_order_ref(RIFT_ORDER_ID)],
+            ..create_req("other-1")
+        };
+        create(&mut map, principal(), other, 1).expect("other variant");
+
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 2).expect("rift row");
+    }
+
+    #[test]
+    fn rift_duplicate_order_at_the_cap_deletes_nothing() {
+        // `AlreadyInFlight` precedes the cap, so a refused create never evicts the
+        // finished rows `make_room` would otherwise delete.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("done-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("filler");
+            set_status(&mut map, &id, ActiveUserTransactionStatus::Succeeded);
+        }
+
+        let err = create(&mut map, principal(), rift_req("rift-2", RIFT_ORDER_ID), 3).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        assert_eq!(
+            list(&map, principal()).len(),
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER
+        );
+    }
+
+    #[test]
+    fn rift_update_cannot_strip_or_change_the_order_id() {
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("create");
+
+        let err = update(&mut map, principal(), rift_update_refs("rift-1", vec![]), 2).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("rift_order_id is required".to_string())
+        );
+
+        let err = update(
+            &mut map,
+            principal(),
+            rift_update_refs("rift-1", vec![rift_order_ref(OTHER_RIFT_ORDER_ID)]),
+            3,
+        )
+        .unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("rift_order_id cannot change".to_string())
+        );
+
+        // Learned refs merged onto the creation ones are accepted.
+        let learned = vec![
+            rift_order_ref(RIFT_ORDER_ID),
+            ActiveUserTransactionRef {
+                key: "rift_status".to_string(),
+                value: "executing".to_string(),
+            },
+        ];
+        let tx = update(
+            &mut map,
+            principal(),
+            rift_update_refs("rift-1", learned.clone()),
+            4,
+        )
+        .expect("update keeping the order id");
+        assert_eq!(tx.external_refs, learned);
     }
 }

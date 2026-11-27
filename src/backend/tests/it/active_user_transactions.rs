@@ -7,10 +7,10 @@ use shared::types::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, CyclesTopUpData,
-        LifiData, NearIntentsData, OisyTradeData, OisyTradeSide, OneSecIcpToEvmData,
+        LifiData, NearIntentsData, OisyTradeData, OisyTradeSide, OneSecIcpToEvmData, RiftData,
         UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
         LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
-        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, RIFT_REF_ORDER_ID,
     },
     custom_token::{ErcTokenId, SplTokenId},
     result_types::{
@@ -1016,6 +1016,81 @@ fn lifi_create_with_unsupported_pair_or_without_poll_keys_is_rejected() {
             "a rejected create must not leave a row behind"
         );
     }
+}
+
+const RIFT_ORDER_ID: &str = "0f8fad5b-d9cb-469f-a165-70867728950e";
+
+fn create_rift(
+    pic: &PicBackend,
+    user: Principal,
+    id: &str,
+    source_token: TokenId,
+    dest_token: TokenId,
+) -> ActiveUserTransactionResult {
+    pic.update::<ActiveUserTransactionResult>(
+        user,
+        "create_active_user_transaction",
+        CreateActiveUserTransactionRequest {
+            data: ActiveUserTransactionData::Rift(RiftData {
+                source_token,
+                dest_token,
+                amount: Nat::from(100_000u64),
+            }),
+            external_refs: vec![ActiveUserTransactionRef {
+                key: RIFT_REF_ORDER_ID.to_string(),
+                value: RIFT_ORDER_ID.to_string(),
+            }],
+            ..create_req(id)
+        },
+    )
+    .expect("create_active_user_transaction call should succeed")
+}
+
+// Through the real endpoint, because the guard against a second deposit for one
+// Rift order is only sound if the create itself refuses it: the frontend's own
+// check cannot be atomic with it. The rules themselves are covered in-process.
+#[test]
+fn rift_variant_roundtrips_and_a_second_row_for_its_order_returns_already_in_flight() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+    let usdc_ethereum = TokenId::Erc20(
+        ErcTokenId("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string()),
+        1,
+    );
+
+    let created = match create_rift(
+        &pic,
+        user,
+        TX_ID,
+        TokenId::BtcNativeMainnet,
+        usdc_ethereum.clone(),
+    ) {
+        ActiveUserTransactionResult::Ok(tx) => tx,
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    };
+
+    // Read back through the query path, so the stored representation is what the
+    // assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, created.data);
+    assert_eq!(listed[0].external_refs, created.external_refs);
+
+    // A different id, so the order is what refuses it.
+    match create_rift(
+        &pic,
+        user,
+        "22222222-2222-4222-8222-222222222222",
+        TokenId::BtcNativeMainnet,
+        usdc_ethereum,
+    ) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+    assert_eq!(list_active(&pic, user).len(), 1);
 }
 
 #[test]
