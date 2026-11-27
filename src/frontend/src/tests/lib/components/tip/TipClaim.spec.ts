@@ -1,13 +1,18 @@
 import { metadata } from '$icp/api/icrc-ledger.api';
 import TipClaim from '$lib/components/tip/TipClaim.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { LOGIN_BUTTON, TIP_CLAIM_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	LOGIN_BUTTON,
+	TIP_CLAIM_BUTTON,
+	TIP_TOKEN_WARNING
+} from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { PendingTipClaim } from '$lib/types/tip';
 import * as consoleUtils from '$lib/utils/console.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
@@ -298,6 +303,99 @@ describe('TipClaim', () => {
 					expect(within(hero).getByText('TOK')).toBeInTheDocument();
 				}
 			);
+		});
+
+		describe('the token warning', () => {
+			const unlistedLedger = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
+
+			const renderWithToken = ({
+				ledger,
+				symbol,
+				name
+			}: {
+				ledger: Principal;
+				symbol: string;
+				name: string;
+			}) => {
+				vi.mocked(metadata).mockResolvedValue([
+					[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
+					[IcrcMetadataResponseEntries.NAME, { Text: name }],
+					[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
+					[IcrcMetadataResponseEntries.FEE, { Nat: 10_000n }]
+				]);
+				setFragment(`#c=${claimCode}`);
+				vi.spyOn(tipServices, 'loadTipPreview').mockResolvedValue({
+					amount: 500_000n,
+					ledger_canister_id: ledger,
+					expires_at_ns: 1_800_000_000_000_000_000n
+				});
+				mockAuthStore(null);
+
+				return render(TipClaim, { props: { tipId } });
+			};
+
+			const warning = (container: HTMLElement) =>
+				container.querySelector(`[data-tid=${TIP_TOKEN_WARNING}]`);
+
+			afterEach(() => {
+				vi.mocked(metadata).mockReset();
+			});
+
+			it('shows none for a token OISY lists', async () => {
+				const { container, getByText } = renderWithToken({
+					ledger: ledgerCanisterId,
+					symbol: 'ICP',
+					name: 'Internet Computer'
+				});
+
+				await waitFor(() => expect(getByText(/0\.005 ICP Tip is Ready/)).toBeInTheDocument());
+
+				expect(warning(container)).not.toBeInTheDocument();
+			});
+
+			it('names the listed token whose symbol another ledger copies', async () => {
+				// A Cyrillic C in place of the Latin one.
+				const { container } = renderWithToken({
+					ledger: unlistedLedger,
+					symbol: 'I\u{421}P',
+					name: 'Mine'
+				});
+
+				await waitFor(() =>
+					expect(warning(container)).toHaveTextContent(
+						replacePlaceholders(get(i18n).tip.text.token_copies_listed, { $token: 'ICP' })
+					)
+				);
+			});
+
+			it('says OISY does not list a token that copies none', async () => {
+				const { container, getByText } = renderWithToken({
+					ledger: unlistedLedger,
+					symbol: 'TOK',
+					name: 'Token'
+				});
+
+				await waitFor(() => expect(getByText(/0\.005 TOK Tip is Ready/)).toBeInTheDocument());
+
+				expect(warning(container)).toHaveTextContent(get(i18n).tip.text.token_not_listed);
+			});
+
+			it('warns about a token OISY does not list even when its ledger does not answer', async () => {
+				vi.mocked(metadata).mockRejectedValue(new Error('ledger down'));
+				setFragment(`#c=${claimCode}`);
+				vi.spyOn(tipServices, 'loadTipPreview').mockResolvedValue({
+					amount: 500_000n,
+					ledger_canister_id: unlistedLedger,
+					expires_at_ns: 1_800_000_000_000_000_000n
+				});
+				mockAuthStore(null);
+
+				const { container } = render(TipClaim, { props: { tipId } });
+
+				await waitFor(() =>
+					expect(warning(container)).toHaveTextContent(get(i18n).tip.text.token_not_listed)
+				);
+			});
 		});
 
 		it('hands the tip over once the visitor signs in from this screen', async () => {

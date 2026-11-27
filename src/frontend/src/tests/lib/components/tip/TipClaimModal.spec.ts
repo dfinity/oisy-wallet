@@ -3,7 +3,12 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
-import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	TIP_ADDED_TOKEN_WARNING,
+	TIP_CLAIM_RETRY_BUTTON,
+	TIP_DONT_ADD_TOKEN_BUTTON,
+	TIP_RECEIVED_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -11,6 +16,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -215,6 +221,102 @@ describe('TipClaimModal', () => {
 		await waitFor(() => expect(getByText(get(i18n).tip.text.claimed_title)).toBeInTheDocument());
 
 		expect(queryByText(/500000/)).not.toBeInTheDocument();
+	});
+
+	describe('a token the wallet does not know', () => {
+		const unlistedLedger = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
+
+		const renderWithToken = async ({
+			ledger,
+			symbol,
+			name
+		}: {
+			ledger: Principal;
+			symbol: string;
+			name: string;
+		}) => {
+			mockDetailsFor(ledger);
+			mockClaimFor(ledger);
+			const { metadata } = await import('$icp/api/icrc-ledger.api');
+			vi.mocked(metadata).mockResolvedValue([
+				[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
+				[IcrcMetadataResponseEntries.NAME, { Text: name }],
+				[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
+				[IcrcMetadataResponseEntries.FEE, { Nat: 10_000n }]
+			]);
+
+			const result = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() =>
+				expect(
+					result.container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)
+				).toBeInTheDocument()
+			);
+
+			return result;
+		};
+
+		const warning = (container: HTMLElement) =>
+			container.querySelector(`[data-tid=${TIP_ADDED_TOKEN_WARNING}]`);
+
+		const dontAddButton = (container: HTMLElement) =>
+			container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_DONT_ADD_TOKEN_BUTTON}]`);
+
+		it('says nothing more about a token already in the list', async () => {
+			const { container } = await renderWithToken({
+				ledger: ledgerCanisterId,
+				symbol: 'ckTEST',
+				name: 'ckTEST'
+			});
+
+			expect(warning(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).not.toBeInTheDocument();
+		});
+
+		it('names the token in the list that a new one copies', async () => {
+			// A Cyrillic S in place of the Latin one.
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'ckTE\u{405}T',
+				name: 'Mine'
+			});
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(
+					replacePlaceholders(get(i18n).tip.text.added_token_copies, { $token: 'ckTEST' })
+				)
+			);
+
+			expect(dontAddButton(container)).toBeInTheDocument();
+		});
+
+		it('says OISY does not list a new token that copies none', async () => {
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			await waitFor(() =>
+				expect(warning(container)).toHaveTextContent(get(i18n).tip.text.added_token_not_listed)
+			);
+		});
+
+		it('leaves a new token out of the list when the claimer says so', async () => {
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			await waitFor(() => expect(dontAddButton(container)).toBeInTheDocument());
+
+			dontAddButton(container)?.click();
+
+			await waitFor(() => expect(get(modalStore)).toBeFalsy());
+
+			expect(setCustomTokenApi).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('the token logo', () => {
