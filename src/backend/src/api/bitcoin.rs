@@ -416,7 +416,7 @@ pub async fn btc_get_spendable_utxos(
         params: BtcGetSpendableUtxosRequest,
     ) -> Result<BtcGetSpendableUtxosResponse, BtcGetSpendableUtxosError> {
         BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER
-            .with(rate_limiter::RateLimiter::check_caller)
+            .with(rate_limiter::TieredRateLimiter::check_caller)
             .map_err(BtcGetSpendableUtxosError::RateLimited)?;
 
         let principal = msg_caller();
@@ -488,7 +488,7 @@ pub async fn btc_get_balance(params: BtcGetBalanceRequest) -> BtcGetBalanceResul
         params: BtcGetBalanceRequest,
     ) -> Result<BtcGetBalanceResponse, BtcGetBalanceError> {
         BTC_GET_BALANCE_RATE_LIMITER
-            .with(rate_limiter::RateLimiter::check_caller)
+            .with(rate_limiter::TieredRateLimiter::check_caller)
             .map_err(BtcGetBalanceError::RateLimited)?;
 
         let principal = msg_caller();

@@ -460,6 +460,38 @@ fn test_btc_get_pending_transactions_rate_limit_is_per_caller() {
 }
 
 // -------------------------------------------------------------------------------------------------
+// - The gate on btc_broadcast_transaction, btc_get_spendable_utxos and btc_get_balance
+// -------------------------------------------------------------------------------------------------
+// 5 calls per caller and 20 from all callers together per hour, each endpoint with its own
+// counters.
+
+const HOUR_NS: u64 = 60 * 60 * 1_000_000_000;
+
+fn exhaust_btc_gate_global_budget<R: std::fmt::Debug>(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    call: impl Fn(Principal) -> R,
+    is_rate_limited: impl Fn(&R) -> bool,
+) -> Principal {
+    let mut callers = (0..5).map(|i| {
+        let caller = Principal::self_authenticating(format!("btc-gate-caller-{i}"));
+        pic_setup.ensure_user_profile(caller);
+        caller
+    });
+
+    for caller in callers.by_ref().take(4) {
+        for i in 0..5 {
+            let result = call(caller);
+            assert!(
+                !is_rate_limited(&result),
+                "{caller} call {i} should not be rate-limited: {result:?}"
+            );
+        }
+    }
+
+    callers.next().expect("a fifth caller")
+}
+
+// -------------------------------------------------------------------------------------------------
 // - btc_broadcast_transaction
 // -------------------------------------------------------------------------------------------------
 // PocketIC's Bitcoin canister has no UTXOs, so these cover what runs before the UTXO fetch: the
@@ -610,60 +642,38 @@ fn assert_btc_broadcast_transaction_rate_limited(
     }
 }
 
-/// Calling `btc_broadcast_transaction` more than 5 times within a minute must return
-/// `BtcBroadcastTransactionError::RateLimited` for the minute tier.
+/// Calling `btc_broadcast_transaction` more than 5 times within an hour must return
+/// `BtcBroadcastTransactionError::RateLimited` for the caller's hour tier.
 #[test]
-fn test_btc_broadcast_transaction_rate_limited_after_5_calls_in_a_minute() {
+fn test_btc_broadcast_transaction_rate_limited_after_5_calls_in_an_hour() {
     let pic_setup = setup();
     // The controller skips the delegation check, so each allowed call reaches the decoding.
     let caller = controller();
     pic_setup.ensure_user_profile(caller);
 
     call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 5);
+    pic_setup.pic.advance_time(Duration::from_secs(61));
 
-    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 5, 60 * 1_000_000_000);
+    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 5, HOUR_NS);
 }
 
-/// Spread over minutes, calling `btc_broadcast_transaction` more than 20 times within an hour
-/// must return `BtcBroadcastTransactionError::RateLimited` for the hour tier.
+/// Once 20 calls from all callers together reach `btc_broadcast_transaction` within an hour, a
+/// caller with budget of their own left must get `BtcBroadcastTransactionError::RateLimited` for
+/// the shared hour tier.
 #[test]
-fn test_btc_broadcast_transaction_rate_limited_after_20_calls_in_an_hour() {
+fn test_btc_broadcast_transaction_rate_limited_after_20_calls_in_all_in_an_hour() {
     let pic_setup = setup();
-    let caller = controller();
-    pic_setup.ensure_user_profile(caller);
 
-    for _ in 0..4 {
-        call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 5);
-        pic_setup.pic.advance_time(Duration::from_secs(61));
-    }
-
-    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 20, 60 * 60 * 1_000_000_000);
-}
-
-/// Spread over hours, calling `btc_broadcast_transaction` more than 50 times within a day must
-/// return `BtcBroadcastTransactionError::RateLimited` for the day tier.
-#[test]
-fn test_btc_broadcast_transaction_rate_limited_after_50_calls_in_a_day() {
-    let pic_setup = setup();
-    let caller = controller();
-    pic_setup.ensure_user_profile(caller);
-
-    // 20 in each of the first two hours and 10 in the third: 50 in all, each hour within the
-    // hour tier, so the next call is refused by the day tier.
-    for calls_this_hour in [20, 20, 10] {
-        for _ in 0..calls_this_hour / 5 {
-            call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 5);
-            pic_setup.pic.advance_time(Duration::from_secs(61));
-        }
-        pic_setup.pic.advance_time(Duration::from_hours(1));
-    }
-
-    assert_btc_broadcast_transaction_rate_limited(
+    let fifth = exhaust_btc_gate_global_budget(
         &pic_setup,
-        caller,
-        50,
-        24 * 60 * 60 * 1_000_000_000,
+        |caller| {
+            call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]))
+                .expect("Canister call failed")
+        },
+        |result| matches!(result, Err(BtcBroadcastTransactionError::RateLimited(_))),
     );
+
+    assert_btc_broadcast_transaction_rate_limited(&pic_setup, fifth, 20, HOUR_NS);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -785,7 +795,7 @@ fn test_get_spendable_utxos_controller_bypasses_delegation_check() {
     );
 }
 
-/// Calling `btc_get_spendable_utxos` more than 15 times within a minute must return
+/// Calling `btc_get_spendable_utxos` more than 5 times within an hour must return
 /// `BtcGetSpendableUtxosError::RateLimited` with the expected payload.
 #[test]
 fn test_btc_get_spendable_utxos_rate_limited_after_exceeding_limit() {
@@ -793,7 +803,7 @@ fn test_btc_get_spendable_utxos_rate_limited_after_exceeding_limit() {
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
 
-    for i in 0..15 {
+    for i in 0..5 {
         let result = call_btc_get_spendable_utxos(&pic_setup, caller, None)
             .expect("btc_get_spendable_utxos should exist");
         assert!(
@@ -802,7 +812,33 @@ fn test_btc_get_spendable_utxos_rate_limited_after_exceeding_limit() {
         );
     }
 
-    let result = call_btc_get_spendable_utxos(&pic_setup, caller, None)
+    assert_btc_get_spendable_utxos_rate_limited(&pic_setup, caller, 5);
+}
+
+/// Once 20 calls from all callers together reach `btc_get_spendable_utxos` within an hour, a
+/// caller with budget of their own left must get `BtcGetSpendableUtxosError::RateLimited`.
+#[test]
+fn test_btc_get_spendable_utxos_rate_limited_after_20_calls_in_all_in_an_hour() {
+    let pic_setup = setup();
+
+    let fifth = exhaust_btc_gate_global_budget(
+        &pic_setup,
+        |caller| {
+            call_btc_get_spendable_utxos(&pic_setup, caller, None)
+                .expect("btc_get_spendable_utxos should exist")
+        },
+        |result| matches!(result, Err(BtcGetSpendableUtxosError::RateLimited(_))),
+    );
+
+    assert_btc_get_spendable_utxos_rate_limited(&pic_setup, fifth, 20);
+}
+
+fn assert_btc_get_spendable_utxos_rate_limited(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+    expected_max_calls: u32,
+) {
+    let result = call_btc_get_spendable_utxos(pic_setup, caller, None)
         .expect("btc_get_spendable_utxos should exist");
     match result {
         Err(BtcGetSpendableUtxosError::RateLimited(RateLimitError {
@@ -810,8 +846,8 @@ fn test_btc_get_spendable_utxos_rate_limited_after_exceeding_limit() {
             window_ns,
             caller: err_caller,
         })) => {
-            assert_eq!(max_calls, 15);
-            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(max_calls, expected_max_calls);
+            assert_eq!(window_ns, HOUR_NS);
             assert_eq!(err_caller, caller);
         }
         other => panic!("expected BtcGetSpendableUtxosError::RateLimited, got {other:?}"),
@@ -950,7 +986,7 @@ fn test_get_balance_controller_bypasses_delegation_check() {
     assert_eq!(response, Ok(BtcGetBalanceResponse { balance: 0 }));
 }
 
-/// Calling `btc_get_balance` more than 20 times within a minute must return
+/// Calling `btc_get_balance` more than 5 times within an hour must return
 /// `BtcGetBalanceError::RateLimited` with the expected payload.
 #[test]
 fn test_btc_get_balance_rate_limited_after_exceeding_limit() {
@@ -958,7 +994,7 @@ fn test_btc_get_balance_rate_limited_after_exceeding_limit() {
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
 
-    for i in 0..20 {
+    for i in 0..5 {
         let result =
             call_btc_get_balance(&pic_setup, caller, None).expect("btc_get_balance should exist");
         assert!(
@@ -967,16 +1003,41 @@ fn test_btc_get_balance_rate_limited_after_exceeding_limit() {
         );
     }
 
+    assert_btc_get_balance_rate_limited(&pic_setup, caller, 5);
+}
+
+/// Once 20 calls from all callers together reach `btc_get_balance` within an hour, a caller with
+/// budget of their own left must get `BtcGetBalanceError::RateLimited`.
+#[test]
+fn test_btc_get_balance_rate_limited_after_20_calls_in_all_in_an_hour() {
+    let pic_setup = setup();
+
+    let fifth = exhaust_btc_gate_global_budget(
+        &pic_setup,
+        |caller| {
+            call_btc_get_balance(&pic_setup, caller, None).expect("btc_get_balance should exist")
+        },
+        |result| matches!(result, Err(BtcGetBalanceError::RateLimited(_))),
+    );
+
+    assert_btc_get_balance_rate_limited(&pic_setup, fifth, 20);
+}
+
+fn assert_btc_get_balance_rate_limited(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+    expected_max_calls: u32,
+) {
     let result =
-        call_btc_get_balance(&pic_setup, caller, None).expect("btc_get_balance should exist");
+        call_btc_get_balance(pic_setup, caller, None).expect("btc_get_balance should exist");
     match result {
         Err(BtcGetBalanceError::RateLimited(RateLimitError {
             max_calls,
             window_ns,
             caller: err_caller,
         })) => {
-            assert_eq!(max_calls, 20);
-            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(max_calls, expected_max_calls);
+            assert_eq!(window_ns, HOUR_NS);
             assert_eq!(err_caller, caller);
         }
         other => panic!("expected BtcGetBalanceError::RateLimited, got {other:?}"),
@@ -1069,7 +1130,8 @@ fn test_get_balance_checks_each_of_a_users_sessions_once() {
     cycles_spent(&laptop);
     cycles_spent(&phone);
 
-    for (i, chain) in [&laptop, &phone, &laptop, &phone].into_iter().enumerate() {
+    // Three more, for 5 reads in all: the gate allows a caller 5 an hour.
+    for (i, chain) in [&laptop, &phone, &laptop].into_iter().enumerate() {
         let spent = cycles_spent(chain);
         assert!(
             spent < 100_000_000,
