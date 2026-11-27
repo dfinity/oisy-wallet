@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 import * as feeServices from '$eth/services/fee.services';
@@ -23,21 +24,28 @@ import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
+import { fetchRiftEvmSwap } from '$lib/services/rift-swap.services';
 import * as swapServices from '$lib/services/swap.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type LifiMaxFee, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import { LifiFeeChangedError, SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
+import {
+	LifiFeeChangedError,
+	RiftSwapRefusedError,
+	SwapBroadcastOutcomeUnknownError
+} from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
 import SwapEthWizardStepsTest from '$tests/eth/components/swap/SwapEthWizardStepsTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockLifiQuote } from '$tests/mocks/lifi.mock';
+import { mockRiftQuote } from '$tests/mocks/rift.mock';
 import {
 	mockNearIntentsProvider,
 	mockOneSecProvider,
@@ -89,6 +97,16 @@ vi.mock('$lib/services/lifi-evm-swap.services', () => ({
 }));
 
 const mockAcceptProviderAgreement = vi.fn();
+
+vi.mock('$lib/services/rift-swap.services', () => ({
+	fetchRiftEvmSwap: vi.fn(),
+	// The provider registries import these.
+	fetchRiftEvmSwapQuote: vi.fn(),
+	riftEvmSupportedDestinations: vi.fn(),
+	fetchRiftBtcSwapQuote: vi.fn(),
+	riftBtcSupportedTokens: vi.fn(),
+	riftBtcSupportedDestinations: vi.fn()
+}));
 
 vi.mock('$lib/services/provider-agreements.services', () => ({
 	acceptProviderAgreement: (...args: unknown[]) => mockAcceptProviderAgreement(...args)
@@ -1110,6 +1128,198 @@ describe('SwapEthWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('Rift EVM→BTC swap', () => {
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+		const btcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
+
+		const riftOffer: SwapMappedResult = {
+			provider: SwapProvider.RIFT,
+			receiveAmount: 150_000n,
+			swapDetails: mockRiftQuote
+		};
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			feeState = writable({
+				gas: 65_000n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(undefined),
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
+			}));
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			vi.spyOn(addrDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(mockBtcAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+			vi.mocked(fetchRiftEvmSwap).mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const createRiftContext = () => {
+			const executionSwapAmountsStore = initSwapAmountsStore();
+			executionSwapAmountsStore.setSwaps({
+				swaps: [riftOffer],
+				amountForSwap: 1,
+				selectedProvider: riftOffer
+			});
+
+			const ctx = new Map();
+			const failedSwapError: Writable<SwapError | undefined> = writable(undefined);
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(btcToken),
+				failedSwapError,
+				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: executionSwapAmountsStore });
+
+			ctx.set(
+				feeStoreMod.ETH_FEE_CONTEXT_KEY,
+				feeStoreMod.initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+
+			return { ctx, failedSwapError };
+		};
+
+		const confirm = async () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+			const { ctx, failedSwapError } = createRiftContext();
+
+			const { getByText, queryByRole } = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount: vi.fn(),
+					onStopTriggerAmount: vi.fn()
+				},
+				context: ctx
+			});
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			return { onClose, onBack, failedSwapError };
+		};
+
+		it("sends through Rift, paying out to the user's BTC address, and closes", async () => {
+			const { onClose, onBack } = await confirm();
+
+			expect(fetchRiftEvmSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					destinationToken: btcToken,
+					userAddress: mockEthAddress,
+					recipientAddress: mockBtcAddress,
+					offer: riftOffer,
+					gas: 65_000n,
+					maxFeePerGas: 2_000_000n,
+					maxPriorityFeePerGas: 1_000_000n
+				})
+			);
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it("refuses to send without the user's BTC address", async () => {
+			vi.spyOn(addrDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(undefined));
+
+			const { onBack } = await confirm();
+
+			expect(fetchRiftEvmSwap).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.swap.error.unexpected_missing_data }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+		});
+
+		// A node's refusal of the deposit can carry the signed transaction or the user's address.
+		it('reports any other failure as an allow-listed category, never its text', async () => {
+			vi.mocked(fetchRiftEvmSwap).mockRejectedValue(
+				new Error(`replacement fee too low: 0x02f8${mockEthAddress.slice(2)}`)
+			);
+
+			await confirm();
+
+			const errorEvent = vi
+				.mocked(analytics.trackEvent)
+				.mock.calls.find(([{ name }]) => name === TRACK_COUNT_SWAP_ERROR);
+
+			expect(errorEvent?.[0].metadata).toEqual(
+				expect.objectContaining({
+					dApp: SwapProvider.RIFT,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN
+				})
+			);
+			expect(errorEvent?.[0].metadata).not.toHaveProperty('error');
+			expect(JSON.stringify(errorEvent?.[0].metadata)).not.toContain(mockEthAddress.slice(2));
+		});
+
+		// Nothing was signed; Rift's answers can carry the user's addresses, which its refusals wrap.
+		it('says why Rift stopped the swap, reported as an allow-listed category', async () => {
+			vi.mocked(fetchRiftEvmSwap).mockRejectedValue(new RiftSwapRefusedError('orderUnverified'));
+
+			const { onBack, onClose, failedSwapError } = await confirm();
+
+			expect(get(failedSwapError)?.message).toBe(en.swap.error.rift_order_unverified);
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					metadata: expect.objectContaining({
+						dApp: SwapProvider.RIFT,
+						result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED
+					})
+				})
+			);
 		});
 	});
 

@@ -318,9 +318,8 @@ const NEAR_INTENTS_XRP_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_XRP_SWAP_ENABLED
 	? [XRP_MAINNET_NETWORK_ID]
 	: [];
 
-// Rift bridges BTC mainnet to the EVM networks it is asked about. The other direction joins with its
-// own change.
-const RIFT_BTC_DESTINATION_NETWORK_IDS: NetworkId[] = RIFT_SWAP_ENABLED
+// Rift bridges BTC mainnet to and from the EVM networks it is asked about.
+const RIFT_EVM_NETWORK_IDS: NetworkId[] = RIFT_SWAP_ENABLED
 	? SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS.filter((id) => nonNullish(RIFT_EVM_NATIVE_ASSETS[id]))
 	: [];
 
@@ -334,7 +333,10 @@ const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 const withIcpIfPaired = (networkId: NetworkId): NetworkId[] => [
 	...(ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId) ? [ICP_NETWORK_ID] : []),
 	...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	...NEAR_INTENTS_BTC_NETWORK_IDS,
+	...new Set<NetworkId>([
+		...NEAR_INTENTS_BTC_NETWORK_IDS,
+		...(RIFT_EVM_NETWORK_IDS.includes(networkId) ? [BTC_MAINNET_NETWORK_ID] : [])
+	]),
 	...NEAR_INTENTS_XRP_NETWORK_IDS
 ];
 
@@ -351,7 +353,7 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 			...(NEAR_INTENTS_BTC_SWAP_ENABLED
 				? [...SUPPORTED_CROSS_SWAP_NETWORK_IDS, ...NEAR_INTENTS_XRP_NETWORK_IDS]
 				: []),
-			...RIFT_BTC_DESTINATION_NETWORK_IDS
+			...RIFT_EVM_NETWORK_IDS
 		])
 	],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),

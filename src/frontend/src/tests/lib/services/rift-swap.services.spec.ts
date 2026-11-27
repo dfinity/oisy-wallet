@@ -1,10 +1,14 @@
 import { sendBtc } from '$btc/services/btc-send.services';
 import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { send as sendEvm } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
+import type * as ethErrorUtils from '$eth/utils/eth-error.utils';
+import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { RIFT_QUOTE_REFRESH_INTERVAL_MS } from '$lib/constants/swap.constants';
@@ -17,14 +21,23 @@ import {
 import {
 	fetchRiftBtcSwap,
 	fetchRiftBtcSwapQuote,
+	fetchRiftEvmSwap,
+	fetchRiftEvmSwapQuote,
 	resetRiftQuoteCache,
 	riftBtcSupportedDestinations,
-	riftBtcSupportedTokens
+	riftBtcSupportedTokens,
+	riftEvmSupportedDestinations
 } from '$lib/services/rift-swap.services';
 import { enableSwapDestinationToken } from '$lib/services/swap.services';
 import { RiftApiError, RiftSwapRefusedError, type RiftSwapRefusal } from '$lib/types/errors';
 import type { RiftOrder, RiftQuote } from '$lib/types/rift';
-import { SwapProvider, type BtcQuoteParams, type SwapRiftBtcParams } from '$lib/types/swap';
+import {
+	SwapProvider,
+	type BtcQuoteParams,
+	type EvmQuoteParams,
+	type SwapRiftBtcParams,
+	type SwapRiftEvmParams
+} from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { toRiftExternalRefsMap } from '$lib/utils/rift-active-tx.utils';
 import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
@@ -55,6 +68,15 @@ vi.mock('$btc/services/btc-send.services', () => ({
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	createActiveUserTransaction: vi.fn(),
 	deleteUnbroadcastActiveUserTransaction: vi.fn()
+}));
+
+vi.mock('$eth/services/send.services', () => ({
+	send: vi.fn()
+}));
+
+vi.mock('$eth/utils/eth-error.utils', async (importOriginal) => ({
+	...(await importOriginal<typeof ethErrorUtils>()),
+	isDefinitiveTransactionRefusal: vi.fn()
 }));
 
 vi.mock('$lib/services/swap.services', () => ({
@@ -558,6 +580,305 @@ describe('rift-swap.services', () => {
 				await fetchRiftBtcSwap(params());
 
 				await fetchRiftBtcSwapQuote(quoteParams);
+
+				expect(postRiftQuote).toHaveBeenCalledTimes(2);
+			});
+		});
+	});
+
+	describe('from an EVM network', () => {
+		const usdc: Erc20Token = { ...USDC_ETHEREUM, decimals: 6 };
+
+		// 100 USDC on Ethereum → BTC, paid out to the user's BTC address and refunded to their EVM one.
+		const userEvmAddress = mockRiftOrderToAddress;
+		const userBtcAddress = mockRiftOrderRefundAddress;
+		const depositAddress = '0x2222222222222222222222222222222222222222';
+
+		const evmQuote: RiftQuote = {
+			...mockRiftQuote,
+			from: 'evm:1.0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+			to: 'bitcoin.btc',
+			amount_in: '100000000',
+			estimated_amount_out: '150000'
+		};
+
+		const evmOrder: RiftOrder = {
+			...mockRiftOrder,
+			from: evmQuote.from,
+			to: evmQuote.to,
+			amount_in: evmQuote.amount_in,
+			deposit_address: depositAddress,
+			to_address: userBtcAddress,
+			refund_address: userEvmAddress
+		};
+
+		describe('riftEvmSupportedDestinations', () => {
+			const destinations = (sourceToken: Token) =>
+				riftEvmSupportedDestinations({
+					sourceToken,
+					supportedSourceTokens: undefined,
+					findProviderSourceTokens: () => undefined
+				});
+
+			it('reaches native BTC from a token Rift is asked about', () => {
+				expect(destinations(usdc)).toEqual({
+					btc: new Set([resolveSwapTokenLookup({ token: BTC_MAINNET_TOKEN })?.identifier])
+				});
+			});
+
+			it.each([
+				{ label: 'a token on BSC', token: BNB_MAINNET_TOKEN },
+				{ label: 'BTC itself', token: BTC_MAINNET_TOKEN },
+				{ label: 'SOL', token: SOLANA_TOKEN }
+			])('reaches nothing from $label', ({ token }) => {
+				expect(destinations(token)).toBeUndefined();
+			});
+		});
+
+		describe('fetchRiftEvmSwapQuote', () => {
+			const quoteParams = (overrides: Partial<EvmQuoteParams> = {}): EvmQuoteParams => ({
+				sourceToken: usdc,
+				destinationToken: BTC_MAINNET_TOKEN as Erc20Token,
+				amount: 100_000_000n,
+				userAddress: userEvmAddress,
+				recipientAddress: userBtcAddress,
+				slippage: 0.5,
+				...overrides
+			});
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+				resetRiftQuoteCache();
+				vi.useFakeTimers();
+				vi.setSystemTime(Date.parse(evmQuote.expires_at) - 5 * 60_000);
+				vi.mocked(postRiftQuote).mockResolvedValue(evmQuote);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('asks for the token to native BTC and offers its estimate', async () => {
+				await expect(fetchRiftEvmSwapQuote(quoteParams())).resolves.toStrictEqual({
+					provider: SwapProvider.RIFT,
+					receiveAmount: 150_000n,
+					swapDetails: evmQuote
+				});
+
+				expect(postRiftQuote).toHaveBeenCalledExactlyOnceWith({
+					...mockRiftQuoteRequest,
+					from: evmQuote.from,
+					to: 'bitcoin.btc',
+					amount_in: '100000000'
+				});
+			});
+
+			it.each([
+				{ label: 'to another EVM token', overrides: { destinationToken: usdc } },
+				{
+					label: 'from a token on BSC',
+					overrides: { sourceToken: BNB_MAINNET_TOKEN as Erc20Token }
+				}
+			])('does not ask Rift $label', async ({ overrides }) => {
+				await expect(fetchRiftEvmSwapQuote(quoteParams(overrides))).resolves.toBeUndefined();
+
+				expect(postRiftQuote).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('fetchRiftEvmSwap', () => {
+			const HASH = `0x${'ef'.repeat(32)}`;
+
+			const params = (overrides: Partial<SwapRiftEvmParams> = {}): SwapRiftEvmParams => ({
+				identity: mockIdentity,
+				progress: vi.fn(),
+				sourceToken: usdc,
+				destinationToken: BTC_MAINNET_TOKEN,
+				swapAmount: 100,
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: userEvmAddress,
+				recipientAddress: userBtcAddress,
+				offer: { provider: SwapProvider.RIFT, receiveAmount: 150_000n, swapDetails: evmQuote },
+				gas: 65_000n,
+				maxFeePerGas: 20n,
+				maxPriorityFeePerGas: 1n,
+				...overrides
+			});
+
+			// Signs, runs the hook, then broadcasts: refused by `outcome` when given.
+			const broadcast = ({ outcome }: { outcome?: unknown } = {}) =>
+				vi.mocked(sendEvm).mockImplementation(async ({ beforeBroadcast }) => {
+					await beforeBroadcast?.({ hash: HASH, nonce: 7 });
+
+					if (outcome !== undefined) {
+						throw outcome;
+					}
+
+					return { hash: HASH, nonce: 7 };
+				});
+
+			const rowId = () => vi.mocked(createActiveUserTransaction).mock.lastCall?.[0].id;
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+				resetRiftQuoteCache();
+				vi.useFakeTimers();
+				vi.setSystemTime(Date.parse(evmQuote.expires_at) - 5 * 60_000);
+
+				vi.mocked(postRiftOrder).mockResolvedValue(evmOrder);
+				vi.mocked(getRiftOrder).mockResolvedValue(evmOrder);
+				vi.mocked(createActiveUserTransaction).mockResolvedValue(mockRiftActiveUserTransaction);
+				vi.mocked(isDefinitiveTransactionRefusal).mockReturnValue(false);
+				broadcast();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it("orders the quote with the user's BTC payout and EVM refund, and pays exactly the quoted amount", async () => {
+				await fetchRiftEvmSwap(params());
+
+				expect(postRiftOrder).toHaveBeenCalledExactlyOnceWith({
+					quote_id: evmQuote.id,
+					to_address: userBtcAddress,
+					refund_address: userEvmAddress
+				});
+				expect(sendEvm).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						from: userEvmAddress,
+						to: depositAddress,
+						amount: 100_000_000n,
+						token: usdc,
+						sourceNetwork: ETHEREUM_NETWORK,
+						gas: 65_000n,
+						maxFeePerGas: 20n,
+						maxPriorityFeePerGas: 1n
+					})
+				);
+			});
+
+			it("creates the row with the deposit's hash, nonce and chain, then reads the order once more", async () => {
+				await fetchRiftEvmSwap(params());
+
+				const [[{ externalRefs }]] = vi.mocked(createActiveUserTransaction).mock.calls;
+
+				expect(toRiftExternalRefsMap(externalRefs)).toMatchObject({
+					rift_order_id: evmOrder.id,
+					rift_deposit_address: depositAddress,
+					rift_deposit_tx: HASH,
+					rift_deposit_nonce: '7',
+					rift_deposit_chain_id: '1'
+				});
+				expect(getRiftOrder).toHaveBeenCalledExactlyOnceWith({
+					orderId: evmOrder.id,
+					urgent: true
+				});
+				expect(enableSwapDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('stops on an order that refunds elsewhere, before anything is signed', async () => {
+				vi.mocked(postRiftOrder).mockResolvedValue({
+					...evmOrder,
+					refund_address: '0x0000000000000000000000000000000000000001'
+				});
+
+				await expect(fetchRiftEvmSwap(params())).rejects.toMatchObject({
+					reason: 'orderUnverified'
+				});
+
+				expect(sendEvm).not.toHaveBeenCalled();
+			});
+
+			it('deletes the row when the node refused the deposit outright', async () => {
+				const err = new Error('insufficient funds');
+				broadcast({ outcome: err });
+				vi.mocked(isDefinitiveTransactionRefusal).mockReturnValue(true);
+
+				await expect(fetchRiftEvmSwap(params())).rejects.toThrow(err);
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+			});
+
+			// Signing again would read the next nonce and could pay twice.
+			it('goes on as sent, keeping the row, when the deposit may have been relayed', async () => {
+				broadcast({ outcome: new Error('timeout') });
+
+				await expect(fetchRiftEvmSwap(params())).resolves.toBeUndefined();
+
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// Refused in the hook, after the row was created: the row goes, the refusal propagates, and the
+			// deposit is never treated as sent.
+			describe('right before the broadcast', () => {
+				const expectStoppedWithRowDeleted = async (reason: RiftSwapRefusal) => {
+					const progress = vi.fn();
+
+					await expect(fetchRiftEvmSwap(params({ progress }))).rejects.toMatchObject({ reason });
+
+					expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: rowId()
+					});
+					expect(progress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+				};
+
+				it('stops when the order has seen a deposit since', async () => {
+					vi.mocked(getRiftOrder).mockResolvedValue({ ...evmOrder, status: 'funded' });
+
+					await expectStoppedWithRowDeleted('orderInFlight');
+				});
+
+				it('stops when the order cannot be read again', async () => {
+					vi.mocked(getRiftOrder).mockRejectedValue(
+						new RiftApiError({ status: 503, message: 'no' })
+					);
+
+					await expectStoppedWithRowDeleted('orderRefused');
+				});
+
+				it('stops when the order passed its deadline during signing', async () => {
+					vi.mocked(getRiftOrder).mockResolvedValue({
+						...evmOrder,
+						deposit_deadline: new Date(Date.now() - 1).toISOString()
+					});
+
+					await expectStoppedWithRowDeleted('quoteExpired');
+				});
+			});
+
+			it('stops with nothing to delete when the order already has a row', async () => {
+				vi.mocked(createActiveUserTransaction).mockRejectedValue({ AlreadyInFlight: null });
+
+				await expect(fetchRiftEvmSwap(params())).rejects.toMatchObject({
+					reason: 'orderInFlight'
+				});
+
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('refuses an amount other than the quoted one, without ordering, and drops the quote', async () => {
+				vi.mocked(postRiftQuote).mockResolvedValue(evmQuote);
+				const quoteParams: EvmQuoteParams = {
+					sourceToken: usdc,
+					destinationToken: BTC_MAINNET_TOKEN as Erc20Token,
+					amount: 100_000_000n,
+					userAddress: userEvmAddress,
+					recipientAddress: userBtcAddress,
+					slippage: 0.5
+				};
+
+				await fetchRiftEvmSwapQuote(quoteParams);
+
+				await expect(fetchRiftEvmSwap(params({ swapAmount: 99 }))).rejects.toThrow();
+
+				expect(postRiftOrder).not.toHaveBeenCalled();
+
+				await fetchRiftEvmSwapQuote(quoteParams);
 
 				expect(postRiftQuote).toHaveBeenCalledTimes(2);
 			});

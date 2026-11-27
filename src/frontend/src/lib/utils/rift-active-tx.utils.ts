@@ -74,12 +74,13 @@ const toRefValue = (text: string): string =>
 
 /**
  * The refs a Rift row is created with, once its deposit is signed: the order it pays, where and with
- * which transaction, the decimals its settled amount will be formatted with, and the display metadata
- * every swap provider shares.
+ * which transaction (for an EVM deposit, its nonce and chain too), the decimals its settled amount
+ * will be formatted with, and the display metadata every swap provider shares.
  */
 export const toRiftCreationRefs = ({
 	order: { id, deposit_address },
 	depositTx,
+	evmDeposit,
 	sourceToken,
 	destinationToken,
 	amount,
@@ -87,6 +88,7 @@ export const toRiftCreationRefs = ({
 }: {
 	order: Pick<RiftOrder, 'id' | 'deposit_address'>;
 	depositTx: string;
+	evmDeposit?: { nonce: number; chainId: bigint };
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: string;
@@ -95,6 +97,10 @@ export const toRiftCreationRefs = ({
 	[RIFT_EXTERNAL_REF_KEYS.ORDER_ID]: id,
 	[RIFT_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: deposit_address,
 	[RIFT_EXTERNAL_REF_KEYS.DEPOSIT_TX]: depositTx,
+	...(nonNullish(evmDeposit) && {
+		[RIFT_EXTERNAL_REF_KEYS.DEPOSIT_NONCE]: `${evmDeposit.nonce}`,
+		[RIFT_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID]: `${evmDeposit.chainId}`
+	}),
 	[RIFT_EXTERNAL_REF_KEYS.SOURCE_DECIMALS]: `${sourceToken.decimals}`,
 	[RIFT_EXTERNAL_REF_KEYS.DEST_DECIMALS]: `${destinationToken.decimals}`,
 	[RIFT_EXTERNAL_REF_KEYS.AMOUNT]: amount,

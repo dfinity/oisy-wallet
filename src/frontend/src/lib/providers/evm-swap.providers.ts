@@ -4,6 +4,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
+import { RIFT_SWAP_ENABLED } from '$env/rest/rift.env';
 import { CHAIN_FUSION_PAIRS, ONESEC_EVM_NETWORK_IDS } from '$lib/constants/swap.constants';
 import { fetchChainFusionEvmQuote } from '$lib/services/chain-fusion-swap.services';
 import { fetchLifiSwapQuote } from '$lib/services/lifi-swap.services';
@@ -12,8 +13,12 @@ import {
 	nearIntentsSupportedTokens
 } from '$lib/services/near-intents.services';
 import { fetchOneSecEvmToIcpQuote } from '$lib/services/onesec-swap.services';
+import {
+	fetchRiftEvmSwapQuote,
+	riftEvmSupportedDestinations
+} from '$lib/services/rift-swap.services';
 import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
-import { SwapProvider, type EvmSwapProviderConfig } from '$lib/types/swap';
+import { SwapProvider, type EvmQuoteParams, type EvmSwapProviderConfig } from '$lib/types/swap';
 import {
 	chainFusionCompatibleDestinations,
 	chainFusionSupportedSourceTokens
@@ -90,6 +95,19 @@ export const evmSwapProviders: EvmSwapProviderConfig[] = [
 					getQuote: fetchLifiSwapQuote,
 					isEnabled: LIFI_SWAP_ENABLED,
 					getSupportedDestinations: buildLifiSupportedDestinations('evm')
+				} satisfies EvmSwapProviderConfig
+			]
+		: []),
+	// To native BTC only, and no source list either: any token on a network Rift is asked about may
+	// get an offer, and one it has no route for gets none.
+	...(RIFT_SWAP_ENABLED
+		? [
+				{
+					key: SwapProvider.RIFT,
+					// Read when called: Rift's service imports `swap.services`, which imports this registry.
+					getQuote: (params: EvmQuoteParams) => fetchRiftEvmSwapQuote(params),
+					isEnabled: RIFT_SWAP_ENABLED,
+					getSupportedDestinations: (params) => riftEvmSupportedDestinations(params)
 				} satisfies EvmSwapProviderConfig
 			]
 		: [])

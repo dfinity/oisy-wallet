@@ -7,6 +7,8 @@ import type { ActiveUserTransactionData } from '$declarations/backend/backend.di
 import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { RIFT_BTC_ASSET_ID, RIFT_INTEGRATOR_ID } from '$env/rest/rift.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { send as sendEvm } from '$eth/services/send.services';
+import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { RIFT_QUOTE_REFRESH_INTERVAL_MS } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -23,11 +25,14 @@ import type { RiftExternalRefKey, RiftOrder, RiftQuote, RiftQuoteRequest } from 
 import {
 	SwapProvider,
 	type BtcQuoteParams,
+	type EvmQuoteParams,
 	type GetSupportedDestinationsFn,
 	type SwapMappedResult,
-	type SwapRiftBtcParams
+	type SwapRiftBtcParams,
+	type SwapRiftEvmParams
 } from '$lib/types/swap';
 import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	toRiftCreationRefs,
@@ -113,8 +118,8 @@ export const riftBtcSupportedDestinations: GetSupportedDestinationsFn = ({ sourc
 	isRiftBtcSource(sourceToken) ? { evm: 'any' } : undefined;
 
 /**
- * A Rift offer for a swap from native BTC to a token on an EVM network Rift is asked about, or
- * `undefined` when there is none.
+ * A Rift offer between two assets Rift is asked about, one of them native BTC and the other on an
+ * EVM network, or `undefined` when there is none.
  *
  * Rift is re-quoted at most every `RIFT_QUOTE_REFRESH_INTERVAL_MS` for unchanged inputs, while any
  * change of inputs asks at once; every outcome is cached, no offer included. The rate itself is kept
@@ -123,16 +128,25 @@ export const riftBtcSupportedDestinations: GetSupportedDestinationsFn = ({ sourc
  *
  * The offer has no minimum: Rift swaps at whatever price it finds once the deposit arrives.
  */
-export const fetchRiftBtcSwapQuote = async ({
+const fetchRiftSwapQuote = async ({
 	sourceToken,
 	destinationToken,
 	amount,
 	onProviderParticipating
-}: BtcQuoteParams): Promise<SwapMappedResult | undefined> => {
+}: Pick<
+	BtcQuoteParams,
+	'sourceToken' | 'destinationToken' | 'amount' | 'onProviderParticipating'
+>): Promise<SwapMappedResult | undefined> => {
 	const from = toRiftAssetId(sourceToken);
 	const to = toRiftAssetId(destinationToken);
 
-	if (from !== RIFT_BTC_ASSET_ID || isNullish(to) || to === RIFT_BTC_ASSET_ID || amount <= ZERO) {
+	// Exactly one side is BTC: v1 asks Rift for no EVM ↔ EVM pair.
+	if (
+		isNullish(from) ||
+		isNullish(to) ||
+		(from === RIFT_BTC_ASSET_ID) === (to === RIFT_BTC_ASSET_ID) ||
+		amount <= ZERO
+	) {
 		return;
 	}
 
@@ -158,6 +172,33 @@ export const fetchRiftBtcSwapQuote = async ({
 		receiveAmount: BigInt(quote.estimated_amount_out),
 		swapDetails: quote
 	};
+};
+
+// A Rift offer for a swap from native BTC to a token on an EVM network Rift is asked about.
+export const fetchRiftBtcSwapQuote = (
+	params: BtcQuoteParams
+): Promise<SwapMappedResult | undefined> =>
+	isRiftBtcSource(params.sourceToken) ? fetchRiftSwapQuote(params) : Promise.resolve(undefined);
+
+// A Rift offer for a swap from a token on an EVM network Rift is asked about to native BTC.
+export const fetchRiftEvmSwapQuote = (
+	params: EvmQuoteParams
+): Promise<SwapMappedResult | undefined> =>
+	isRiftBtcSource(params.destinationToken)
+		? fetchRiftSwapQuote(params)
+		: Promise.resolve(undefined);
+
+/**
+ * The `getSupportedDestinations` of the EVM registry's Rift entry: native BTC, from a token Rift is
+ * asked about. A token on another network, or on a testnet, reaches nothing through Rift.
+ */
+export const riftEvmSupportedDestinations: GetSupportedDestinationsFn = ({ sourceToken }) => {
+	const assetId = toRiftAssetId(sourceToken);
+	const btc = resolveSwapTokenLookup({ token: BTC_MAINNET_TOKEN })?.identifier;
+
+	return nonNullish(assetId) && assetId !== RIFT_BTC_ASSET_ID && nonNullish(btc)
+		? { btc: new Set([btc]) }
+		: undefined;
 };
 
 /**
@@ -291,16 +332,16 @@ export const fetchRiftBtcSwap = async ({
 	offer: { swapDetails: quote },
 	utxosFee
 }: SwapRiftBtcParams): Promise<void> => {
-	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
-	const rowData = toRiftData({ sourceToken, destinationToken, amount });
-
-	// Only the backend's path signs before broadcasting, which the row needs. The amount sent is the
-	// one Rift quoted: it uses whatever arrives, at a rate of its own for any other amount.
-	if (!BTC_SEND_VIA_BACKEND_ENABLED || BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
-		throw new Error(get(i18n).swap.error.unexpected);
-	}
-
 	try {
+		const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+		const rowData = toRiftData({ sourceToken, destinationToken, amount });
+
+		// Only the backend's path signs before broadcasting, which the row needs. The amount sent is the
+		// one Rift quoted: it uses whatever arrives, at a rate of its own for any other amount.
+		if (!BTC_SEND_VIA_BACKEND_ENABLED || BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
+			throw new Error(get(i18n).swap.error.unexpected);
+		}
+
 		const order = await createRiftOrder({
 			quote,
 			toAddress: recipientAddress,
@@ -372,4 +413,120 @@ export const fetchRiftBtcSwap = async ({
 	// The destination token is enabled so it stays visible while the order settles; the balance
 	// refresh happens once the row terminalizes.
 	await enableSwapDestinationToken({ destinationToken, identity });
+};
+
+/**
+ * Executes a Rift swap from a token on an EVM network to native BTC: orders the reviewed quote,
+ * checks the order against the review, and pays its deposit address exactly the quoted amount, in one
+ * plain transfer of the native coin or one ERC-20 `transfer`, at the fee the user reviewed.
+ *
+ * The row is created once the deposit is signed and before it is broadcast, with the deposit's hash,
+ * nonce and chain, so that no deposit ever goes out untracked, and the order is read once more right
+ * then. A row whose deposit is not broadcast after that is deleted: nothing was sent. After a broadcast
+ * the node refused outright it is deleted too. Any other broadcast failure may have relayed the
+ * deposit, so the swap goes on as sent, and the poller settles it, as reverted or replaced if it never
+ * reaches Rift. Native BTC is always enabled, so there is no destination token to enable.
+ *
+ * Whatever the outcome, the reviewed quote is dropped: a quote is ordered once, and a new swap, even
+ * one with the same inputs, starts from a fresh quote, and so a new order.
+ */
+export const fetchRiftEvmSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	sourceNetwork,
+	userAddress,
+	recipientAddress,
+	offer: { swapDetails: quote },
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
+}: SwapRiftEvmParams): Promise<void> => {
+	try {
+		const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+		const rowData = toRiftData({ sourceToken, destinationToken, amount });
+
+		// The amount sent is the one Rift quoted: it uses whatever arrives, at a rate of its own for any
+		// other amount.
+		if (BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
+			throw new Error(get(i18n).swap.error.unexpected);
+		}
+
+		const order = await createRiftOrder({
+			quote,
+			toAddress: recipientAddress,
+			refundAddress: userAddress
+		});
+
+		// Snapshotted rather than derived at settlement, as for the other providers: the row's terminal
+		// analytics report the value the user swapped at.
+		const sourceTokenExchangeRate = get(exchanges)?.[sourceToken.id]?.usd;
+
+		progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+		let rowId: string | undefined;
+
+		try {
+			await sendEvm({
+				from: userAddress,
+				to: order.deposit_address,
+				amount,
+				token: sourceToken,
+				sourceNetwork,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas,
+				beforeBroadcast: async ({ hash, nonce }) => {
+					rowId = await createRiftRow({
+						identity,
+						data: rowData,
+						refs: toRiftCreationRefs({
+							order,
+							depositTx: hash,
+							evmDeposit: { nonce, chainId: sourceNetwork.chainId },
+							sourceToken,
+							destinationToken,
+							amount: `${swapAmount}`,
+							usdSourceValue: nonNullish(sourceTokenExchangeRate)
+								? `${Number(swapAmount) * sourceTokenExchangeRate}`
+								: undefined
+						})
+					});
+
+					try {
+						await assertRiftOrderAwaitsDeposit({ orderId: order.id });
+					} catch (err: unknown) {
+						await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+						rowId = undefined;
+
+						throw err;
+					}
+				}
+			});
+		} catch (err: unknown) {
+			// Nothing was broadcast before the row existed.
+			if (isNullish(rowId)) {
+				throw err;
+			}
+
+			// Only a deposit the node refused outright never started.
+			if (isDefinitiveTransactionRefusal(err)) {
+				await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+
+				throw err;
+			}
+
+			// Any other failure may have relayed the deposit. Signing again would read the next nonce and
+			// could pay twice, so the swap goes on as sent: its row settles it.
+			consoleError(err);
+		}
+	} finally {
+		resetRiftQuoteCache();
+	}
+
+	progress(ProgressStepsSwap.SWAP);
+	progress(ProgressStepsSwap.UPDATE_UI);
 };

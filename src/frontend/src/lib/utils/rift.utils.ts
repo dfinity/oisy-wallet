@@ -1,11 +1,14 @@
+import { BtcSendValidationError, BtcValidationError } from '$btc/types/btc-send';
 import { isBtcAddress } from '$btc/utils/btc-address.utils';
 import { isBitcoinToken } from '$btc/utils/token.utils';
 import { RIFT_BTC_ASSET_ID, RIFT_EVM_NATIVE_ASSETS } from '$env/rest/rift.env';
 import { isEthAddress } from '$eth/utils/account.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
+import { isInsufficientBalanceError } from '$eth/utils/eth-error.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import { RiftSwapRefusedError, type RiftSwapRefusal } from '$lib/types/errors';
 import type { RiftOrder, RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
 import type { Token } from '$lib/types/token';
@@ -204,4 +207,27 @@ export const riftSwapRefusedMessage = ({
 	};
 
 	return messages[err.reason];
+};
+
+/**
+ * The allow-listed category of a failed Rift swap, for analytics, whichever direction. Rift's answers
+ * can name the user's addresses, and its refusals wrap them; a node's or ethers' refusal of an EVM
+ * deposit can carry the signed transaction: none of it may reach analytics (invariant 4 in
+ * `docs/ai/frontend/analytics.md`). The message itself stays for the user and the console.
+ */
+export const toRiftSwapErrorType = (err: unknown): PLAUSIBLE_EVENT_SWAP_ERROR_TYPES => {
+	if (err instanceof RiftSwapRefusedError) {
+		return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED;
+	}
+
+	if (
+		isInsufficientBalanceError(err) ||
+		(err instanceof BtcValidationError &&
+			(err.type === BtcSendValidationError.InsufficientBalance ||
+				err.type === BtcSendValidationError.InsufficientBalanceForFee))
+	) {
+		return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.INSUFFICIENT_FUNDS;
+	}
+
+	return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN;
 };

@@ -42,6 +42,9 @@ export const RIFT_EXTERNAL_REF_KEYS = {
 	DEPOSIT_ADDRESS: 'rift_deposit_address',
 	// The BTC txid, or the EVM tx hash.
 	DEPOSIT_TX: 'rift_deposit_tx',
+	// An EVM deposit only: what tells a deposit still unmined from one that reverted or was replaced.
+	DEPOSIT_NONCE: 'rift_deposit_nonce',
+	DEPOSIT_CHAIN_ID: 'rift_deposit_chain_id',
 	// Saved at creation, since a disabled custom token's metadata may be gone by the time the order
 	// settles: what `rift_amount_out` is formatted with, the source's for a refund, the destination's
 	// for a delivery.

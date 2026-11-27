@@ -215,8 +215,8 @@ describe('swap.constants', () => {
 			expect(reaches({ from: SOLANA_MAINNET_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
 		});
 
-		// Rift is asked about BTC to its EVM networks only; the other direction joins with its own change.
-		it("opens Bitcoin to Rift's EVM networks, one way only, with the Rift flag", async () => {
+		// Rift is asked about BTC to and from its EVM networks, and nothing else.
+		it("opens Bitcoin to and from Rift's EVM networks with the Rift flag", async () => {
 			const {
 				reaches,
 				BTC_MAINNET_NETWORK_ID,
@@ -230,7 +230,26 @@ describe('swap.constants', () => {
 			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: BASE_NETWORK_ID })).toBeTruthy();
 			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ROBINHOOD_ID })).toBeTruthy();
 			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: SOLANA_MAINNET_NETWORK_ID })).toBeFalsy();
-			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
+			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: BASE_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: ROBINHOOD_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: SOLANA_MAINNET_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
+		});
+
+		it("lists Bitcoin once among an EVM network's destinations with both NEAR Intents and Rift on", async () => {
+			const { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } = await loadMatrix({
+				oneSec: false,
+				chainFusion: false,
+				nearIntentsBtc: true,
+				rift: true
+			});
+			const { SUPPORTED_CROSS_SWAP_NETWORKS } = await import('$lib/constants/swap.constants');
+
+			expect(
+				SUPPORTED_CROSS_SWAP_NETWORKS[ETHEREUM_NETWORK_ID].filter(
+					(id) => id === BTC_MAINNET_NETWORK_ID
+				)
+			).toHaveLength(1);
 		});
 
 		it("lists each of Bitcoin's destinations once with both NEAR Intents and Rift on", async () => {

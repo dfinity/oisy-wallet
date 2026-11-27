@@ -350,8 +350,11 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
 4. Track `TRACK_COUNT_SWAP_SUBMITTED`. The modal closes and the AUT poller takes over.
 
 A swap that stops before its deposit (`RiftSwapRefusedError`: an expired quote, a refused, unverified
-or in-flight order) says why, and the form comes back with a fresh quote. Its `TRACK_COUNT_SWAP_ERROR`
-event carries the `quote_rejected` category, never Rift's text, which can name the user's addresses.
+or in-flight order) says why, and the form comes back with a fresh quote. Every failed Rift swap, in
+either direction, reports an allow-listed category in its `TRACK_COUNT_SWAP_ERROR` event
+(`toRiftSwapErrorType`: `quote_rejected` for those refusals, `insufficient_funds`, else `unknown`),
+never the error's text: Rift's can name the user's addresses, and a node's refusal of an EVM deposit
+can carry the signed transaction.
 
 ### Execution: EVM → BTC
 
@@ -370,6 +373,8 @@ event carries the `quote_rejected` category, never Rift's text, which can name t
      ([one row per order](#active-user-transactions)). Then re-read the order and broadcast only if
      it still awaits its deposit ([re-check before broadcast](#active-user-transactions)).
    - On `isDefinitiveTransactionRefusal` (`eth/utils/eth-error.utils.ts`), delete the row.
+   - Any other broadcast failure may have relayed the deposit. As on LI.FI's EVM path, the swap goes
+     on as sent and the row settles it: signing again would read the next nonce and could pay twice.
 3. The BTC destination token is native BTC, which is always enabled; no token enabling is needed.
 4. Track `TRACK_COUNT_SWAP_SUBMITTED`. The modal closes.
 
@@ -508,10 +513,11 @@ Status mapping (decided 2026-11-25):
 | `frozen`                             | `Failed`, `swap.error.rift_order_frozen` (contact Rift support; the order id stays on the row) |
 | network error, 404, unparseable      | no change                                                                                      |
 
-- **An EVM deposit that never reaches Rift.** While the order is `awaiting_deposit`, an EVM row's
-  deposit is also read with `readEvmSourceTxOutcome` (from `rift_deposit_tx`, `rift_deposit_nonce`
-  and `rift_deposit_chain_id`), sharing the tick's `confirmedNonceByChainId`, as the NEAR Intents
-  poller does. A mined deposit that reverted consumed its nonce but sent Rift nothing, and a
+- **An EVM deposit that never reaches Rift.** While the order is `awaiting_deposit`, or once Rift
+  calls it `expired`, an EVM row's deposit is also read with `readEvmSourceTxOutcome` (from
+  `rift_deposit_tx`, `rift_deposit_nonce` and `rift_deposit_chain_id`), as the NEAR Intents poller
+  does, with a `confirmedNonceByChainId` of the Rift round's own, since the round runs beside the
+  tick. A read that fails leaves the row to Rift's status. A mined deposit that reverted consumed its nonce but sent Rift nothing, and a
   replaced one never will. Mapped as `nearIntentsDepositOutcomeToUpdate` maps them:
   - `reverted` → `Failed`, `swap.error.failed_unexpectedly`;
   - `replaced` → `Failed`, `swap.error.swap_replaced_or_dropped`;
