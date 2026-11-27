@@ -313,6 +313,26 @@ describe('icrc.utils', () => {
 			expect(token?.icon).toBe(logo);
 		});
 
+		it.each([
+			`/icons/icrc/${mockValidIcToken.ledgerCanisterId}.png/../ryjl3-tyaaa-aaaaa-aaaba-cai.png`,
+			`/icons/icrc/${mockValidIcToken.ledgerCanisterId}.png/%2e%2e/ryjl3-tyaaa-aaaaa-aaaba-cai.png`,
+			`/icons/icrc/${mockValidIcToken.ledgerCanisterId}.png\\..\\ryjl3-tyaaa-aaaaa-aaaba-cai.png`
+		])(
+			'should use the static icon for a metadata logo that steps out of OISY own icon file for this ledger: %s',
+			(logo) => {
+				const token = mapIcrcToken({
+					...mockParams,
+					metadata: [
+						...mockMetadata.slice(0, mockMetadata.length - 1),
+						[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+					],
+					icrcCustomTokens: {}
+				});
+
+				expect(token?.icon).toBe(`/icons/icrc/${mockToken.ledgerCanisterId}.png`);
+			}
+		);
+
 		it('should prioritize the icon from icrcCustomTokens instead of the icon from metadata', () => {
 			const metadataIcon = 'https://metadata-icon.png';
 

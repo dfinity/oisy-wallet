@@ -122,7 +122,11 @@ const isOwnIconFile = ({
 }: {
 	logo: string;
 	ledgerCanisterId: LedgerCanisterIdText;
-}): boolean => OWN_ICON_FOLDERS.some((folder) => logo.startsWith(`${folder}${ledgerCanisterId}.`));
+}): boolean =>
+	OWN_ICON_FOLDERS.some((folder) => {
+		const prefix = `${folder}${ledgerCanisterId}.`;
+		return logo.startsWith(prefix) && /^[a-z0-9]+$/i.test(logo.slice(prefix.length));
+	});
 
 const mapIcon = ({
 	listedIcon,
