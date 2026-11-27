@@ -21,6 +21,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
+import { mockIndexCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
@@ -834,6 +835,44 @@ describe('TipClaimModal', () => {
 
 			// An update, not an insert.
 			expect(token).toMatchObject({ version: [3n] });
+		});
+
+		it('carries the version and index canister of a saved row whose details did not load', async () => {
+			// Missing from the loaded store, yet saved: only the rows the backend returned still hold
+			// the version, without which the save collides with the row the canister already has.
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+
+			const saved = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			backendCustomTokens.set([
+				{
+					...mockCustomTokens[0],
+					token: {
+						Icrc: { ledger_id: saved, index_id: [Principal.fromText(mockIndexCanisterId)] }
+					},
+					enabled: false,
+					version: [4n]
+				}
+			]);
+
+			mockDetailsFor(saved);
+			mockClaimFor(saved);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalledOnce());
+
+			const [[{ token }]] = vi.mocked(setCustomTokenApi).mock.calls;
+
+			// An update of the saved row, which keeps its index canister.
+			expect(token).toMatchObject({ enabled: true, version: [4n] });
+			expect(
+				(token.token as { Icrc: { index_id: [] | [Principal] } }).Icrc.index_id[0]?.toText()
+			).toBe(mockIndexCanisterId);
 		});
 
 		it('does not start a second handover on a double tap', async () => {

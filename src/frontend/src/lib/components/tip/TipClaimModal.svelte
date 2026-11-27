@@ -129,6 +129,26 @@
 	let handingOff = $state(false);
 
 	/**
+	 * The ledger's row in the list the backend returned, with the version and index canister a save
+	 * of it has to carry. A saved token whose details did not load is missing from the loaded
+	 * stores, but not from these rows.
+	 */
+	const findSavedRow = (
+		ledgerCanisterId: string
+	): { version: bigint | undefined; indexCanisterId: string | undefined } | undefined => {
+		for (const { token, version } of $backendCustomTokens) {
+			if ('Icrc' in token && token.Icrc.ledger_id.toText() === ledgerCanisterId) {
+				return {
+					version: fromNullable(version),
+					indexCanisterId: fromNullable(token.Icrc.index_id)?.toText()
+				};
+			}
+		}
+
+		return undefined;
+	};
+
+	/**
 	 * Whether the claim brings a token the claimer's wallet does not know: neither one OISY lists
 	 * nor one already in their list, on or off. Read only once their list has loaded, so a token
 	 * they have is never called new.
@@ -151,9 +171,7 @@
 			![...$allIcrcTokens, ...($icrcCustomTokensStore ?? []).map(({ data }) => data)].some(
 				(token) => token.ledgerCanisterId === ledgerCanisterId
 			) &&
-			!$backendCustomTokens.some(
-				({ token }) => 'Icrc' in token && token.Icrc.ledger_id.toText() === ledgerCanisterId
-			)
+			isNullish(findSavedRow(ledgerCanisterId))
 		);
 	});
 
@@ -218,13 +236,15 @@
 		// mismatch rather than refusing politely (`token/service.rs`). `icrcTokens`
 		// hides testnet tokens whenever testnets are off, so a row the claimer
 		// really has can be missing from the lookup above — and a versionless save
-		// for it would take down the call. Asked of the unfiltered store, which is
-		// the closest thing on this side to what the canister holds, and its
-		// version is carried through so the upsert is an update rather than a
-		// collision.
-		const registered = ($icrcCustomTokensStore ?? [])
-			.map(({ data }) => data)
-			.find((token) => token.ledgerCanisterId === ledgerCanisterId);
+		// for it would take down the call. Asked of the unfiltered store, and then
+		// of the rows the backend returned, which still hold a saved token whose
+		// details did not load; its version is carried through so the upsert is
+		// an update rather than a collision.
+		const registered =
+			($icrcCustomTokensStore ?? [])
+				.map(({ data }) => data)
+				.find((token) => token.ledgerCanisterId === ledgerCanisterId) ??
+			findSavedRow(ledgerCanisterId);
 
 		// Not in their list at all, which is the case that used to end in silence:
 		// `icrcTokens` is the defaults plus the claimer's *own* imports, so a token
