@@ -565,6 +565,12 @@ reaches production before PR 8.
      credited (open question 2), the payout reaches the user's address, and the poller settles the
      row.
 
+   Decided in PR 8: `LIFI_BTC_SWAP_ENABLED` becomes `LOCAL || STAGING || BETA || PROD`, as
+   `BTC_SEND_VIA_BACKEND_ENABLED` and `ONRAMPER_ENABLED` are, rather than `true`, so turning it off
+   again is a one-line rollback per environment. It is opened as a draft and merged once the three
+   conditions above hold. Until the first one does, it changes nothing in beta or production, where
+   `BTC_SEND_VIA_BACKEND_ENABLED` is still off.
+
 ---
 
 ## Acceptance criteria
