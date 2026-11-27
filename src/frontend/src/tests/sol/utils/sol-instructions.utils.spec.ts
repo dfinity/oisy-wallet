@@ -36,6 +36,7 @@ import {
 	asSolParsedRpcInstruction,
 	mapSolInstruction,
 	mapSolParsedInstruction,
+	solTokenProgramOpeningsInitialised,
 	solUnbatchedInstructions
 } from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -100,6 +101,12 @@ import {
 	getCloseAccountInstruction,
 	getCreateAssociatedTokenIdempotentInstruction,
 	getCreateAssociatedTokenInstruction,
+	getInitializeAccount2Instruction,
+	getInitializeAccount3Instruction,
+	getInitializeAccountInstruction,
+	getInitializeMint2Instruction,
+	getInitializeMintInstruction,
+	getInitializeMultisig2Instruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction,
 	getUnwrapLamportsInstruction,
@@ -112,6 +119,8 @@ import {
 	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getCloseAccountInstruction as getToken2022CloseAccountInstruction,
+	getInitializeAccount3Instruction as getToken2022InitializeAccount3Instruction,
+	getInitializeImmutableOwnerInstruction as getToken2022InitializeImmutableOwnerInstruction,
 	getPermissionedBurnInstruction as getToken2022PermissionedBurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
@@ -1037,9 +1046,14 @@ describe('sol-instructions.utils', () => {
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 			});
-			// The recorded message opens a token account with the reserve the chain charged at the time.
+			// The recorded message opens a token account with the reserve the chain charged at the time,
+			// and initialises it right after.
 			expect(
-				mapSolInstruction({ instruction: mockInstruction2, rentExemptMinimum: 2_039_280n })
+				mapSolInstruction({
+					instruction: mockInstruction2,
+					rentExemptMinimum: 2_039_280n,
+					initialised: true
+				})
 			).toStrictEqual({
 				amount: 2039280n,
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
@@ -1084,13 +1098,40 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+			expect(
+				mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n, initialised: true })
+			).toStrictEqual({
 				amount: 1_488_440n,
 				payer: mockSolAddress
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
+
+		it.each([
+			{ program: 'Token', programAddress: TOKEN_PROGRAM_ADDRESS },
+			{ program: 'Token-2022', programAddress: TOKEN_2022_PROGRAM_ADDRESS }
+		])(
+			'should fail closed on a `CreateAccount` instruction for the $program program the message does not initialise',
+			({ programAddress }) => {
+				// Nobody holds such an account yet, and initialising one needs nobody's signature, so
+				// whoever later names themselves its holder can close it and take its lamports.
+				const instruction = getCreateAccountInstruction({
+					payer: createNoopSigner(address(mockSolAddress)),
+					newAccount: createNoopSigner(address(mockSolAddress2)),
+					lamports: 1_488_440n,
+					space: 165n,
+					programAddress: address(programAddress)
+				});
+
+				expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			}
+		);
 
 		it('should fail closed on a `CreateAccountWithSeed` instruction that opens a System-owned account', () => {
 			// No key signs for a derived address, but System `transferSolWithSeed` spends such an account
@@ -1129,9 +1170,33 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+			expect(
+				mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n, initialised: true })
+			).toStrictEqual({
 				amount: 1_488_440n,
 				payer: mockSolAddress
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountWithSeed` instruction opening a Token-2022 account the message does not initialise', () => {
+			// The size is the request's own choice and the rent is measured by it: 10 MiB at its exact
+			// rent is 53_268_311_040 lamports while a token account costs 1_488_440.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 53_268_311_040n,
+				space: 10_485_760n,
+				programAddress: address(TOKEN_2022_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
@@ -2814,6 +2879,153 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`
 			);
+		});
+	});
+
+	describe('solTokenProgramOpeningsInitialised', () => {
+		const account = mockSolAddress2;
+
+		const opening = ({ programAddress = TOKEN_PROGRAM_ADDRESS } = {}) =>
+			getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(account)),
+				lamports: 1_488_440n,
+				space: 165n,
+				programAddress: address(programAddress)
+			});
+
+		const initialisation = ({ of = account } = {}) =>
+			getInitializeAccount3Instruction({
+				account: address(of),
+				mint: address(JUP_TOKEN.address),
+				owner: address(mockSolAddress)
+			});
+
+		const initialised = (instructions: unknown[]) =>
+			solTokenProgramOpeningsInitialised({ instructions });
+
+		it('should find the opening the recorded message initialises', () => {
+			// A swap routed through Whirlpool opens its wrapped SOL account, then initialises it.
+			expect(initialised([...mockSolParsedTransactionMessage.instructions])).toStrictEqual(
+				new Set([3])
+			);
+		});
+
+		it.each([
+			{ as: 'a token account', initialise: () => initialisation() },
+			{
+				as: 'a token account in the original form',
+				initialise: () =>
+					getInitializeAccountInstruction({
+						account: address(account),
+						mint: address(JUP_TOKEN.address),
+						owner: address(mockSolAddress)
+					})
+			},
+			{
+				as: 'a token account in the second form',
+				initialise: () =>
+					getInitializeAccount2Instruction({
+						account: address(account),
+						mint: address(JUP_TOKEN.address),
+						owner: address(mockSolAddress)
+					})
+			},
+			{
+				as: 'a mint',
+				initialise: () =>
+					getInitializeMint2Instruction({
+						mint: address(account),
+						decimals: 6,
+						mintAuthority: address(mockSolAddress)
+					})
+			},
+			{
+				as: 'a mint in the original form',
+				initialise: () =>
+					getInitializeMintInstruction({
+						mint: address(account),
+						decimals: 6,
+						mintAuthority: address(mockSolAddress)
+					})
+			},
+			{
+				as: 'a multisig',
+				initialise: () =>
+					getInitializeMultisig2Instruction({
+						multisig: address(account),
+						m: 1,
+						signers: [address(mockSolAddress)]
+					})
+			}
+		])('should find an opening the message initialises as $as', ({ initialise }) => {
+			expect(initialised([opening(), initialise()])).toStrictEqual(new Set([0]));
+		});
+
+		it('should find a Token-2022 opening the Token-2022 program initialises', () => {
+			expect(
+				initialised([
+					opening({ programAddress: TOKEN_2022_PROGRAM_ADDRESS }),
+					getToken2022InitializeAccount3Instruction({
+						account: address(account),
+						mint: address(JUP_TOKEN.address),
+						owner: address(mockSolAddress)
+					})
+				])
+			).toStrictEqual(new Set([0]));
+		});
+
+		it('should not find an opening the message leaves uninitialised', () => {
+			expect(initialised([opening()]).size).toBe(0);
+		});
+
+		it('should not find an opening the other token program initialises', () => {
+			// Only the program an account is opened for can initialise it.
+			expect(
+				initialised([opening({ programAddress: TOKEN_2022_PROGRAM_ADDRESS }), initialisation()])
+					.size
+			).toBe(0);
+		});
+
+		it('should not find an opening initialised before it', () => {
+			expect(initialised([initialisation(), opening()]).size).toBe(0);
+		});
+
+		it('should not count an initialisation of another account', () => {
+			expect(initialised([opening(), initialisation({ of: mockSolAddress3 })]).size).toBe(0);
+		});
+
+		it('should not count a Token-2022 extension set up on its own', () => {
+			// Setting up an extension leaves the account itself uninitialised.
+			expect(
+				initialised([
+					opening({ programAddress: TOKEN_2022_PROGRAM_ADDRESS }),
+					getToken2022InitializeImmutableOwnerInstruction({ account: address(account) })
+				]).size
+			).toBe(0);
+		});
+
+		it('should not count an opening for another program', () => {
+			expect(
+				initialised([opening({ programAddress: mockSolAddress3 }), initialisation()]).size
+			).toBe(0);
+		});
+
+		// An address closed and opened again is a second account, which the first initialisation does
+		// not set up.
+		it('should find only the opening an initialisation follows at a reopened address', () => {
+			expect(
+				initialised([
+					opening(),
+					initialisation(),
+					getCloseAccountInstruction({
+						account: address(account),
+						destination: address(mockSolAddress),
+						owner: createNoopSigner(address(mockSolAddress))
+					}),
+					opening()
+				])
+			).toStrictEqual(new Set([0]));
 		});
 	});
 

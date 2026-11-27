@@ -486,10 +486,29 @@ const fundsBeyondRent = ({
 }): boolean =>
 	isNullish(rentExemptMinimum) || lamports > rentExemptMinimumFor({ space, rentExemptMinimum });
 
+/**
+ * Whether a creation opens an account for a token program that the message leaves uninitialised.
+ *
+ * Such an account has no holder yet, and the token programs let anyone give it one: initialising a
+ * token account names its holder and needs nobody's signature, and that holder can close it at once
+ * and take every lamport in it. Its rent bounds nothing either, since the size it is measured by is
+ * the one the request states. A creation for a token program reads as rent only when the message
+ * itself initialises what it opens, through the program it opens it for.
+ */
+const leftUninitialised = ({
+	owner,
+	initialised
+}: {
+	owner: SolAddress;
+	initialised: boolean;
+}): boolean =>
+	(owner === TOKEN_PROGRAM_ADDRESS || owner === TOKEN_2022_PROGRAM_ADDRESS) && !initialised;
+
 const mapSolSystemInstruction = ({
 	instruction,
 	rentExemptMinimum,
 	returnsToWallet,
+	initialised,
 	userAddress
 }: {
 	instruction: SolParsedInstruction;
@@ -497,6 +516,9 @@ const mapSolSystemInstruction = ({
 	// Whether this creation opens a wrapped SOL account the message closes back to the wallet, whose
 	// funding beyond the rent is the SOL it wraps rather than a payment.
 	returnsToWallet: boolean;
+	// Whether the message initialises the account this creation opens, which a creation for a token
+	// program needs to read as rent.
+	initialised: boolean;
 	userAddress?: OptionSolAddress;
 }): MappedSolTransaction => {
 	const { instructionType } = instruction;
@@ -532,10 +554,14 @@ const mapSolSystemInstruction = ({
 		// trade leaves of it comes back with the close. Only with the reserve known, as for any
 		// creation for a program: without it the review states neither the account's rent nor the SOL
 		// it wraps.
+		//
+		// And an account for a token program is rent only once the message initialises it: left
+		// uninitialised, anybody can make it theirs and close it (see `leftUninitialised`).
 		if (
 			owner === SYSTEM_PROGRAM_ADDRESS ||
 			isNullish(rentExemptMinimum) ||
-			(!returnsToWallet && fundsBeyondRent({ lamports, space, rentExemptMinimum }))
+			(!returnsToWallet && fundsBeyondRent({ lamports, space, rentExemptMinimum })) ||
+			leftUninitialised({ owner, initialised })
 		) {
 			return unfaithfulInstruction();
 		}
@@ -552,7 +578,8 @@ const mapSolSystemInstruction = ({
 	// account opened this way is therefore the same native wallet, spendable by whoever holds that
 	// base, and the review can no more name it than it can name a plain creation's. Owned by a
 	// program instead, it states its rent like the plain form and is bounded by it the same way,
-	// since the seed pays out no differently once the account exists.
+	// since the seed pays out no differently once the account exists. An account for a token program
+	// has to be initialised by the message here too.
 	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
 		const {
 			data: { amount, space, programAddress: owner },
@@ -564,7 +591,8 @@ const mapSolSystemInstruction = ({
 		if (
 			owner === SYSTEM_PROGRAM_ADDRESS ||
 			isNullish(rentExemptMinimum) ||
-			(!returnsToWallet && fundsBeyondRent({ lamports: amount, space, rentExemptMinimum }))
+			(!returnsToWallet && fundsBeyondRent({ lamports: amount, space, rentExemptMinimum })) ||
+			leftUninitialised({ owner, initialised })
 		) {
 			return unfaithfulInstruction();
 		}
@@ -1458,6 +1486,18 @@ export const solUnbatchedInstructions = (instruction: SolInstruction): SolInstru
 
 const INITIALIZE_ACCOUNT_TYPES = ['initializeAccount', 'initializeAccount2', 'initializeAccount3'];
 
+// The account each initialisation of the token programs sets up, by the name the RPC gives it: a
+// token account, a mint or a multisig.
+const INITIALIZED_ACCOUNT_KEYS = new Map<string, string>([
+	['initializeAccount', 'account'],
+	['initializeAccount2', 'account'],
+	['initializeAccount3', 'account'],
+	['initializeMint', 'mint'],
+	['initializeMint2', 'mint'],
+	['initializeMultisig', 'multisig'],
+	['initializeMultisig2', 'multisig']
+]);
+
 /**
  * The positions of the creations that open a wrapped SOL account the message hands back to the
  * wallet: opened for the Token program at a token account's size, initialised for wrapped SOL held
@@ -1554,11 +1594,78 @@ export const solWrappedSolOpeningsReturnedToWallet = ({
 	return returned;
 };
 
+/**
+ * The positions of the creations that open an account for the Token or Token-2022 program which the
+ * message then initialises itself - as a token account, a mint or a multisig - through the program
+ * it opened the account for. See `leftUninitialised` for why the others are refused.
+ *
+ * By position rather than by address, as for the wrapped SOL openings: an address closed and opened
+ * again is a second account, and only the opening an initialisation follows is vouched for.
+ */
+export const solTokenProgramOpeningsInitialised = ({
+	instructions
+}: {
+	instructions: readonly unknown[];
+}): Set<number> => {
+	const initialised = new Set<number>();
+
+	// The accounts opened for a token program so far and not initialised yet, each with the position
+	// of its opening and the program it was opened for.
+	const open = new Map<SolAddress, { opening: number; owner: SolAddress }>();
+
+	instructions.forEach((instruction, position) => {
+		const parsed = asSolParsedRpcInstruction(instruction);
+
+		if (isNullish(parsed)) {
+			return;
+		}
+
+		const {
+			program,
+			programId,
+			parsed: { type, info }
+		} = parsed;
+
+		const read = (key: string): unknown => fieldOf({ info, key });
+
+		if (program === 'system' && ['createAccount', 'createAccountWithSeed'].includes(type)) {
+			const account = read('newAccount');
+			const owner = read('programAddress');
+
+			if (typeof account !== 'string') {
+				return;
+			}
+
+			open.delete(account);
+
+			if (owner === TOKEN_PROGRAM_ADDRESS || owner === TOKEN_2022_PROGRAM_ADDRESS) {
+				open.set(account, { opening: position, owner });
+			}
+
+			return;
+		}
+
+		const key = INITIALIZED_ACCOUNT_KEYS.get(type);
+		const account = nonNullish(key) ? read(key) : undefined;
+		const opened = typeof account === 'string' ? open.get(account) : undefined;
+
+		if (typeof account !== 'string' || isNullish(opened) || opened.owner !== programId) {
+			return;
+		}
+
+		initialised.add(opened.opening);
+		open.delete(account);
+	});
+
+	return initialised;
+};
+
 export const mapSolInstruction = ({
 	instruction,
 	userAddress,
 	rentExemptMinimum,
-	returnsToWallet = false
+	returnsToWallet = false,
+	initialised = false
 }: {
 	instruction: SolInstruction;
 	userAddress?: OptionSolAddress;
@@ -1569,6 +1676,9 @@ export const mapSolInstruction = ({
 	// Whether this instruction opens a wrapped SOL account the message closes back to the wallet,
 	// which only the whole message can say. See `solWrappedSolOpeningsReturnedToWallet`.
 	returnsToWallet?: boolean;
+	// Whether the message initialises the account this instruction opens for a token program, which
+	// only the whole message can say either. See `solTokenProgramOpeningsInitialised`.
+	initialised?: boolean;
 }): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation
 	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
@@ -1637,6 +1747,7 @@ export const mapSolInstruction = ({
 			instruction: parsedInstruction,
 			rentExemptMinimum,
 			returnsToWallet,
+			initialised,
 			userAddress
 		});
 	}
