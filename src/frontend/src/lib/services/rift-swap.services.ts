@@ -332,16 +332,16 @@ export const fetchRiftBtcSwap = async ({
 	offer: { swapDetails: quote },
 	utxosFee
 }: SwapRiftBtcParams): Promise<void> => {
-	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
-	const rowData = toRiftData({ sourceToken, destinationToken, amount });
-
-	// Only the backend's path signs before broadcasting, which the row needs. The amount sent is the
-	// one Rift quoted: it uses whatever arrives, at a rate of its own for any other amount.
-	if (!BTC_SEND_VIA_BACKEND_ENABLED || BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
-		throw new Error(get(i18n).swap.error.unexpected);
-	}
-
 	try {
+		const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+		const rowData = toRiftData({ sourceToken, destinationToken, amount });
+
+		// Only the backend's path signs before broadcasting, which the row needs. The amount sent is the
+		// one Rift quoted: it uses whatever arrives, at a rate of its own for any other amount.
+		if (!BTC_SEND_VIA_BACKEND_ENABLED || BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
+			throw new Error(get(i18n).swap.error.unexpected);
+		}
+
 		const order = await createRiftOrder({
 			quote,
 			toAddress: recipientAddress,
@@ -444,16 +444,16 @@ export const fetchRiftEvmSwap = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas
 }: SwapRiftEvmParams): Promise<void> => {
-	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
-	const rowData = toRiftData({ sourceToken, destinationToken, amount });
-
-	// The amount sent is the one Rift quoted: it uses whatever arrives, at a rate of its own for any
-	// other amount.
-	if (BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
-		throw new Error(get(i18n).swap.error.unexpected);
-	}
-
 	try {
+		const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+		const rowData = toRiftData({ sourceToken, destinationToken, amount });
+
+		// The amount sent is the one Rift quoted: it uses whatever arrives, at a rate of its own for any
+		// other amount.
+		if (BigInt(quote.amount_in) !== amount || isNullish(rowData)) {
+			throw new Error(get(i18n).swap.error.unexpected);
+		}
+
 		const order = await createRiftOrder({
 			quote,
 			toAddress: recipientAddress,

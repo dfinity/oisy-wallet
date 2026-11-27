@@ -822,10 +822,26 @@ describe('rift-swap.services', () => {
 				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
-			it('refuses an amount other than the quoted one, without ordering', async () => {
+			it('refuses an amount other than the quoted one, without ordering, and drops the quote', async () => {
+				vi.mocked(postRiftQuote).mockResolvedValue(evmQuote);
+				const quoteParams: EvmQuoteParams = {
+					sourceToken: usdc,
+					destinationToken: BTC_MAINNET_TOKEN as Erc20Token,
+					amount: 100_000_000n,
+					userAddress: userEvmAddress,
+					recipientAddress: userBtcAddress,
+					slippage: 0.5
+				};
+
+				await fetchRiftEvmSwapQuote(quoteParams);
+
 				await expect(fetchRiftEvmSwap(params({ swapAmount: 99 }))).rejects.toThrow();
 
 				expect(postRiftOrder).not.toHaveBeenCalled();
+
+				await fetchRiftEvmSwapQuote(quoteParams);
+
+				expect(postRiftQuote).toHaveBeenCalledTimes(2);
 			});
 		});
 	});
