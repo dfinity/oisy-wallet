@@ -1,6 +1,6 @@
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
-import { setManyCustomTokens } from '$lib/api/backend.api';
+import { setCustomToken } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -44,14 +44,14 @@ const loadCustomTokensByNetworkKey: Partial<
 };
 
 /**
- * Saves the tokens as enabled to the user's token list, so a suggested token stays enabled for
- * the user once it is no longer suggested. Only after a successful save, and only for the
- * standards of the saved tokens, are the custom tokens reloaded, so they carry the version the
- * backend gave the new entries.
+ * Saves each token as enabled to the user's token list, so a suggested token stays enabled for
+ * the user once it is no longer suggested. Every token is saved in a call of its own, and only the
+ * standards of the tokens that were saved have their custom tokens reloaded, so they carry the
+ * version the backend gave the new entries.
  *
- * The save carries no version, so the backend refuses it for a token that has gained an entry in
- * the meantime: the user's own choice always wins. A failed save is not reported: the next
- * session tries again.
+ * A save carries no version, so the backend refuses it for a token that already has an entry: the
+ * user's own choice always wins, and with a call per token, a refused token does not hold back the
+ * others. A failed save is not reported: the next session tries again.
  */
 export const saveSuggestedTokens = async ({
 	identity,
@@ -65,14 +65,18 @@ export const saveSuggestedTokens = async ({
 			tokens.map((token) => ({ ...token, enabled: true }))
 		);
 
-		if (tokensToSave.length === 0) {
-			return;
-		}
+		const results = await Promise.allSettled(
+			tokensToSave.map(async (token) => {
+				await setCustomToken({ identity, token: toCustomToken(token) });
 
-		await setManyCustomTokens({ identity, tokens: tokensToSave.map(toCustomToken) });
+				return token;
+			})
+		);
 
 		const loaders = new Set(
-			tokensToSave.map(({ networkKey }) => loadCustomTokensByNetworkKey[networkKey])
+			results
+				.filter((result) => result.status === 'fulfilled')
+				.map(({ value: { networkKey } }) => loadCustomTokensByNetworkKey[networkKey])
 		);
 
 		await Promise.all([...loaders].filter(nonNullish).map((load) => load({ identity })));

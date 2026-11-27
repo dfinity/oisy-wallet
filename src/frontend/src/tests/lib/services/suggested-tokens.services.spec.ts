@@ -3,7 +3,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as USDC_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
-import { setManyCustomTokens } from '$lib/api/backend.api';
+import { setCustomToken } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	findSuggestedTokensWithBalance,
@@ -17,7 +17,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 
 vi.mock('$lib/api/backend.api', () => ({
-	setManyCustomTokens: vi.fn().mockResolvedValue(undefined)
+	setCustomToken: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock(import('$eth/services/erc20.services'), async (importOriginal) => ({
@@ -92,27 +92,31 @@ describe('suggested-tokens.services', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should save the tokens as enabled', async () => {
+		it('should save each token as enabled in a call of its own', async () => {
 			await saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc, usdcSol] });
 
-			expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
+			expect(setCustomToken).toHaveBeenCalledTimes(2);
+
+			expect(setCustomToken).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
-				tokens: [
-					expect.objectContaining({
-						enabled: true,
-						version: toNullable(),
-						token: {
-							Erc20: { token_address: USDC_TOKEN.address, chain_id: USDC_TOKEN.network.chainId }
-						}
-					}),
-					expect.objectContaining({
-						enabled: true,
-						version: toNullable(),
-						token: {
-							SplMainnet: expect.objectContaining({ token_address: USDC_SOL_TOKEN.address })
-						}
-					})
-				]
+				token: expect.objectContaining({
+					enabled: true,
+					version: toNullable(),
+					token: {
+						Erc20: { token_address: USDC_TOKEN.address, chain_id: USDC_TOKEN.network.chainId }
+					}
+				})
+			});
+
+			expect(setCustomToken).toHaveBeenNthCalledWith(2, {
+				identity: mockIdentity,
+				token: expect.objectContaining({
+					enabled: true,
+					version: toNullable(),
+					token: {
+						SplMainnet: expect.objectContaining({ token_address: USDC_SOL_TOKEN.address })
+					}
+				})
 			});
 		});
 
@@ -124,15 +128,26 @@ describe('suggested-tokens.services', () => {
 			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
 		});
 
+		it('should save and reload the other tokens when the backend refuses one', async () => {
+			vi.mocked(setCustomToken).mockRejectedValueOnce(new Error('Version mismatch'));
+
+			await saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc, usdcSol] });
+
+			expect(setCustomToken).toHaveBeenCalledTimes(2);
+
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+		});
+
 		it('should not save without tokens', async () => {
 			await saveSuggestedTokens({ identity: mockIdentity, tokens: [] });
 
-			expect(setManyCustomTokens).not.toHaveBeenCalled();
+			expect(setCustomToken).not.toHaveBeenCalled();
 			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
 		});
 
 		it('should neither throw nor reload when the save fails', async () => {
-			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(new Error('Version mismatch'));
+			vi.mocked(setCustomToken).mockRejectedValueOnce(new Error('Version mismatch'));
 
 			await expect(
 				saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc] })

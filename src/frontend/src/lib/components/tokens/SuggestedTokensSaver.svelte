@@ -28,8 +28,9 @@
 	const sentTokenIds = new SvelteSet<TokenId>();
 
 	// A token's entry is known only once the custom tokens of its standard have loaded: before that,
-	// a saved token shows without its version, and the backend refuses the whole save. Each standard
-	// counts on its own, since the ERC-20 and SPL lists load only while one of their networks is on.
+	// a saved token shows without its version, and the backend would refuse a save of it. Each
+	// standard counts on its own, since the ERC-20 and SPL lists load only while one of their
+	// networks is on.
 	const isCustomTokensLoaded = (token: Token): boolean =>
 		(isTokenIc(token) && $icrcCustomTokensInitialized) ||
 		(isTokenErc20(token) && $erc20CustomTokensInitialized) ||
