@@ -19,6 +19,7 @@ ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-bitcoin-canister = { workspace = true }
 ic-cdk-management-canister = { workspace = true }
+ic-cdk-management-canister-outcalls = { workspace = true }
 ic-cdk-timers = { workspace = true }
 ic-cycles-ledger-client = { workspace = true }
 ic-ed25519 = { workspace = true }

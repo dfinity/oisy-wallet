@@ -1,7 +1,9 @@
 use std::time::Duration;
 
 use candid::Principal;
-use pocket_ic::common::rest::{CanisterHttpReply, CanisterHttpResponse, MockCanisterHttpResponse};
+use pocket_ic::common::rest::{
+    CanisterHttpPricingVersion, CanisterHttpReply, CanisterHttpResponse, MockCanisterHttpResponse,
+};
 use pretty_assertions::assert_eq;
 use shared::types::{
     api_keys::ApiKeys,
@@ -128,6 +130,37 @@ fn exchange_rates_skip_provider_prices_that_fail_validation() {
     assert!(rates
         .iter()
         .any(|(token_id, rate)| *token_id == TokenId::EvmNative(1) && rate.is_some()));
+}
+
+#[test]
+fn exchange_rate_outcalls_are_priced_pay_as_you_go() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    enable_exchange_rate_refresh(&pic_setup);
+
+    // The cache is empty, so this call starts a refresh of the native tokens in the background.
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(caller, "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer on an empty cache");
+
+    let mut requests = Vec::new();
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+        requests = pic_setup.pic.get_canister_http();
+        if !requests.is_empty() {
+            break;
+        }
+    }
+
+    assert!(!requests.is_empty(), "The refresh should start an outcall");
+    for request in requests {
+        assert_eq!(
+            request.pricing_version,
+            CanisterHttpPricingVersion::PayAsYouGo,
+            "{} should be priced pay-as-you-go",
+            request.url
+        );
+    }
 }
 
 #[test]
