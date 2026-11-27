@@ -77,12 +77,23 @@
 		}))
 	);
 	const firstHop = $derived(hops[0]);
-	const fitsInOneTrack = $derived(
+	const chainsInOneTrack = $derived(
 		steps.length <= 4 &&
 			steps.every(({ from }, index) => {
 				const previous = steps[index - 1];
 				return isNullish(previous) || isSameRiftAssetId({ a: from, b: previous.to });
 			})
+	);
+
+	// Token symbols never shrink, so a track wider than the card would clip them: the route then
+	// shows one hop per row. The track is as wide as its content up to the card, and never narrower
+	// than its narrowest layout, so being wider than the card means it doesn't fit. The last width is
+	// kept while stacked: it depends on the route, not on the card, so a wider card can bring the
+	// track back. A width of 0 means not measured yet.
+	let availableWidth = $state(0);
+	let oneTrackWidth = $state(0);
+	const fitsInOneTrack = $derived(
+		chainsInOneTrack && (availableWidth === 0 || oneTrackWidth <= availableWidth)
 	);
 
 	const hopCount = $derived(
@@ -108,8 +119,18 @@
 	>
 		<IconArrowRight />
 	</span>
-	<span style:grid-column={column} class="route-venue row-start-2 text-center text-xs">{venue}</span
+	<span
+		style:grid-column={column}
+		class="route-venue row-start-2 text-center text-xs text-secondary">{venue}</span
 	>
+{/snippet}
+
+{#snippet oneTrack(first: RouteAsset)}
+	{@render token(first, 1)}
+	{#each hops as { to, venue }, index (index)}
+		{@render connector(venue, index * 2 + 2)}
+		{@render token(to, index * 2 + 3)}
+	{/each}
 {/snippet}
 
 {#if nonNullish(firstHop)}
@@ -136,14 +157,15 @@
 			{/each}
 		</ol>
 
-		<div class="grid gap-2 pb-1" aria-hidden="true">
+		<div class="grid gap-2 pb-1" aria-hidden="true" bind:clientWidth={availableWidth}>
 			{#if fitsInOneTrack}
-				<div style:--hops={hops.length} class="route-track" class:dense={hops.length > 2}>
-					{@render token(firstHop.from, 1)}
-					{#each hops as { to, venue }, index (index)}
-						{@render connector(venue, index * 2 + 2)}
-						{@render token(to, index * 2 + 3)}
-					{/each}
+				<div
+					style:--hops={hops.length}
+					class="route-track one-track"
+					class:dense={hops.length > 2}
+					bind:clientWidth={oneTrackWidth}
+				>
+					{@render oneTrack(firstHop.from)}
 				</div>
 			{:else}
 				{#each hops as { from, to, venue }, index (index)}
@@ -159,10 +181,6 @@
 {/if}
 
 <style lang="scss">
-	.swap-route {
-		container-type: inline-size;
-	}
-
 	summary::-webkit-details-marker {
 		display: none;
 	}
@@ -178,10 +196,12 @@
 	.route-track {
 		--icon-size: 0.875rem;
 		--arrow-size: 0.75rem;
+		// Room for a venue name under its arrow; the name may spill under the tokens beside it.
+		--arrow-column: 2.5rem;
 		display: grid;
 		grid-template-columns:
-			repeat(var(--hops), minmax(0, max-content) minmax(var(--arrow-size), 3.875rem))
-			minmax(0, max-content);
+			repeat(var(--hops), max-content minmax(var(--arrow-column), 3.875rem))
+			max-content;
 		grid-template-rows: minmax(1.125rem, auto) auto;
 		align-items: center;
 		row-gap: 0.0625rem;
@@ -190,6 +210,11 @@
 	.route-track.dense {
 		--icon-size: 0.75rem;
 		--arrow-size: 0.625rem;
+		--arrow-column: 2rem;
+	}
+
+	.one-track {
+		width: fit-content;
 	}
 
 	.route-token {
@@ -226,16 +251,5 @@
 
 	.stacked .route-venue {
 		width: 100%;
-	}
-
-	@container (max-width: 16.125rem) {
-		.dense .route-token {
-			flex-direction: column;
-			align-items: start;
-		}
-
-		.dense .route-arrow {
-			align-self: start;
-		}
 	}
 </style>
