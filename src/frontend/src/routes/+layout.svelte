@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
@@ -14,6 +15,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
+	import { ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { routeToken } from '$lib/derived/nav.derived';
@@ -41,6 +43,10 @@
 	}
 
 	let { children }: Props = $props();
+
+	const bannerInFlow = $derived(
+		$authNotSignedIn && !$isLocked && (page.route.id?.startsWith(ROUTE_ID_GROUP_APP) ?? false)
+	);
 
 	/**
 	 * Init dApp
@@ -226,6 +232,8 @@
 	});
 </script>
 
+<Banner inFlow={bannerInFlow} />
+
 {#await init()}
 	<div
 		class="app-initializing pointer-events-none fixed inset-0 flex items-center justify-center text-brand-primary dark:text-primary"
@@ -241,7 +249,6 @@
      so without one the press on buttons never shows on iPhones. Svelte registers it passive. -->
 <svelte:document ontouchstart={() => undefined} />
 
-<Banner />
 <Toasts elevated={nonNullish($modalStore?.type)} maxVisible={3} />
 <Busy />
 <ModalExitHandler />

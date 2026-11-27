@@ -11,6 +11,7 @@
 		fullWidth?: boolean;
 		rowBreakpoint?: 'sm' | 'md';
 		justify?: 'center' | 'start';
+		testIdSuffix?: string;
 	}
 
 	let {
@@ -18,7 +19,8 @@
 		variant = 'login',
 		fullWidth = false,
 		rowBreakpoint = 'md',
-		justify = 'start'
+		justify = 'start',
+		testIdSuffix = ''
 	}: Props = $props();
 
 	// One-Click OpenID sign-in only targets Internet Identity 2.0 on mainnet
@@ -40,6 +42,7 @@
 		{fullWidth}
 		onclick={() => onAuthenticate()}
 		{rowBreakpoint}
+		{testIdSuffix}
 		{variant}
 	/>
 
@@ -56,6 +59,7 @@
 		<ButtonsSignInOpenId
 			onProviderSelected={(provider) => onAuthenticate({ openIdProvider: provider })}
 			{rowBreakpoint}
+			{testIdSuffix}
 			{variant}
 		/>
 	{/if}

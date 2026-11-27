@@ -466,8 +466,9 @@ replay from a completed snapshot, review remount, manual selection or periodic r
 that remounts inherits the confirmation it mounts with, so it does not squeeze again.
 
 While a foreground round compares, the cell's title and status run one `smart-thinking` band and
-its border a `smart-beam`; the confirmation plays only the squeeze. Both are scoped styles in
-`SwapProviderCell`, which owns the timings. Keep: the band never lighter than the plain line; a
+its border a `smart-beam`; the confirmation plays only the squeeze. Both live in
+`styles/global/smart-swap.scss`, shared with the landing's `LandingSmartSwapCell`;
+`SwapProviderCell` owns the timings. Keep: the band never lighter than the plain line; a
 fixed rem tile plus a shared animation start time keeps both lines in step; the beam turns by
 `rotate` behind a mask and pauses, not resets, between rounds. Reduced motion: plain title, grey
 status, a still `border-brand-subtle-20` ring.

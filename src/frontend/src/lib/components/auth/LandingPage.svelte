@@ -1,24 +1,40 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
-	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
+	import LandingSectionMenu from '$lib/components/auth/LandingSectionMenu.svelte';
 	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
+	import {
+		LANDING_HERO_STEP,
+		LANDING_REVEAL_DURATION,
+		LANDING_REVEAL_STAGGER
+	} from '$lib/constants/landing.constants';
 	import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
+	import { landingBackgroundFade } from '$lib/utils/landing.utils';
 </script>
 
-<div
+<!-- Signed out, AuthGuard shows this page instead of SplitPane, so it carries the main landmark. -->
+<main
+	style:--landing-duration={`${LANDING_REVEAL_DURATION}ms`}
+	style:--landing-stagger={`${LANDING_REVEAL_STAGGER}ms`}
 	style:--landing-reduced-duration={`${MOTION_REDUCED_FADE_DURATION}ms`}
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
+	{@attach landingBackgroundFade}
 >
-	<div class="landing-enter flex w-full max-w-screen-md flex-col items-center">
+	<!-- First in the main landmark, so it is the first stop after the header's controls. -->
+	<LandingSectionMenu />
+
+	<div class="hero flex w-full max-w-screen-md flex-col items-center">
 		<SignupsClosedBanner />
 
 		<HeroSignIn />
 	</div>
 
-	<div class="landing-enter artwork flex w-full justify-center">
+	<div
+		style:--landing-step={LANDING_HERO_STEP.artwork}
+		class="landing-enter artwork flex w-full justify-center"
+	>
 		<div class="aspect-[1080/752] w-[90%]">
 			{#await import('$lib/components/auth/LandingWalletPreview.svelte') then { default: LandingWalletPreview }}
 				<LandingWalletPreview />
@@ -28,10 +44,14 @@
 		</div>
 	</div>
 
-	<div class="landing-enter features w-full sm:-mt-48">
-		<FeatureCards />
+	<div class="flex w-full flex-col items-center">
+		{#await import('$lib/components/auth/LandingSections.svelte') then { default: LandingSections }}
+			<LandingSections />
+		{:catch}
+			<!-- The hero and its sign-in buttons stay usable if the sections fail to load. -->
+		{/await}
 	</div>
-</div>
+</main>
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
@@ -39,9 +59,13 @@
 
 <style lang="scss">
 	/* Keyboard focus reveals the controls immediately. */
-	.landing-enter {
+	// The hero's title, description and sign-in buttons (HeroSignIn's `landing-step` blocks) enter
+	// one stagger apart, then the artwork.
+	.landing-enter,
+	.hero :global(.landing-step) {
 		// A one-time landing entrance deliberately settles more slowly than in-app controls.
-		animation: landing-enter 300ms ease-out backwards;
+		animation: landing-enter var(--landing-duration) ease-out backwards;
+		animation-delay: calc(var(--landing-step, 0) * var(--landing-stagger));
 
 		&:focus-within {
 			// Reveal focused controls without removing/restarting the animation timeline.
@@ -54,12 +78,6 @@
 
 	.artwork {
 		animation-name: none;
-	}
-
-	.features {
-		// Opacity/filter on an ancestor prevent Chrome from blurring the cards' backdrop.
-		animation-name: landing-rise;
-		animation-delay: 200ms;
 	}
 
 	@media (prefers-reduced-motion: no-preference) {
@@ -100,11 +118,11 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.landing-enter {
+		.landing-enter,
+		.hero :global(.landing-step) {
 			animation: landing-fade var(--landing-reduced-duration) ease-out backwards;
 		}
-		.artwork,
-		.features {
+		.artwork {
 			animation: none;
 		}
 	}

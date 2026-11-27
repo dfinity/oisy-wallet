@@ -1,14 +1,210 @@
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as backendApi from '$lib/api/backend.api';
+import LandingBorrowPreview from '$lib/components/auth/LandingBorrowPreview.svelte';
 import LandingPage from '$lib/components/auth/LandingPage.svelte';
+import { LANDING_SECTION_IDS } from '$lib/constants/landing.constants';
+import { currentCurrency } from '$lib/derived/currency.derived';
+import { Currency } from '$lib/enums/currency';
+import { currencyStore } from '$lib/stores/currency.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { themeStore } from '$lib/stores/theme.store';
 import { Theme } from '$lib/types/theme';
-import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-import { render } from '@testing-library/svelte';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import { fireEvent, render, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('LandingPage', () => {
+	it('shows the hero promise and loads the feature sections below it', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const { getByRole, findByRole } = render(LandingPage);
+		const { address_book, auth, notes } = get(i18n);
+		const { landing, text } = auth;
+		const heading = getByRole('heading', { level: 1 });
+
+		// Signed out, this page replaces SplitPane, so it must carry the main landmark itself.
+		expect(within(getByRole('main')).getByRole('heading', { level: 1 })).toBe(heading);
+		expect(heading).toHaveTextContent(replaceOisyPlaceholders(text.title_part_1));
+		expect(heading).toHaveTextContent(text.title_part_2);
+
+		for (const title of [
+			landing.hold_title,
+			landing.swap_title,
+			landing.give_title,
+			landing.borrow_title,
+			landing.security_title,
+			landing.connect_title,
+			landing.close_title
+		]) {
+			// The sections are a lazy chunk that pulls in token and swap-provider data; a cold load can
+			// take longer than findBy's default second.
+			await expect(
+				findByRole('heading', { level: 2, name: title }, { timeout: 5000 })
+			).resolves.toBeInTheDocument();
+		}
+
+		for (const title of [
+			notes.text.title,
+			address_book.text.title,
+			landing.tip_title,
+			landing.security_first_send_title
+		]) {
+			expect(getByRole('heading', { level: 3, name: title })).toBeInTheDocument();
+		}
+	});
+
+	it('uses the colored network logos in the swap preview', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const { findByRole } = render(LandingPage);
+		const { auth, core } = get(i18n);
+		const swapSection = await findByRole(
+			'region',
+			{ name: auth.landing.swap_title },
+			{ timeout: 5000 }
+		);
+
+		for (const network of [BTC_MAINNET_NETWORK, ETHEREUM_NETWORK]) {
+			// By alt text: the preview is one labelled image, so its logos have no role of their own.
+			const logos = within(swapSection).getAllByAltText(
+				replacePlaceholders(core.alt.logo, { $name: network.name })
+			);
+
+			logos.forEach((logo) => expect(logo).toHaveAttribute('src', network.iconColored));
+		}
+	});
+
+	it('moves focus to the section a fragment link names once the sections load', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const scrollIntoView = vi.fn();
+		Element.prototype.scrollIntoView = scrollIntoView;
+		window.location.hash = `#${LANDING_SECTION_IDS.swap}`;
+
+		const { findByRole } = render(LandingPage);
+		const section = await findByRole('region', { name: get(i18n).auth.landing.swap_title });
+
+		await vi.waitFor(() => expect(section).toHaveFocus());
+
+		expect(section).toHaveAttribute('id', LANDING_SECTION_IDS.swap);
+		expect(scrollIntoView).toHaveBeenCalledOnce();
+
+		window.location.hash = '';
+		Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+	});
+
+	it('shows sample fiat prices, balances, and fees with a non-USD wallet preference', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const originalCurrency = get(currentCurrency);
+
+		currencyStore.switchCurrency(Currency.EUR);
+
+		try {
+			const { findByRole } = render(LandingPage);
+			const { hold_title, swap_title } = get(i18n).auth.landing;
+			const hold = within(await findByRole('region', { name: hold_title }, { timeout: 5000 }));
+			const swap = within(await findByRole('region', { name: swap_title }, { timeout: 5000 }));
+
+			expect(hold.getByText('$96,154.86')).toBeInTheDocument();
+			expect(hold.getByText('$40,385.04')).toBeInTheDocument();
+			expect(swap.getByText('$4,807.74')).toBeInTheDocument();
+			expect(swap.getByText('$4,795.20')).toBeInTheDocument();
+			expect(swap.getByText('~$1.40')).toBeInTheDocument();
+			expect(get(currentCurrency)).toBe(Currency.EUR);
+		} finally {
+			currencyStore.switchCurrency(originalCurrency);
+		}
+	});
+
+	it('brings the selected Borrow or Earn preview to the front', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const { findByRole, getByRole, queryByRole } = render(LandingPage);
+		const { auth, liquidium, earning } = get(i18n);
+		const controls = within(await findByRole('group', { name: auth.landing.borrow_eyebrow }));
+		const borrowButton = controls.getByRole('button', { name: liquidium.text.action_borrow });
+		const earnButton = controls.getByRole('button', { name: earning.text.title });
+
+		expect(borrowButton).toHaveAttribute('aria-pressed', 'true');
+		expect(getByRole('img', { name: auth.landing.borrow_preview })).toBeInTheDocument();
+		expect(
+			queryByRole('img', { name: auth.landing.earn_preview_with_harvest })
+		).not.toBeInTheDocument();
+
+		await fireEvent.click(earnButton);
+
+		expect(earnButton).toHaveAttribute('aria-pressed', 'true');
+		expect(borrowButton).toHaveAttribute('aria-pressed', 'false');
+		expect(getByRole('img', { name: auth.landing.earn_preview_with_harvest })).toBeInTheDocument();
+		expect(queryByRole('img', { name: auth.landing.borrow_preview })).not.toBeInTheDocument();
+	});
+
+	it('rotates only while the previews are visible and respects a manual choice', async () => {
+		let setIntersection = (_ratio: number) => {};
+		const disconnect = vi.fn();
+		vi.stubGlobal(
+			'IntersectionObserver',
+			class {
+				observe: (target: Element) => void;
+				disconnect = disconnect;
+
+				constructor(callback: (entries: IntersectionObserverEntry[]) => void) {
+					this.observe = (target) => {
+						setIntersection = (intersectionRatio) => {
+							const bounds = target.getBoundingClientRect();
+							callback([
+								{
+									target,
+									intersectionRatio,
+									isIntersecting: intersectionRatio > 0,
+									boundingClientRect: bounds,
+									intersectionRect: bounds,
+									rootBounds: bounds,
+									time: 0
+								}
+							]);
+						};
+					};
+				}
+			}
+		);
+		const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+		vi.useFakeTimers();
+		const { getByRole, unmount } = render(LandingBorrowPreview);
+		const { auth, liquidium, earning } = get(i18n);
+		const borrow = getByRole('button', { name: liquidium.text.action_borrow });
+		const earn = getByRole('button', { name: earning.text.title });
+
+		try {
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(borrow).toHaveAttribute('aria-pressed', 'true');
+
+			setIntersection(1);
+			await tick();
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(earn).toHaveAttribute('aria-pressed', 'true');
+
+			hidden.mockReturnValue(true);
+			await fireEvent(document, new Event('visibilitychange'));
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(earn).toHaveAttribute('aria-pressed', 'true');
+
+			hidden.mockReturnValue(false);
+			await fireEvent(document, new Event('visibilitychange'));
+			await fireEvent.click(borrow);
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(borrow).toHaveAttribute('aria-pressed', 'true');
+			expect(getByRole('button', { name: auth.landing.borrow_preview_play })).toBeInTheDocument();
+		} finally {
+			unmount();
+			vi.useRealTimers();
+			hidden.mockRestore();
+			vi.unstubAllGlobals();
+		}
+	});
+
 	it('keeps the same accessible vector preview and intrinsic size across theme changes', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		themeStore.select(Theme.LIGHT);

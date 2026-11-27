@@ -18,7 +18,7 @@ const loadLangI18n = async (lang: Languages): Promise<I18n> => {
 	};
 };
 
-const loadLang = async (lang: Languages): Promise<I18n> => {
+export const loadLanguage = async (lang: Languages): Promise<I18n> => {
 	try {
 		return await loadLangI18n(lang);
 	} catch (_: unknown) {
@@ -39,7 +39,7 @@ const initI18n = (): I18nStore => {
 	const { subscribe, set } = writable<I18n>(enI18n());
 
 	const switchLang = async (lang: Languages) => {
-		const language = await loadLang(lang);
+		const language = await loadLanguage(lang);
 
 		set(language);
 

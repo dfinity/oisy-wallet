@@ -5,6 +5,12 @@
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	interface Props {
+		inFlow?: boolean;
+	}
+
+	let { inFlow = false }: Props = $props();
+
 	let envBannerVisible = $state(true);
 
 	const closeEnvBanner = () => (envBannerVisible = false);
@@ -12,7 +18,8 @@
 
 {#if STAGING && envBannerVisible}
 	<div
-		class="test-banner fixed top-0 left-1/2 flex max-w-screen-md -translate-x-1/2 justify-between gap-4 border-4 border-solid border-black bg-error-primary"
+		class="test-banner flex max-w-screen-md justify-between gap-4 border-4 border-solid border-black bg-error-primary"
+		class:overlay={!inFlow}
 	>
 		<span class="flex items-center justify-center gap-4">
 			<IconGixWarning size="48px" />
@@ -46,12 +53,17 @@
 		z-index: calc(var(--overlay-z-index) + 10);
 
 		padding: var(--padding-2x) var(--padding-3x);
-		margin: var(--padding-3x) 0;
+		margin: var(--padding-3x) auto;
 
 		border-radius: var(--border-radius);
 
 		width: calc(100% - var(--padding-4x));
 
 		box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1215686275);
+	}
+
+	div.test-banner.overlay {
+		position: fixed;
+		inset: 0 0 auto;
 	}
 </style>

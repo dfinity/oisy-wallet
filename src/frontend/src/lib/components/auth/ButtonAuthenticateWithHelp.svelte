@@ -20,13 +20,17 @@
 		helpAlignment?: 'inherit' | 'center';
 		needHelpLink?: boolean;
 		asPopup?: boolean;
+		testIdSuffix?: string;
+		onSignInSuccess?: () => Promise<void>;
 	}
 
 	let {
 		fullWidth = false,
 		helpAlignment = 'inherit',
 		needHelpLink = true,
-		asPopup = false
+		asPopup = false,
+		testIdSuffix = '',
+		onSignInSuccess
 	}: Props = $props();
 
 	const modalId = Symbol();
@@ -46,6 +50,8 @@
 			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 
 			transactionsFilterStore.clear();
+
+			await onSignInSuccess?.();
 		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
@@ -60,6 +66,7 @@
 		{fullWidth}
 		justify={helpAlignment === 'center' ? 'center' : 'start'}
 		{onAuthenticate}
+		{testIdSuffix}
 	/>
 
 	<span

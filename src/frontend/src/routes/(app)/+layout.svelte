@@ -121,13 +121,15 @@
 	<LockPage />
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
+		<!-- Signed out, the landing's floating section menu sits over the page bottom below `lg`, so the
+		footer gets room to scroll clear of it. -->
 		<div
-			class="relative flex flex-col pb-5 md:pb-0"
+			class={['relative flex flex-col', $authNotSignedIn ? 'pb-24 lg:pb-0' : 'pb-5 md:pb-0']}
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
 			class:overflow-x-hidden={$authNotSignedIn}
 		>
-			<Header />
+			<Header showLandingNavigation />
 
 			<AuthGuard>
 				<SplitPane>

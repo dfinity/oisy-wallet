@@ -4,6 +4,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { CurrencyExchangeData } from '$lib/types/currency';
 	import type { TokenFinancialData } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
@@ -11,16 +12,17 @@
 		balance: TokenFinancialData['balance'];
 		usdBalance: TokenFinancialData['usdBalance'];
 		nullishBalanceMessage?: string;
+		fiatExchangeRate?: CurrencyExchangeData;
 	}
 
-	let { balance, usdBalance, nullishBalanceMessage }: Props = $props();
+	let { balance, usdBalance, nullishBalanceMessage, fiatExchangeRate }: Props = $props();
 
 	let exchangeBalance = $derived(
 		nonNullish(usdBalance)
 			? formatCurrency({
 					value: usdBalance,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
+					currency: fiatExchangeRate?.currency ?? $currentCurrency,
+					exchangeRate: fiatExchangeRate ?? $currencyExchangeStore,
 					language: $currentLanguage
 				})
 			: undefined

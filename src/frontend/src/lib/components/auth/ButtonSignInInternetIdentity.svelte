@@ -8,9 +8,17 @@
 		fullWidth?: boolean;
 		variant?: 'login' | 'lock';
 		rowBreakpoint?: 'sm' | 'md';
+		// Keeps test ids unique when the page shows more than one sign-in block.
+		testIdSuffix?: string;
 	}
 
-	let { onclick, fullWidth = false, variant = 'login', rowBreakpoint = 'md' }: Props = $props();
+	let {
+		onclick,
+		fullWidth = false,
+		variant = 'login',
+		rowBreakpoint = 'md',
+		testIdSuffix = ''
+	}: Props = $props();
 
 	const variantClasses = $derived(
 		variant === 'lock'
@@ -25,7 +33,7 @@
 
 <button
 	class={`flex h-14 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-base leading-snug font-bold whitespace-nowrap transition-[color,background-color,border-color,scale] duration-150 ease-out press focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses} ${widthClasses}`}
-	data-tid={LOGIN_BUTTON}
+	data-tid={`${LOGIN_BUTTON}${testIdSuffix}`}
 	{onclick}
 	type="button"
 >

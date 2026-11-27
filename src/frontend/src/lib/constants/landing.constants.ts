@@ -1,0 +1,47 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { SUPPORTED_MAINNET_NETWORKS_IDS } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import type { Network } from '$lib/types/network';
+
+// Keep the landing's lead assets first, then list the other networks alphabetically.
+export const LANDING_NETWORKS: Network[] = [
+	BTC_MAINNET_NETWORK,
+	ICP_NETWORK,
+	ETHEREUM_NETWORK,
+	XRP_MAINNET_NETWORK,
+	SOLANA_MAINNET_NETWORK,
+	ARBITRUM_MAINNET_NETWORK,
+	BASE_NETWORK,
+	BSC_MAINNET_NETWORK,
+	POLYGON_MAINNET_NETWORK,
+	ROBINHOOD_MAINNET_NETWORK
+].filter(({ id }) => SUPPORTED_MAINNET_NETWORKS_IDS.includes(id));
+
+// The landing's one-time entrance, shared by the hero (CSS) and the sections below it
+// (`landingReveal`), so the page settles as one piece.
+export const LANDING_REVEAL_DURATION = 300;
+export const LANDING_REVEAL_STAGGER = 100;
+
+// Hero blocks in entrance order, each one LANDING_REVEAL_STAGGER after the last. The title takes
+// the default step, 0.
+export const LANDING_HERO_STEP = {
+	description: 1,
+	signIn: 2,
+	artwork: 3
+} as const;
+
+// Fragment targets of the header's section row and the phone section menu.
+export const LANDING_SECTION_IDS = {
+	hold: 'landing-hold',
+	security: 'landing-security',
+	swap: 'landing-swap',
+	borrow: 'landing-borrow'
+} as const;
