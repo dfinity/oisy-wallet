@@ -1207,6 +1207,10 @@ The review step repeats the distinction. At or beyond a **5% give-up — crossin
 
 A **fill-or-kill** order is the exception to all of this: it can only execute by crossing, so a FOK price that cannot cross is a blocking error ("it would be canceled") that disables Review and takes precedence over both warnings above.
 
+### Typing a limit price
+
+On phones the price field opens the number keypad. Keypads set to a comma locale show a comma instead of a dot, so a lone comma counts as the decimal point (12,5 is 12.5). Any other comma is dropped as a thousands separator (1,234.5 is 1234.5).
+
 ---
 
 ## Lend and borrow (Liquidium)

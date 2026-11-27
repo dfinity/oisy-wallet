@@ -63,6 +63,12 @@ describe('LimitOrderPriceSection', () => {
 		expect(container.querySelector('input')).toBeDisabled();
 	});
 
+	it('opens the decimal keypad for the price', () => {
+		const { container } = render(LimitOrderPriceSection, { props: { ...baseProps } });
+
+		expect(container.querySelector('input')).toHaveAttribute('inputmode', 'decimal');
+	});
+
 	it('shows a crossing warning for a sell priced at or below the bid', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, price: '9' }

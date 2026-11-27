@@ -190,6 +190,9 @@ export const floorToStep = ({ value, step }: { value: number; step: number }): n
 
 // Trim a typed string to at most `maxDecimals` fractional digits, dropping any
 // non-numeric characters. Mirrors the keystroke-level decimal cap on the field.
+// The decimal keypad shows a comma instead of a dot on phones set to a comma
+// locale (e.g. German), so a lone comma is the decimal point. Any other comma
+// is dropped as a thousands separator.
 export const limitDecimals = ({
 	raw,
 	maxDecimals
@@ -197,7 +200,8 @@ export const limitDecimals = ({
 	raw: string;
 	maxDecimals: number;
 }): string => {
-	const cleaned = raw.replace(/[^0-9.]/g, '');
+	const hasDecimalComma = !raw.includes('.') && raw.split(',').length === 2;
+	const cleaned = (hasDecimalComma ? raw.replace(',', '.') : raw).replace(/[^0-9.]/g, '');
 	const dotIndex = cleaned.indexOf('.');
 	if (dotIndex < 0) {
 		return cleaned;
