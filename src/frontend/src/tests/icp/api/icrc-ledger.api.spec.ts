@@ -284,6 +284,20 @@ describe('icrc-ledger.api', () => {
 			});
 		});
 
+		it('approves with no expiry and the expected allowance when given', async () => {
+			const expectedAllowance = 300_000n;
+
+			await approve({ ...params, expiresAt: undefined, expectedAllowance });
+
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				spender: spenderAccount,
+				expected_allowance: expectedAllowance,
+				created_at_time: createdAt
+			});
+			expect(ledgerCanisterMock.approve.mock.calls[0][0].expires_at).toBeUndefined();
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(approve({ ...params, identity: undefined })).rejects.toThrow();
 		});

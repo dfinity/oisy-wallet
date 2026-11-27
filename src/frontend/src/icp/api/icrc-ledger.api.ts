@@ -140,7 +140,8 @@ export const transfer = async ({
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @param {bigint} params.amount - The amount to approve.
  * @param {IcrcAccount} params.spender - The account to approve as a spender.
- * @param {bigint} params.expiresAt - The expiration timestamp for the approval.
+ * @param {bigint} [params.expiresAt] - Optional expiration timestamp for the approval. Without it, the approval does not expire.
+ * @param {bigint} [params.expectedAllowance] - Optional allowance the approval replaces. The ledger refuses the approval if the current allowance differs.
  * @param {bigint} [params.createdAt] - Optional timestamp for when the approval was created.
  * @returns {Promise<IcrcBlockIndex>} The block index of the approval.
  */
@@ -150,13 +151,15 @@ export const approve = async ({
 	amount,
 	spender,
 	expiresAt: expires_at,
+	expectedAllowance: expected_allowance,
 	createdAt
 }: {
 	identity: NullishIdentity;
 	ledgerCanisterId: CanisterIdText;
 	amount: bigint;
 	spender: IcrcAccount;
-	expiresAt: bigint;
+	expiresAt?: bigint;
+	expectedAllowance?: bigint;
 	createdAt?: bigint;
 }): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
@@ -167,6 +170,7 @@ export const approve = async ({
 		amount,
 		spender: toCandidAccount(spender),
 		expires_at,
+		expected_allowance,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
 };

@@ -177,6 +177,11 @@ export enum WizardStepsCyclesMint {
 	MINTING = 'Minting'
 }
 
+export enum WizardStepsUsageCredits {
+	SET = 'Set spending limit',
+	REVIEW = 'Spending limit review'
+}
+
 export enum WizardStepsCyclesTopUp {
 	// From Tools only: what the top-up is paid with.
 	TOKEN = 'Token',

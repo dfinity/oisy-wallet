@@ -172,6 +172,15 @@ export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 export const NAVIGATION_ITEM_TOOLS = 'navigation-item-tools';
 
 export const TOOLS_CANISTER_TOP_UP_BUTTON = 'tools-canister-top-up-button';
+export const TOOLS_USAGE_CREDITS_OWN_CREDITS = 'tools-usage-credits-own-credits';
+export const TOOLS_USAGE_CREDITS_BALANCE = 'tools-usage-credits-balance';
+export const TOOLS_USAGE_CREDITS_BALANCE_SHORT = 'tools-usage-credits-balance-short';
+export const TOOLS_USAGE_CREDITS_FREE_SIGNATURES = 'tools-usage-credits-free-signatures';
+export const TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON = 'tools-usage-credits-add-more-button';
+export const TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON = 'tools-usage-credits-get-cycles-button';
+export const TOOLS_USAGE_CREDITS_MODAL = 'tools-usage-credits-modal';
+export const TOOLS_USAGE_CREDITS_REVIEW_BUTTON = 'tools-usage-credits-review-button';
+export const TOOLS_USAGE_CREDITS_SET_BUTTON = 'tools-usage-credits-set-button';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';

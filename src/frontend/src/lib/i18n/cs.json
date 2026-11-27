@@ -923,6 +923,33 @@
 			"top_up_canister": "Dobít kanistr pomocí ICP nebo TCYCLES"
 		}
 	},
+	"usage_credits": {
+		"text": {
+			"title": "",
+			"description": "",
+			"own_credits": "",
+			"balance": "",
+			"add_more": "",
+			"get_cycles": "",
+			"add_title": "",
+			"add_description": "",
+			"own_credits_after": "",
+			"added": "",
+			"free_signatures": "",
+			"signatures_one": "",
+			"signatures_other": "",
+			"new_limit": "",
+			"set": "",
+			"previous_limit": "",
+			"limit_left": "",
+			"balance_short": "",
+			"balance_empty": ""
+		},
+		"error": {
+			"load": "",
+			"add": ""
+		}
+	},
 	"shortcuts": {
 		"privacy_mode": "P"
 	},

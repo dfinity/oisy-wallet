@@ -923,6 +923,33 @@
 			"top_up_canister": "Top up a canister with ICP or TCYCLES"
 		}
 	},
+	"usage_credits": {
+		"text": {
+			"title": "Usage credits",
+			"description": "When your free daily usage credits are used up, signing is paid from your ICP Cycles, up to the spending limit you set here.",
+			"own_credits": "Spending limit",
+			"balance": "ICP Cycles balance",
+			"add_more": "Set spending limit",
+			"get_cycles": "Get ICP Cycles",
+			"add_title": "Set your spending limit",
+			"add_description": "Signing can charge up to this amount to your ICP Cycles. They stay in your balance.",
+			"own_credits_after": "Remaining",
+			"added": "Your spending limit is set to $amount $token.",
+			"free_signatures": "Free signatures left",
+			"signatures_one": "~1 signature",
+			"signatures_other": "~$count signatures",
+			"new_limit": "New spending limit",
+			"set": "Set",
+			"previous_limit": "Previous spending limit",
+			"limit_left": "$remaining of $limit $token left",
+			"balance_short": "Your balance covers only $amount $token of your remaining limit.",
+			"balance_empty": "Your balance is empty."
+		},
+		"error": {
+			"load": "Couldn't load your usage credits.",
+			"add": "Couldn't set your spending limit. Please try again."
+		}
+	},
 	"shortcuts": {
 		"privacy_mode": "P"
 	},
